@@ -1,5 +1,5 @@
 // GM_config
-// version        1.1.1
+// version        1.1.2
 // copyright      JoeSimmons & SizzleMcTwizzle & IzzySoft
 
 var GM_config = {
@@ -56,9 +56,8 @@ var GM_config = {
 			if (field.section) {
 				anch = frameBody.appendChild(create('div', {className:'section_header_holder', kids:[
 				  create('h2', {className:'section_header center',innerHTML:field.section[0]})],
-				  id:'section_'+secNo}));
-				if(field.section[1]) anch.lastChild.appendChild(create('p', {className:'section_desc indent40',innerHTML:field.section[1]}));
-				secNo++;
+				  id:'section_'+secNo++}));
+				if(field.section[1]) anch.appendChild(create('p', {className:'section_desc indent40',innerHTML:field.section[1]}));
 			}
 			switch(field.type) {
 				case 'textarea':
