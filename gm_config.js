@@ -262,6 +262,6 @@ input[type="radio"] {margin-right:8px;}
  setTimeout(func, 0);
  }
  },
- addEvent: function(el,ev,scr) { el.addEventListener(ev,function(e){eval(scr);},false); },
+ addEvent: function(el,ev,scr) { el.addEventListener(ev, function() { typeof scr === 'function' ? setTimeout(scr, 0) : eval(scr) }, false); },
  remove: function(el) { if(el && el.parentNode) el.parentNode.removeChild(el); }
 };
