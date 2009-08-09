@@ -104,7 +104,7 @@ var GM_config = {
 					break;
 				default:
 				  if (typeof GM_config.define[field.type] == 'function')
-				    GM_config.define[field.type](field);
+				    GM_config.define[field.type](field, anch);
 				  else {
 				    anch.appendChild(create('div', {title:field.title||'',kids:[
 						create('span', {textContent:label, className:'field_label'}),
