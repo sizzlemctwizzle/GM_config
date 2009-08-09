@@ -1,5 +1,5 @@
 // GM_config
-// version        1.1.2
+// version        1.1.3
 // copyright      JoeSimmons & SizzleMcTwizzle & IzzySoft
 
 var GM_config = {
@@ -103,10 +103,14 @@ var GM_config = {
 					if(field.script) obj.addEvent(tmp, 'click', field.script);
 					break;
 				default:
-					anch.appendChild(create('div', {title:field.title||'',kids:[
+				  if (typeof GM_config.define[field.type] == 'function')
+				    GM_config.define[field.type](field);
+				  else {
+				    anch.appendChild(create('div', {title:field.title||'',kids:[
 						create('span', {textContent:label, className:'field_label'}),
 						create('input', {id:'field_'+i,type:'text',value:value,size:(field.size?field.size:25)})
-					], className: 'config_var'}));
+				    ], className: 'config_var'}));
+				  }
 			}
 		}
 
@@ -209,6 +213,7 @@ var GM_config = {
  },
  values: {},
  settings: {},
+ define: {},
  css: {
  basic: <><![CDATA[
 body {background:#fff;}
