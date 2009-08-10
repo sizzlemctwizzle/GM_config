@@ -1,5 +1,5 @@
 // GM_config
-// version        1.1.3
+// version        1.1.4
 // copyright      JoeSimmons & SizzleMcTwizzle & IzzySoft
 
 var GM_config = {
@@ -103,8 +103,8 @@ var GM_config = {
 					if(field.script) obj.addEvent(tmp, 'click', field.script);
 					break;
 				default:
-				  if (typeof GM_config.define[field.type] == 'function')
-				    GM_config.define[field.type](field, anch);
+				  if (typeof GM_config.define[field.type] == 'object')
+				    GM_config.define[field.type].open(field, anch);
 				  else {
 				    anch.appendChild(create('div', {title:field.title||'',kids:[
 						create('span', {textContent:label, className:'field_label'}),
@@ -135,7 +135,8 @@ var GM_config = {
 		var type, fields = this.settings, isNum=/^[\d\.]+$/;//, isNum=/^\d+$/, isFloat=/^[\d\.]+$/;
 		for(f in fields) {
 			var field = this.frame.contentDocument.getElementById('field_'+f);
-			if(field.type=='radio'||field.type=='text'||field.type=='checkbox') type=field.type;
+			if (typeof GM_config.define[fields[f].type] == 'object') type='custom';
+			else if(field.type=='radio'||field.type=='text'||field.type=='checkbox') type=field.type;
 			else type=field.tagName.toLowerCase();
 			switch(type) {
 				case 'text':
@@ -157,6 +158,9 @@ var GM_config = {
 						if(radios[i].checked) this.values[f] = radios[i].value;
 					}
 					break;
+			        case 'custom':
+				        GM_config.define[fields[f].type].save(fields[f], field);
+				        break;
 			}
 		}
 	this.save();
@@ -183,7 +187,8 @@ var GM_config = {
 	var type, obj = GM_config, fields = obj.settings;
 	for(f in fields) {
 		var field = obj.frame.contentDocument.getElementById('field_'+f);
-		if(field.type=='radio'||field.type=='text'||field.type=='checkbox') type=field.type;
+		if (typeof GM_config.define[fields[f].type] == 'object') type='custom';
+		else if(field.type=='radio'||field.type=='text'||field.type=='checkbox') type=field.type;
 		else type=field.tagName.toLowerCase();
 		switch(type) {
 			case 'text':
@@ -207,6 +212,9 @@ var GM_config = {
 				if(radios.length>0) for(var i=radios.length-1; i>=0; i--) {
 					if(radios[i].value==obj.settings[f].default) radios[i].checked=true;
 				}
+				break;
+		        case 'custom':
+				GM_config.define[fields[f].type].save(fields[f], field);
 				break;
 		}
 	}
