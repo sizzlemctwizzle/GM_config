@@ -1,4 +1,4 @@
-var highlighCSS = (<><![CDATA[
+var highlightCSS = (<><![CDATA[
 pre.sh_sourceCode {
   background-color: white;
   color: black;
