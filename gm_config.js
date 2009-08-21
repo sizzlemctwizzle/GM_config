@@ -29,7 +29,7 @@ var GM_config = {
 		passed_values = {};
 	for (var i in settings) {
 		passed_settings[i] = settings[i];
-		passed_values[i] = (stored[i]===false && settings[i].default===true)? false : (((typeof stored[i]=='number'||typeof stored[i]=='string')?stored[i].toString():false)||settings[i].default||'');
+		passed_values[i] = (stored[i]===false && settings[i].default===true)? false : (((typeof stored[i]=='number'||typeof stored[i]=='string'||typeof stored[i]=='boolean')?stored[i]:false)||settings[i].default||'');
 	}
 	this.settings = passed_settings;
 	this.values = passed_values;
