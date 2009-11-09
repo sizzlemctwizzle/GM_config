@@ -1,21 +1,18 @@
 // GM_config
-// version        1.1.4
+// version        1.1.9
 // copyright      JoeSimmons & SizzleMcTwizzle & IzzySoft
 
 var GM_config = {
  init: function() {
-	for(var arg,i=arguments.length-1; i>=0; i--) {
+	for(var i=0,l=arguments.length,arg; i<l; i++) {
 		arg=arguments[i];
 		switch(typeof arg) {
-			case 'object': for (var j in arg) {
+			case 'object': for(var j in arg) {
 				if (typeof arg[j] == 'function') {
-					if (j=='open') this.onOpen=arg[j]; 
-					else if (j=='close') this.onClose=arg[j];
-					else if (j=='save') this.onSave=arg[j];
-				} else {
-					var settings = arg;
-					break;
-				}
+					if (j=='open') {this.onOpen=arg[j]; delete arg[j];}
+					else if (j=='close') {this.onClose=arg[j]; delete arg[j];}
+					else if (j=='save') {this.onSave=arg[j]; delete arg[j];}
+				} else var settings = arg;
 			} break;
 			case 'function': this.onOpen = arg; break;
 			case 'string': if(arg.indexOf('{')!=-1&&arg.indexOf('}')!=-1) var css = arg;
@@ -26,10 +23,11 @@ var GM_config = {
 	if(!this.title) this.title = 'Settings - Anonymous Script';
 	var stored = this.read(),
 		passed_settings = {},
-		passed_values = {};
+		passed_values = {},
+		typewhite = /number|string|boolean/;
 	for (var i in settings) {
 		passed_settings[i] = settings[i];
-		passed_values[i] = (stored[i]===false && settings[i].default===true)? false : (((typeof stored[i]=='number'||typeof stored[i]=='string'||typeof stored[i]=='boolean')?stored[i]:false)||settings[i].default||'');
+		passed_values[i] = (stored[i]===false && settings[i]._def===true)? false : (((typewhite.test(typeof stored[i]))?stored[i]:false)||settings[i]._def||'');
 	}
 	this.settings = passed_settings;
 	this.values = passed_values;
@@ -45,9 +43,7 @@ var GM_config = {
 		obj.frame.contentDocument.getElementsByTagName('head')[0].appendChild(obj.create('style',{type:'text/css',innerHTML:obj.css.basic+obj.css.stylish}));
 
 		// Add header and title
-		frameBody.appendChild(obj.create('div', {id:'header',className:'config_header_holder block indent40', kids:[
-		  obj.create('h1', {id:'config_header',className:'config_header',innerHTML:obj.title})
-		  ]}));
+		frameBody.appendChild(obj.create('div', {id:'header',className:'config_header block center', textContent:obj.title}));
 
 		// Append elements
 		var anch = frameBody, secNo = 0; // anchor to append elements
@@ -55,9 +51,10 @@ var GM_config = {
 			var type, field = settings[i], Options = field.options, label = field.label, value = obj.values[i];
 			if (field.section) {
 				anch = frameBody.appendChild(create('div', {className:'section_header_holder', kids:[
-				  create('h2', {className:'section_header center',innerHTML:field.section[0]})],
-				  id:'section_'+secNo++}));
-				if(field.section[1]) anch.appendChild(create('p', {className:'section_desc indent40',innerHTML:field.section[1]}));
+				  create('div', {className:'section_header center',innerHTML:field.section[0]})],
+				  id:'section_'+secNo}));
+				if(field.section[1]) anch.appendChild(create('p', {className:'section_desc center',innerHTML:field.section[1]}));
+				secNo++;
 			}
 			switch(field.type) {
 				case 'textarea':
@@ -81,7 +78,9 @@ var GM_config = {
 					var options = new Array();
 					if(!Options.length)
 					  for (var j in Options)
-						options.push(create('option',{textContent:Options[j],value:j,selected:Options[j]==value?true:false}));
+						{
+						options.push(create('option',{textContent:Options[j],value:j,selected:Options[j]==field._def?true:false}));
+						}
 					else for (var j=0,len=Options.length; j<len; j++)
 						options.push(create('option',{textContent:Options[j],selected:Options[j]==value?true:false}));
 					anch.appendChild(create('div', {title:field.title||'',kids:[
@@ -91,7 +90,7 @@ var GM_config = {
 					break;
 				case 'checkbox':
 					anch.appendChild(create('div', {title:field.title||'',kids:[
-						create('span', {textContent:label, className:'field_label'}),
+						create('label', {textContent:label, className:'field_label', "for":'field_'+i}),
 						create('input', {id:'field_'+i,type:'checkbox',value:value,checked:!value||value==''?false:true})
 					], className: 'config_var'}));
 					break;
@@ -102,15 +101,16 @@ var GM_config = {
 					], className: 'config_var'}));
 					if(field.script) obj.addEvent(tmp, 'click', field.script);
 					break;
+				case 'hidden':
+				anch.appendChild(create('div', {title:field.title||'',kids:[
+						create('input', {id:'field_'+i,type:'hidden',value:value})
+					], className: 'config_var'}));
+					break;
 				default:
-				  if (typeof GM_config.define[field.type] == 'object')
-				    GM_config.define[field.type].open(field, anch);
-				  else {
-				    anch.appendChild(create('div', {title:field.title||'',kids:[
+					anch.appendChild(create('div', {title:field.title||'',kids:[
 						create('span', {textContent:label, className:'field_label'}),
 						create('input', {id:'field_'+i,type:'text',value:value,size:(field.size?field.size:25)})
-				    ], className: 'config_var'}));
-				  }
+					], className: 'config_var'}));
 			}
 		}
 
@@ -124,24 +124,27 @@ var GM_config = {
 
 		obj.center(); // Show and center it
 		window.addEventListener('resize', obj.center, false); // Center it on resize
-		if (onOpen=obj.onOpen) onOpen(); // Call the open() callback function
+		if (obj.onOpen) obj.onOpen(); // Call the open() callback function
 		
 		// Close frame on window close
 		window.addEventListener('beforeunload', function(){GM_config.remove(this);}, false);
 	}, false);
  },
  close: function(save) {
+if(this.onClose) this.onClose(); //  Call the close() callback function
 	if(save) {
-		var type, fields = this.settings, isNum=/^[\d\.]+$/;//, isNum=/^\d+$/, isFloat=/^[\d\.]+$/;
+		var type, fields = this.settings, isNum=/^[\d\.]+$/, typewhite=/radio|text|hidden|checkbox/;
 		for(f in fields) {
 			var field = this.frame.contentDocument.getElementById('field_'+f);
-			if (typeof GM_config.define[fields[f].type] == 'object') type='custom';
-			else if(field.type=='radio'||field.type=='text'||field.type=='checkbox') type=field.type;
+			if(typewhite.test(field.type)) type=field.type;
 			else type=field.tagName.toLowerCase();
 			switch(type) {
 				case 'text':
 					this.values[f] = (this.settings[f].type=='text') ? field.value : (((isNum.test(field.value||field.value=='0'))&&(this.settings[f].type=='int'||this.settings[f].type=='float'))?parseFloat(field.value):false);
 					if(this.values[f]===false) {alert('Invalid type for field: '+f+'\nPlease use type: '+this.settings[f].type);return}
+					break;
+				case 'hidden':
+					this.values[f] = field.value.toString();
 					break;
 				case 'textarea':
 					this.values[f] = field.value;
@@ -158,17 +161,13 @@ var GM_config = {
 						if(radios[i].checked) this.values[f] = radios[i].value;
 					}
 					break;
-			        case 'custom':
-				        GM_config.define[fields[f].type].save(fields[f], field);
-				        break;
 			}
 		}
-	this.save();
-	if (onSave=this.onSave) onSave(); // Call the save() callback function
 	}
+	if(this.onSave) this.onSave(); // Call the save() callback function
 	if(this.frame) this.remove(this.frame);
+	this.save();
 	delete this.frame;
-	if (onClose=this.onClose) onClose(); //  Call the close() callback function
  },
  set: function(name,val) {
 	this.values[name] = val;
@@ -187,76 +186,68 @@ var GM_config = {
 	var type, obj = GM_config, fields = obj.settings;
 	for(f in fields) {
 		var field = obj.frame.contentDocument.getElementById('field_'+f);
-		if (typeof GM_config.define[fields[f].type] == 'object') type='custom';
-		else if(field.type=='radio'||field.type=='text'||field.type=='checkbox') type=field.type;
+		if(field.type=='radio'||field.type=='text'||field.type=='checkbox') type=field.type;
 		else type=field.tagName.toLowerCase();
 		switch(type) {
 			case 'text':
-				field.value = obj.settings[f].default || '';
+				field.value = obj.settings[f]._def || '';
+				break;
+			case 'hidden':
+				field.value = obj.settings[f]._def || '';
 				break;
 			case 'textarea':
-				field.value = obj.settings[f].default || '';
+				field.value = obj.settings[f]._def || '';
 				break;
 			case 'checkbox':
-				field.checked = obj.settings[f].default || false;
+				field.checked = obj.settings[f]._def || false;
 				break;
 			case 'select':
-				if(obj.settings[f].default) {
+				if(obj.settings[f]._def) {
 					for(var i=field.options.length-1; i>=0; i--)
-					if(field.options[i].value==obj.settings[f].default) field.selectedIndex=i;
+					if(field.options[i].value==obj.settings[f]._def) field.selectedIndex=i;
 				}
 				else field.selectedIndex=0;
 				break;
 			case 'div':
 				var radios = field.getElementsByTagName('input');
 				if(radios.length>0) for(var i=radios.length-1; i>=0; i--) {
-					if(radios[i].value==obj.settings[f].default) radios[i].checked=true;
+					if(radios[i].value==obj.settings[f]._def) radios[i].checked=true;
 				}
-				break;
-		        case 'custom':
-				GM_config.define[fields[f].type].save(fields[f], field);
 				break;
 		}
 	}
  },
  values: {},
  settings: {},
- define: {},
  css: {
  basic: <><![CDATA[
-body {background:#fff;}
+body {background:#FFFFFF;}
 .indent40 {margin-left:40%;}
-* {font-family:"myriad pro" arial tahoma "sans serif";}
+* {font-family: arial, tahoma, sans-serif, myriad pro;}
 .field_label {font-weight:bold; margin-right:6px;}
 .block {display:block;}
 .saveclose_buttons {
 margin:16px 10px 10px 10px;
 padding:2px 12px 2px 12px;
 }
-.reset, #buttons_holder, .reset a {text-align:right; color:#000;}
+.reset, #buttons_holder, .reset a {text-align:right; color:#000000;}
 .config_header {font-size:24pt; margin:0;}
 .config_desc, .section_desc, .reset {font-size:9pt;}
 .center {text-align:center;}
-#config_fields div {margin-bottom:8px;}
-#config_fields div div {display:inline;}
-#config_fields, .section_header_holder {margin-top:25px;}
-.section_header {font-size:12pt; background:#414141; color:#FFF; border:1px solid #000;}
+.section_header_holder {margin-top:25px;}
+.config_var {margin:0 0 4px 0;}
+.section_header {font-size:13pt; background:#414141; color:#FFFFFF; border:1px solid #000000; margin:0;}
+.section_desc {font-size:9pt; background:#EFEFEF; color:#575757; border:1px solid #CCCCCC; margin:0 0 6px 0;}
 input[type="radio"] {margin-right:8px;}
 ]]></>.toString(),
  stylish: ''},
  create: function(a,b) {
 	var ret=window.document.createElement(a);
 	if(b) for(var prop in b) {
-		if(prop.indexOf('on')==0)
-			ret.addEventListener(prop.substring(2),b[prop],false);
-		else if(prop=="kids") {
-			prop=b[prop];
-			for(var i=0;i<prop.length;i++)
-				ret.appendChild(prop[i]);
-		}
-		else if(prop=="style"||prop=="accesskey"||prop=="value") ret.setAttribute(prop, b[prop]);
-		else
-			ret[prop]=b[prop];
+		if(prop.indexOf('on')==0) ret.addEventListener(prop.substring(2),b[prop],false);
+		else if(prop=="kids" && (prop=b[prop])) for(var i=0; i<prop.length; i++) ret.appendChild(prop[i]);
+		else if(",style,accesskey,id,name,src,href,for".indexOf(","+prop.toLowerCase())!=-1) ret.setAttribute(prop, b[prop]);
+		else ret[prop]=b[prop];
 	}
 	return ret;
  },
@@ -275,6 +266,6 @@ input[type="radio"] {margin-right:8px;}
  setTimeout(func, 0);
  }
  },
- addEvent: function(el,ev,scr) { el.addEventListener(ev, function() { typeof scr === 'function' ? setTimeout(scr, 0) : eval(scr) }, false); },
+ addEvent: function(el,ev,scr) { el.addEventListener(ev, function() { typeof scr == 'function' ? setTimeout(scr, 0) : eval(scr) }, false); },
  remove: function(el) { if(el && el.parentNode) el.parentNode.removeChild(el); }
 };
