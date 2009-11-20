@@ -1,5 +1,5 @@
 // GM_config
-// version        1.1.9
+// version        1.2.0
 // copyright      JoeSimmons & SizzleMcTwizzle & IzzySoft
 
 var GM_config = {
@@ -76,13 +76,7 @@ var GM_config = {
 					break;
 				case 'select':
 					var options = new Array();
-					if(!Options.length)
-					  for (var j in Options)
-						{
-						options.push(create('option',{textContent:Options[j],value:j,selected:Options[j]==field._def?true:false}));
-						}
-					else for (var j=0,len=Options.length; j<len; j++)
-						options.push(create('option',{textContent:Options[j],selected:Options[j]==value?true:false}));
+					for (var j in Options) options.push(create('option',{textContent:Options[j],value:j,selected:(value?(value==j):(Options[j]==field._def))}));
 					anch.appendChild(create('div', {title:field.title||'',kids:[
 						create('span', {textContent:label, className:'field_label'}),
 						create('select',{id:'field_'+i,kids:options})
