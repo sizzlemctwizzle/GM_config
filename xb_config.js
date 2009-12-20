@@ -39,7 +39,9 @@ var XB_config = {
 		     typewhite = /number|string|boolean/;
 	for (var i in settings) {
             passed_settings[i] = settings[i];
-            passed_values[i] = (stored[i]===false && settings[i]['default']===true) ? false : (((typewhite.test(typeof stored[i]))?stored[i]:false)||settings[i]['default']||'');
+            passed_values[i] = (stored[i]===false && settings[i]['default']===true) 
+                               ? false : 
+                               (((typewhite.test(typeof stored[i]))?stored[i]:false)||settings[i]['default']||'');
 	}
 	this.settings = passed_settings;
 	this.values = passed_values;
@@ -69,8 +71,7 @@ var XB_config = {
                           settings=obj.settings,
                           css=obj.create('style',{
                                                    type:'text/css',
-                                                   textContent:obj.css.basic + 
-                                                               obj.css.stylish});
+                                                   textContent:obj.css.basic + obj.css.stylish});
                 obj.frameDoc.getElementsByTagName('head')[0].appendChild(css);
 
 		// Add header and title
@@ -268,7 +269,7 @@ if(this.onClose) this.onClose(); //  Call the close() callback function
                      'input[type="radio"] {margin-right:8px;}',
                      'stylish' : ''
  },
- create: function(A, B, C) {
+ 'create' : function(A, B, C) {
      if (!B) 
          A = document.createTextNode(A);
      else {
@@ -287,7 +288,7 @@ if(this.onClose) this.onClose(); //  Call the close() callback function
      }
      return A;
  },
- center: function() {
+ 'center' : function() {
 	var node = XB_config.frame, 
                    style = node.style, 
                    beforeOpacity = style.opacity;
@@ -298,13 +299,20 @@ if(this.onClose) this.onClose(); //  Call the close() callback function
 	style.left = Math.floor((window.innerWidth/2)-(node.offsetWidth/2)) + 'px';
 	style.opacity = '1';
  },
- run: function() {
- var script=this.getAttribute('script');
- if(script && typeof script=='string' && script!='') {
- func = new Function(script);
- setTimeout(func, 0);
- }
+ 'run' : function() {
+     var script=this.getAttribute('script');
+     if(script && typeof script=='string' && script!='') {
+         func = new Function(script);
+         setTimeout(func, 0);
+     }
  },
- addEvent: function(el,ev,scr) { el.addEventListener(ev, function() { typeof scr == 'function' ? setTimeout(scr, 0) : eval(scr) }, false); },
- remove: function(el) { if(el && el.parentNode) el.parentNode.removeChild(el); }
+ 'addEvent' : function(el,ev,scr) { 
+     el.addEventListener(ev, function() { 
+                                 typeof scr == 'function' ? setTimeout(scr, 0) : eval(scr) 
+                             }, false); 
+ },
+ 'remove' : function(el) { 
+     if(el && el.parentNode) 
+         el.parentNode.removeChild(el); 
+ }
 };
