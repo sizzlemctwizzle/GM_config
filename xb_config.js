@@ -3,44 +3,75 @@
 // copyright      JoeSimmons & SizzleMcTwizzle & IzzySoft
 
 var XB_config = {
- init: function() {
-	for(var i=0,l=arguments.length,arg; i<l; i++) {
-		arg=arguments[i];
-		switch(typeof arg) {
-			case 'object': for(var j in arg) {
-				if (typeof arg[j] == 'function') {
-					if (j=='open') {this.onOpen=arg[j]; delete arg[j];}
-					else if (j=='close') {this.onClose=arg[j]; delete arg[j];}
-					else if (j=='save') {this.onSave=arg[j]; delete arg[j];}
-				} else var settings = arg;
-			} break;
-			case 'function': this.onOpen = arg; break;
-			case 'string': if(arg.indexOf('{')!=-1&&arg.indexOf('}')!=-1) var css = arg;
-				else this.title = arg;
-				break;
-		}
+    'init' : function() {
+        for(var i=0,len=arguments.length,arg; i<len; ++i) {
+            arg=arguments[i];
+            switch(typeof arg) {
+            case 'object': 
+                for(var j in arg) {
+                    if (typeof arg[j] == 'function') {
+                        if (j=='open')
+                            this.onOpen=arg[j]; 
+                        else if (j=='close')
+                            this.onClose=arg[j];
+                        else if (j=='save')
+                            this.onSave=arg[j];
+                    } else 
+                        var settings = arg;
+                } 
+                break;
+            case 'function': 
+                this.onOpen = arg;
+                break;
+            case 'string': 
+                if(arg.indexOf('{')!=-1&&arg.indexOf('}')!=-1) 
+                    var css = arg;
+                else 
+                    this.title = arg;
+                break;
+            }
 	}
-	if(!this.title) this.title = 'Settings - Anonymous Script';
+	if(!this.title) 
+            this.title = 'Settings - Anonymous Script';
 	var stored = this.read(),
-		passed_settings = {},
-		passed_values = {},
-		typewhite = /number|string|boolean/;
+		     passed_settings = {},
+		     passed_values = {},
+		     typewhite = /number|string|boolean/;
 	for (var i in settings) {
-		passed_settings[i] = settings[i];
-		passed_values[i] = (stored[i]===false && settings[i]._def===true)? false : (((typewhite.test(typeof stored[i]))?stored[i]:false)||settings[i]._def||'');
+            passed_settings[i] = settings[i];
+            passed_values[i] = (stored[i]===false && settings[i]['default']===true) ? false : (((typewhite.test(typeof stored[i]))?stored[i]:false)||settings[i]['default']||'');
 	}
 	this.settings = passed_settings;
 	this.values = passed_values;
-	if (css) this.css.stylish = css;
+	if (css) 
+            this.css.stylish = css;
  },
- open: function() {
- var that=XB_config;
- if(document.evaluate("//iframe[@id='XB_config']",document,null,9,null).singleNodeValue) return;
-	// Create frame
-	document.body.appendChild((that.frame=that.create('iframe',{id:'XB_config',src:'about:blank',style:'position:fixed; top:0; left:0; opacity:0; display:none; z-index:999; width:75%; height:75%; max-height:95%; max-width:95%; border:1px solid #000000; overflow:auto;'})));
-	that.frame.addEventListener('load', function(){
-		var obj = XB_config, frameBody = this.contentDocument.getElementsByTagName('body')[0], create=obj.create, settings=obj.settings;
-		obj.frame.contentDocument.getElementsByTagName('head')[0].appendChild(obj.create('style',{type:'text/css',innerHTML:obj.css.basic+obj.css.stylish}));
+ 'open' : function() {
+     var that=XB_config;
+     if(document.evaluate("//iframe[@id='XB_config']",document,null,9,null).singleNodeValue) return;
+     // Create frame
+     that.frame=that.create('iframe',{
+                                       'id': 'XB_config',
+                                       'src': 'about:blank',
+                                       'style' : 'position:fixed;' +
+                                                 'top:0; left:0; opacity:0;' +
+                                                 'display:none; z-index:999;' +
+                                                 'width:75%; height:75%;' +
+                                                 'max-height:95%; max-width:95%;' +
+                                                 'border:1px solid #000000;' +
+                                                 'overflow:auto;'});
+     document.body.appendChild(that.frame);
+	that.frame.addEventListener('load', function() {
+		var obj = XB_config,
+                          obj.frameDoc = this.contentDocument,
+                          frameBody = this.frameDoc.getElementsByTagName('body')[0], 
+                          create=obj.create, 
+                          settings=obj.settings,
+                          css=obj.create('style',{
+                                                   type:'text/css',
+                                                   textContent:obj.css.basic + 
+                                                               obj.css.stylish});
+                obj.frameDoc.getElementsByTagName('head')[0].appendChild(css);
 
 		// Add header and title
 		frameBody.appendChild(obj.create('div', {id:'header',className:'config_header block center', textContent:obj.title}));
@@ -76,7 +107,7 @@ var XB_config = {
 					break;
 				case 'select':
 					var options = new Array();
-					for (var j in Options) options.push(create('option',{textContent:Options[j],value:j,selected:(value?(value==j):(Options[j]==field._def))}));
+					for (var j in Options) options.push(create('option',{textContent:Options[j],value:j,selected:(value?(value==j):(Options[j]==field['default']))}));
 					anch.appendChild(create('div', {title:field.title||'',kids:[
 						create('span', {textContent:label, className:'field_label'}),
 						create('select',{id:'field_'+i,kids:options})
@@ -124,7 +155,7 @@ var XB_config = {
 		window.addEventListener('beforeunload', function(){XB_config.remove(this);}, false);
 	}, false);
  },
- close: function(save) {
+ 'close' : function(save) {
 if(this.onClose) this.onClose(); //  Call the close() callback function
 	if(save) {
 		if(this.onSave) this.onSave(); // Call the save() callback function
@@ -163,19 +194,19 @@ if(this.onClose) this.onClose(); //  Call the close() callback function
 	this.save();
 	delete this.frame;
  },
- set: function(name,val) {
+ 'set' : function(name,val) {
 	this.values[name] = val;
  },
- get: function(name) {
+ 'get' : function(name) {
 	return this.values[name];
  },
- save: function() {
+ 'save' : function() {
 	GM_setValue('XB_config', this.values.toSource());
  },
- read: function() {
+ 'read' : function() {
 	return eval(GM_getValue('XB_config', '({})'));
  },
- reset: function(e) {
+ 'reset' : function(e) {
 	e.preventDefault();
 	var type, obj = XB_config, fields = obj.settings;
 	for(f in fields) {
@@ -184,70 +215,84 @@ if(this.onClose) this.onClose(); //  Call the close() callback function
 		else type=field.tagName.toLowerCase();
 		switch(type) {
 			case 'text':
-				field.value = obj.settings[f]._def || '';
+				field.value = obj.settings[f]['default'] || '';
 				break;
 			case 'hidden':
-				field.value = obj.settings[f]._def || '';
+				field.value = obj.settings[f]['default'] || '';
 				break;
 			case 'textarea':
-				field.value = obj.settings[f]._def || '';
+				field.value = obj.settings[f]['default'] || '';
 				break;
 			case 'checkbox':
-				field.checked = obj.settings[f]._def || false;
+				field.checked = obj.settings[f]['default'] || false;
 				break;
 			case 'select':
-				if(obj.settings[f]._def) {
+				if(obj.settings[f]['default']) {
 					for(var i=field.options.length-1; i>=0; i--)
-					if(field.options[i].value==obj.settings[f]._def) field.selectedIndex=i;
+					if(field.options[i].value==obj.settings[f]['default']) field.selectedIndex=i;
 				}
 				else field.selectedIndex=0;
 				break;
 			case 'div':
 				var radios = field.getElementsByTagName('input');
 				if(radios.length>0) for(var i=radios.length-1; i>=0; i--) {
-					if(radios[i].value==obj.settings[f]._def) radios[i].checked=true;
+					if(radios[i].value==obj.settings[f]['default']) radios[i].checked=true;
 				}
 				break;
 		}
 	}
  },
- values: {},
- settings: {},
- css: {
- basic: <><![CDATA[
-body {background:#FFFFFF;}
-.indent40 {margin-left:40%;}
-* {font-family: arial, tahoma, sans-serif, myriad pro;}
-.field_label {font-weight:bold; margin-right:6px;}
-.block {display:block;}
-.saveclose_buttons {
-margin:16px 10px 10px 10px;
-padding:2px 12px 2px 12px;
-}
-.reset, #buttons_holder, .reset a {text-align:right; color:#000000;}
-.config_header {font-size:24pt; margin:0;}
-.config_desc, .section_desc, .reset {font-size:9pt;}
-.center {text-align:center;}
-.section_header_holder {margin-top:25px;}
-.config_var {margin:0 0 4px 0;}
-.section_header {font-size:13pt; background:#414141; color:#FFFFFF; border:1px solid #000000; margin:0;}
-.section_desc {font-size:9pt; background:#EFEFEF; color:#575757; border:1px solid #CCCCCC; margin:0 0 6px 0;}
-input[type="radio"] {margin-right:8px;}
-]]></>.toString(),
- stylish: ''},
- create: function(a,b) {
-	var ret=window.document.createElement(a);
-	if(b) for(var prop in b) {
-		if(prop.indexOf('on')==0) ret.addEventListener(prop.substring(2),b[prop],false);
-		else if(prop=="kids" && (prop=b[prop])) for(var i=0; i<prop.length; i++) ret.appendChild(prop[i]);
-		else if(",style,accesskey,id,name,src,href,for".indexOf(","+prop.toLowerCase())!=-1) ret.setAttribute(prop, b[prop]);
-		else ret[prop]=b[prop];
-	}
-	return ret;
+ 'values' : {},
+ 'settings' : {},
+ 'css' : {
+           'basic' : 'body {background:#FFFFFF;}\n' +
+                     '.indent40 {margin-left:40%;}\n' +
+                     '* {font-family: arial, tahoma, sans-serif, myriad pro;}\n' +
+                     '.field_label {font-weight:bold; margin-right:6px;}\n' +
+                     '.block {display:block;}\n' +
+                     '.saveclose_buttons {\n' +
+                     'margin:16px 10px 10px 10px;\n' +
+                     'padding:2px 12px 2px 12px;\n' +
+                     '}\n.reset, #buttons_holder,' + 
+                     '.reset a {text-align:right; color:#000000;}\n' +
+                     '.config_header {font-size:24pt; margin:0;}\n' +
+                     '.config_desc, .section_desc, .reset {font-size:9pt;}\n' +
+                     '.center {text-align:center;}\n' +
+                     '.section_header_holder {margin-top:25px;}\n' +
+                     '.config_var {margin:0 0 4px 0;}\n' +
+                     '.section_header {\n' +
+                     'font-size:13pt;\nbackground:#414141;\n' +
+                     'color:#FFFFFF;\nborder:1px solid #000000; margin:0;}\n' +
+                     '.section_desc {font-size:9pt;\nbackground:#EFEFEF;\n' +
+                     'color:#575757;\nborder:1px solid #CCCCCC;\nmargin:0 0 6px 0;}\n' +
+                     'input[type="radio"] {margin-right:8px;}',
+                     'stylish' : ''
+ },
+ create: function(A, B, C) {
+     if (!B) 
+         A = document.createTextNode(A);
+     else {
+         A = document.createElement(A);
+         for (var b in B) {
+             if (b.indexOf("on") == 0)
+                 A.addEventListener(b.substring(2), B[b], false);
+             else if (b == "style")
+                 A.setAttribute(b, B[b]);
+             else
+                 A[b] = B[b];
+         }
+         if (C) 
+             for(var i = 0, len = C.length; i<len; i++)
+                 A.appendChild(C[i]);
+     }
+     return A;
  },
  center: function() {
-	var node = XB_config.frame, style = node.style, beforeOpacity = style.opacity;
-	if(style.display=='none') style.opacity='0';
+	var node = XB_config.frame, 
+                   style = node.style, 
+                   beforeOpacity = style.opacity;
+	if(style.display=='none') 
+            style.opacity='0';
 	style.display = '';
 	style.top = Math.floor((window.innerHeight/2)-(node.offsetHeight/2)) + 'px';
 	style.left = Math.floor((window.innerWidth/2)-(node.offsetWidth/2)) + 'px';
