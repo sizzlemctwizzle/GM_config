@@ -267,7 +267,7 @@ if(this.onClose) this.onClose(); //  Call the close() callback function
                      '.section_desc {font-size:9pt;\nbackground:#EFEFEF;\n' +
                      'color:#575757;\nborder:1px solid #CCCCCC;\nmargin:0 0 6px 0;}\n' +
                      'input[type="radio"] {margin-right:8px;}',
-                     'stylish' : ''
+           'stylish' : ''
  },
  'create' : function(A, B, C) {
      if (!B) 
