@@ -1,5 +1,5 @@
 // GM_config
-// version        1.2.1
+// version        1.2.0
 // copyright      JoeSimmons & SizzleMcTwizzle & IzzySoft
 
 var GM_config = {
@@ -27,7 +27,7 @@ var GM_config = {
 		typewhite = /number|string|boolean/;
 	for (var i in settings) {
 		passed_settings[i] = settings[i];
-		passed_values[i] = (stored[i]===false && settings[i]._def===true)? false : (((typewhite.test(typeof stored[i]))?stored[i]:false)||settings[i]._def||'');
+		passed_values[i] = (stored[i]===false && settings[i]['default']===true)? false : (((typewhite.test(typeof stored[i]))?stored[i]:false)||settings[i]['default']||'');
 	}
 	this.settings = passed_settings;
 	this.values = passed_values;
@@ -76,7 +76,7 @@ var GM_config = {
 					break;
 				case 'select':
 					var options = new Array();
-					for (var j in Options) options.push(create('option',{textContent:Options[j],value:j,selected:(value?(value==j):(Options[j]==field._def))}));
+					for (var j in Options) options.push(create('option',{textContent:Options[j],value:j,selected:(value?(value==j):(Options[j]==field['default']))}));
 					anch.appendChild(create('div', {title:field.title||'',kids:[
 						create('span', {textContent:label, className:'field_label'}),
 						create('select',{id:'field_'+i,kids:options})
@@ -127,7 +127,6 @@ var GM_config = {
  close: function(save) {
 if(this.onClose) this.onClose(); //  Call the close() callback function
 	if(save) {
-		if(this.onSave) this.onSave(); // Call the save() callback function
 		var type, fields = this.settings, isNum=/^[\d\.]+$/, typewhite=/radio|text|hidden|checkbox/;
 		for(f in fields) {
 			var field = this.frame.contentDocument.getElementById('field_'+f);
@@ -159,6 +158,7 @@ if(this.onClose) this.onClose(); //  Call the close() callback function
 			}
 		}
 	}
+	if(this.onSave) this.onSave(); // Call the save() callback function
 	if(this.frame) this.remove(this.frame);
 	this.save();
 	delete this.frame;
@@ -184,28 +184,28 @@ if(this.onClose) this.onClose(); //  Call the close() callback function
 		else type=field.tagName.toLowerCase();
 		switch(type) {
 			case 'text':
-				field.value = obj.settings[f]._def || '';
+				field.value = obj.settings[f]['default'] || '';
 				break;
 			case 'hidden':
-				field.value = obj.settings[f]._def || '';
+				field.value = obj.settings[f]['default'] || '';
 				break;
 			case 'textarea':
-				field.value = obj.settings[f]._def || '';
+				field.value = obj.settings[f]['default'] || '';
 				break;
 			case 'checkbox':
-				field.checked = obj.settings[f]._def || false;
+				field.checked = obj.settings[f]['default'] || false;
 				break;
 			case 'select':
-				if(obj.settings[f]._def) {
+				if(obj.settings[f]['default']) {
 					for(var i=field.options.length-1; i>=0; i--)
-					if(field.options[i].value==obj.settings[f]._def) field.selectedIndex=i;
+					if(field.options[i].value==obj.settings[f]['default']) field.selectedIndex=i;
 				}
 				else field.selectedIndex=0;
 				break;
 			case 'div':
 				var radios = field.getElementsByTagName('input');
 				if(radios.length>0) for(var i=radios.length-1; i>=0; i--) {
-					if(radios[i].value==obj.settings[f]._def) radios[i].checked=true;
+					if(radios[i].value==obj.settings[f]['default']) radios[i].checked=true;
 				}
 				break;
 		}

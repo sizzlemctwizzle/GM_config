@@ -2,57 +2,13 @@
 // version        dev0
 // copyright      JoeSimmons & SizzleMcTwizzle & IzzySoft
 
-var XB_config = {
-    'init' : function() {
-        for(var i=0,len=arguments.length,arg; i<len; ++i) {
-            arg=arguments[i];
-            switch(typeof arg) {
-            case 'object': 
-                for(var j in arg) {
-                    if (typeof arg[j] == 'function') {
-                        if (j=='open')
-                            this.onOpen=arg[j]; 
-                        else if (j=='close')
-                            this.onClose=arg[j];
-                        else if (j=='save')
-                            this.onSave=arg[j];
-                    } else 
-                        var settings = arg;
-                } 
-                break;
-            case 'function': 
-                this.onOpen = arg;
-                break;
-            case 'string': 
-                if(arg.indexOf('{')!=-1&&arg.indexOf('}')!=-1) 
-                    var css = arg;
-                else 
-                    this.title = arg;
-                break;
-            }
-	}
-	if(!this.title) 
-            this.title = 'Settings - Anonymous Script';
-	var stored = this.read(),
-		     passed_settings = {},
-		     passed_values = {},
-		     typewhite = /number|string|boolean/;
-	for (var i in settings) {
-            passed_settings[i] = settings[i];
-            passed_values[i] = (stored[i]===false && settings[i]['default']===true) 
-                               ? false : 
-                               (((typewhite.test(typeof stored[i]))?stored[i]:false)||settings[i]['default']||'');
-	}
-	this.settings = passed_settings;
-	this.values = passed_values;
-	if (css) 
-            this.css.stylish = css;
- },
- 'open' : function() {
-     var that=XB_config;
-     if(document.evaluate("//iframe[@id='XB_config']",document,null,9,null).singleNodeValue) return;
-     // Create frame
-     that.frame=that.create('iframe',{
+// XB_config.init located at http://gmconfig.googlecode.com/svn/trunk/xb_config.js
+(function() {
+    XB_config.open = function() {
+        var that=XB_config;
+        if(document.evaluate("//iframe[@id='XB_config']",document,null,9,null).singleNodeValue) return;
+        // Create frame
+        that.frame=that.create('iframe',{
                                        'id': 'XB_config',
                                        'src': 'about:blank',
                                        'style' : 'position:fixed;' +
@@ -62,7 +18,7 @@ var XB_config = {
                                                  'max-height:95%; max-width:95%;' +
                                                  'border:1px solid #000000;' +
                                                  'overflow:auto;'});
-     document.body.appendChild(that.frame);
+        document.body.appendChild(that.frame);
 	that.frame.addEventListener('load', function() {
 		var obj = XB_config,
                           obj.frameDoc = this.contentDocument,
@@ -155,9 +111,10 @@ var XB_config = {
 		// Close frame on window close
 		window.addEventListener('beforeunload', function(){XB_config.remove(this);}, false);
 	}, false);
- },
- 'close' : function(save) {
-if(this.onClose) this.onClose(); //  Call the close() callback function
+    };
+
+    XB_config.close = function(save) {
+        if(this.onClose) this.onClose(); //  Call the close() callback function
 	if(save) {
 		if(this.onSave) this.onSave(); // Call the save() callback function
 		var type, fields = this.settings, isNum=/^[\d\.]+$/, typewhite=/radio|text|hidden|checkbox/;
@@ -194,23 +151,28 @@ if(this.onClose) this.onClose(); //  Call the close() callback function
 	if(this.frame) this.remove(this.frame);
 	this.save();
 	delete this.frame;
- },
- 'set' : function(name,val) {
-	this.values[name] = val;
- },
- 'get' : function(name) {
-	return this.values[name];
- },
- 'save' : function() {
-	GM_setValue('XB_config', this.values.toSource());
- },
- 'read' : function() {
-	return eval(GM_getValue('XB_config', '({})'));
- },
- 'reset' : function(e) {
-	e.preventDefault();
-	var type, obj = XB_config, fields = obj.settings;
-	for(f in fields) {
+    };
+
+    XB_config.set = function(name,val) {
+      this.values[name] = val;
+    };
+
+    XB_config.get = function(name) {
+      return this.values[name];
+    };
+
+    XB_config.save = function() {
+      GM_setValue('XB_config', this.values.toSource());
+    };
+
+    XB_config.read = function() {
+      return eval(GM_getValue('XB_config', '({})'));
+    };
+
+    XB_config.reset = function(e) {
+      e.preventDefault();
+      var type, obj = XB_config, fields = obj.settings;
+      for(f in fields) {
 		var field = obj.frame.contentDocument.getElementById('field_'+f);
 		if(field.type=='radio'||field.type=='text'||field.type=='checkbox') type=field.type;
 		else type=field.tagName.toLowerCase();
@@ -242,53 +204,31 @@ if(this.onClose) this.onClose(); //  Call the close() callback function
 				break;
 		}
 	}
- },
- 'values' : {},
- 'settings' : {},
- 'css' : {
-           'basic' : 'body {background:#FFFFFF;}\n' +
-                     '.indent40 {margin-left:40%;}\n' +
-                     '* {font-family: arial, tahoma, sans-serif, myriad pro;}\n' +
-                     '.field_label {font-weight:bold; margin-right:6px;}\n' +
-                     '.block {display:block;}\n' +
-                     '.saveclose_buttons {\n' +
-                     'margin:16px 10px 10px 10px;\n' +
-                     'padding:2px 12px 2px 12px;\n' +
-                     '}\n.reset, #buttons_holder,' + 
-                     '.reset a {text-align:right; color:#000000;}\n' +
-                     '.config_header {font-size:24pt; margin:0;}\n' +
-                     '.config_desc, .section_desc, .reset {font-size:9pt;}\n' +
-                     '.center {text-align:center;}\n' +
-                     '.section_header_holder {margin-top:25px;}\n' +
-                     '.config_var {margin:0 0 4px 0;}\n' +
-                     '.section_header {\n' +
-                     'font-size:13pt;\nbackground:#414141;\n' +
-                     'color:#FFFFFF;\nborder:1px solid #000000; margin:0;}\n' +
-                     '.section_desc {font-size:9pt;\nbackground:#EFEFEF;\n' +
-                     'color:#575757;\nborder:1px solid #CCCCCC;\nmargin:0 0 6px 0;}\n' +
-                     'input[type="radio"] {margin-right:8px;}',
-           'stylish' : ''
- },
- 'create' : function(A, B, C) {
-     if (!B) 
-         A = document.createTextNode(A);
-     else {
-         A = document.createElement(A);
-         for (var b in B) {
-             if (b.indexOf("on") == 0)
-                 A.addEventListener(b.substring(2), B[b], false);
-             else if (b == "style")
-                 A.setAttribute(b, B[b]);
-             else
-                 A[b] = B[b];
-         }
-         if (C) 
-             for(var i = 0, len = C.length; i<len; i++)
-                 A.appendChild(C[i]);
-     }
-     return A;
- },
- 'center' : function() {
+    };
+
+    XB_config.css.basic = 'body {background:#FFFFFF;}\n' +
+                          '.indent40 {margin-left:40%;}\n' +
+                          '* {font-family: arial, tahoma, sans-serif, myriad pro;}\n' +
+                          '.field_label {font-weight:bold; margin-right:6px;}\n' +
+                          '.block {display:block;}\n' +
+                          '.saveclose_buttons {\n' +
+                          'margin:16px 10px 10px 10px;\n' +
+                          'padding:2px 12px 2px 12px;\n' +
+                          '}\n.reset, #buttons_holder,' + 
+                          '.reset a {text-align:right; color:#000000;}\n' +
+                          '.config_header {font-size:24pt; margin:0;}\n' +
+                          '.config_desc, .section_desc, .reset {font-size:9pt;}\n' +
+                          '.center {text-align:center;}\n' +
+                          '.section_header_holder {margin-top:25px;}\n' +
+                          '.config_var {margin:0 0 4px 0;}\n' +
+                          '.section_header {\n' +
+                          'font-size:13pt;\nbackground:#414141;\n' +
+                          'color:#FFFFFF;\nborder:1px solid #000000; margin:0;}\n' +
+                          '.section_desc {font-size:9pt;\nbackground:#EFEFEF;\n' +
+                          'color:#575757;\nborder:1px solid #CCCCCC;\nmargin:0 0 6px 0;}\n' +
+                          'input[type="radio"] {margin-right:8px;}';
+
+    XB_config.center = function() {
 	var node = XB_config.frame, 
                    style = node.style, 
                    beforeOpacity = style.opacity;
@@ -298,21 +238,24 @@ if(this.onClose) this.onClose(); //  Call the close() callback function
 	style.top = Math.floor((window.innerHeight/2)-(node.offsetHeight/2)) + 'px';
 	style.left = Math.floor((window.innerWidth/2)-(node.offsetWidth/2)) + 'px';
 	style.opacity = '1';
- },
- 'run' : function() {
-     var script=this.getAttribute('script');
-     if(script && typeof script=='string' && script!='') {
-         func = new Function(script);
-         setTimeout(func, 0);
-     }
- },
- 'addEvent' : function(el,ev,scr) { 
-     el.addEventListener(ev, function() { 
-                                 typeof scr == 'function' ? setTimeout(scr, 0) : eval(scr) 
-                             }, false); 
- },
- 'remove' : function(el) { 
-     if(el && el.parentNode) 
-         el.parentNode.removeChild(el); 
- }
-};
+    };
+
+    XB_config.run = function() {
+        var script=this.getAttribute('script');
+        if(script && typeof script=='string' && script!='') {
+            func = new Function(script);
+            setTimeout(func, 0);
+        }
+    };
+
+    XB_config.addEvent = function(el,ev,scr) { 
+        el.addEventListener(ev, function() { 
+                                    typeof scr == 'function' ? setTimeout(scr, 0) : eval(scr) 
+                                }, false); 
+    };
+
+    XB_config.remove = function(el) { 
+      if(el && el.parentNode) 
+          el.parentNode.removeChild(el); 
+    };
+ })();
