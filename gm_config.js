@@ -125,7 +125,7 @@ var GM_config = {
 	}, false);
  },
  close: function(save) {
-if(this.onClose) this.onClose(); //  Call the close() callback function
+if(this.onClose && !save) this.onClose(); //  Call the close() callback function
 	if(save) {
 		var type, fields = this.settings, isNum=/^[\d\.]+$/, typewhite=/radio|text|hidden|checkbox/;
 		for(f in fields) {
@@ -135,7 +135,10 @@ if(this.onClose) this.onClose(); //  Call the close() callback function
 			switch(type) {
 				case 'text':
 					this.values[f] = (this.settings[f].type=='text') ? field.value : (((isNum.test(field.value||field.value=='0'))&&(this.settings[f].type=='int'||this.settings[f].type=='float'))?parseFloat(field.value):false);
-					if(this.values[f]===false) {alert('Invalid type for field: '+f+'\nPlease use type: '+this.settings[f].type);return}
+					if(this.values[f]===false) {
+                                          alert('Invalid type for field: '+f+'\nPlease use type: '+this.settings[f].type);
+                                          return;
+                                        }
 					break;
 				case 'hidden':
 					this.values[f] = field.value.toString();
