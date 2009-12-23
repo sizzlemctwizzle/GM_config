@@ -164,7 +164,7 @@ var GM_config = {
 	}
 	if(this.frame) this.remove(this.frame);
 	delete this.frame;
-        if(this.onClose && !save) this.onClose(); //  Call the close() callback function
+        if(this.onClose) this.onClose(); //  Call the close() callback function
  },
  set: function(name,val) {
 	this.values[name] = val;
