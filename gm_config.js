@@ -1,5 +1,5 @@
 // GM_config
-// version        1.2.0
+// version        1.2.2
 // copyright      JoeSimmons & SizzleMcTwizzle & IzzySoft
 
 var GM_config = {
@@ -125,7 +125,6 @@ var GM_config = {
 	}, false);
  },
  close: function(save) {
-if(this.onClose && !save) this.onClose(); //  Call the close() callback function
 	if(save) {
 		var type, fields = this.settings, isNum=/^[\d\.]+$/, typewhite=/radio|text|hidden|checkbox/;
 		for(f in fields) {
@@ -160,11 +159,12 @@ if(this.onClose && !save) this.onClose(); //  Call the close() callback function
 					break;
 			}
 		}
+                if(this.onSave) this.onSave(); // Call the save() callback function
+                this.save();
 	}
-	if(this.onSave) this.onSave(); // Call the save() callback function
 	if(this.frame) this.remove(this.frame);
-	this.save();
 	delete this.frame;
+        if(this.onClose && !save) this.onClose(); //  Call the close() callback function
  },
  set: function(name,val) {
 	this.values[name] = val;
