@@ -221,17 +221,17 @@ var GM_config = {
 body {background:#FFFFFF;}
 .indent40 {margin-left:40%;}
 * {font-family: arial, tahoma, sans-serif, myriad pro;}
-.field_label {font-weight:bold; margin-right:6px;}
+.field_label {font-weight:bold; font-size:12px; margin-right:6px;}
 .block {display:block;}
 .saveclose_buttons {
 margin:16px 10px 10px 10px;
 padding:2px 12px 2px 12px;
 }
 .reset, #buttons_holder, .reset a {text-align:right; color:#000000;}
-.config_header {font-size:24pt; margin:0;}
+.config_header {font-size:20pt; margin:0;}
 .config_desc, .section_desc, .reset {font-size:9pt;}
 .center {text-align:center;}
-.section_header_holder {margin-top:25px;}
+.section_header_holder {margin-top:8px;}
 .config_var {margin:0 0 4px 0;}
 .section_header {font-size:13pt; background:#414141; color:#FFFFFF; border:1px solid #000000; margin:0;}
 .section_desc {font-size:9pt; background:#EFEFEF; color:#575757; border:1px solid #CCCCCC; margin:0 0 6px 0;}
