@@ -111,7 +111,7 @@
 		window.addEventListener('beforeunload', function(){window.XB_config.remove(this);}, false);
 	};
     },
-    'close' = function(save) {
+    'close' : function(save) {
         if(this.onClose) this.onClose(); //  Call the close() callback function
 	if(save) {
 		if(this.onSave) this.onSave(); // Call the save() callback function
