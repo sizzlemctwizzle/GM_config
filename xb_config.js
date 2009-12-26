@@ -157,10 +157,6 @@
       this.values[name] = val;
     };
 
-    window.XB_config.get = function(name) {
-      return this.values[name];
-    };
-
     window.XB_config.save = function() {
       localStorage.setItem('window.XB_config', this.values.toSource());
     };
