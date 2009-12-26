@@ -236,7 +236,7 @@
                                     typeof scr == 'function' ? setTimeout(scr, 0) : eval(scr) 
                                 }, false); 
     },
-    XB_config.remove = function(el) { 
+    'remove' : function(el) { 
       if(el && el.parentNode) 
           el.parentNode.removeChild(el); 
     }
