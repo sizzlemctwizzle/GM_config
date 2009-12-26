@@ -38,18 +38,18 @@
 		for (var i in settings) {
 			var type, field = settings[i], Options = field.options, label = field.label, value = obj.values[i];
 			if (field.section) {
-				anch = frameBody.appendChild(create('div', {className:'section_header_holder', kids:[
-				  create('div', {className:'section_header center',innerHTML:field.section[0]})],
-				  id:'section_'+secNo}));
-				if(field.section[1]) anch.appendChild(create('p', {className:'section_desc center',innerHTML:field.section[1]}));
+                          anch = frameBody.appendChild(create('div', {className:'section_header_holder', id:'section_'+secNo}, 
+                                                              [create('div', {className:'section_header center',innerHTML:field.section[0]})]));
+				if(field.section[1]) 
+                                  anch.appendChild(create('p', {className:'section_desc center',innerHTML:field.section[1]}));
 				secNo++;
 			}
 			switch(field.type) {
 				case 'textarea':
-					anch.appendChild(create('div', {title:field.title||'',kids:[
-						create('span', {textContent:label, className:'field_label'}),
-						create('textarea', {id:'field_'+i,innerHTML:value,cols:(field.cols?field.cols:20),rows:(field.rows?field.rows:2)})
-					], className: 'config_var'}));
+					anch.appendChild(create('div', {title:field.title||'', className: 'config_var'},
+                                                                [create('span', {textContent:label, className:'field_label'}),
+                                                                 create('textarea', {id:'field_'+i,innerHTML:value,cols:(field.cols?field.cols:20),rows:(field.rows?field.rows:2)})
+                                                                 ]));
 					break;
 				case 'radio':
 					var boxes = [];
@@ -57,52 +57,52 @@
 						boxes.push(create('span', {textContent:Options[j]}));
 						boxes.push(create('input', {value:Options[j],type:'radio',name:i,checked:Options[j]==value?true:false}));
 					}
-					anch.appendChild(create('div', {title:field.title||'',kids:[
-						create('span', {textContent:label, className:'field_label'}),
-						create('div', {id:'field_'+i,kids:boxes})
-					], className: 'config_var'}));
+					anch.appendChild(create('div', {title:field.title||'', className: 'config_var'},
+                                                                [create('span', {textContent:label, className:'field_label'}),
+                                                                 create('div', {id:'field_'+i,kids:boxes})
+                                                                 ]));
 					break;
 				case 'select':
 					var options = new Array();
 					for (var j in Options) options.push(create('option',{textContent:Options[j],value:j,selected:(value?(value==j):(Options[j]==field['default']))}));
-					anch.appendChild(create('div', {title:field.title||'',kids:[
-						create('span', {textContent:label, className:'field_label'}),
-						create('select',{id:'field_'+i,kids:options})
-					], className: 'config_var'}));
+					anch.appendChild(create('div', {title:field.title||'', className: 'config_var'}, 
+                                                                [create('span', {textContent:label, className:'field_label'}),
+                                                                 create('select',{id:'field_'+i,kids:options})
+                                                                 ]));
 					break;
 				case 'checkbox':
-					anch.appendChild(create('div', {title:field.title||'',kids:[
-						create('label', {textContent:label, className:'field_label', "for":'field_'+i}),
-						create('input', {id:'field_'+i,type:'checkbox',value:value,checked:!value||value==''?false:true})
-					], className: 'config_var'}));
+                                  anch.appendChild(create('div', {title:field.title||'', className: 'config_var'},
+                                                          [create('label', {textContent:label, className:'field_label', "for":'field_'+i}),
+                                                           create('input', {id:'field_'+i,type:'checkbox',value:value,checked:!value||value==''?false:true})
+                                                           ]));
 					break;
 				case 'button':
 				var tmp;
-					anch.appendChild(create('div', {kids:[
-						(tmp=create('input', {id:'field_'+i,type:'button',value:label,size:(field.size?field.size:25),title:field.title||''}))
-					], className: 'config_var'}));
+                                anch.appendChild(create('div', {className: 'config_var'}, 
+                                                        [(tmp=create('input', {id:'field_'+i,type:'button',value:label,size:(field.size?field.size:25),title:field.title||''}))
+                                                         ]));
 					if(field.script) obj.addEvent(tmp, 'click', field.script);
 					break;
 				case 'hidden':
-				anch.appendChild(create('div', {title:field.title||'',kids:[
-						create('input', {id:'field_'+i,type:'hidden',value:value})
-					], className: 'config_var'}));
+				anch.appendChild(create('div', {title:field.title||'', className: 'config_var'},
+                                                        [create('input', {id:'field_'+i,type:'hidden',value:value})
+                                                         ]));
 					break;
 				default:
-					anch.appendChild(create('div', {title:field.title||'',kids:[
-						create('span', {textContent:label, className:'field_label'}),
-						create('input', {id:'field_'+i,type:'text',value:value,size:(field.size?field.size:25)})
-					], className: 'config_var'}));
+                                  anch.appendChild(create('div', {title:field.title||'',  className: 'config_var'}, 
+                                                          [create('span', {textContent:label, className:'field_label'}),
+                                                           create('input', {id:'field_'+i,type:'text',value:value,size:(field.size?field.size:25)})
+                                                           ]));
 			}
 		}
 
 		// Add save and close buttons
-		frameBody.appendChild(obj.create('div', {id:'buttons_holder', kids:[
+		frameBody.appendChild(obj.create('div', {id:'buttons_holder'}, [
 			obj.create('button',{id:'saveBtn',textContent:'Save',title:'Save options and close window',className:'saveclose_buttons',onclick:function(){XB_config.close(true)}}),
 			obj.create('button',{id:'cancelBtn', textContent:'Cancel',title:'Close window',className:'saveclose_buttons',onclick:function(){XB_config.close(false)}}),
-			obj.create('div', {className:'reset_holder block', kids:[
-			obj.create('a',{id:'resetLink',textContent:'Restore to default',href:'#',title:'Restore settings to default configuration',className:'reset',onclick:obj.reset})
-		]})]}));
+			obj.create('div', {className:'reset_holder block'}, 
+                                   [obj.create('a',{id:'resetLink',textContent:'Restore to default',href:'#',title:'Restore settings to default configuration',className:'reset',onclick:obj.reset})
+                                    ])]));
 
 		obj.center(); // Show and center it
 		window.addEventListener('resize', obj.center, false); // Center it on resize
