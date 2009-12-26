@@ -162,11 +162,11 @@
     };
 
     XB_config.save = function() {
-      GM_setValue('XB_config', this.values.toSource());
+      localStorage.setItem('XB_config', this.values.toSource());
     };
 
     XB_config.read = function() {
-      return eval(GM_getValue('XB_config', '({})'));
+      return eval(localStorage.getItem('XB_config') || '({})');
     };
 
     XB_config.reset = function(e) {
