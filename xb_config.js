@@ -1,15 +1,14 @@
 // XB_config
-// version        dev0
+// version        0.0.1
 // copyright      JoeSimmons & SizzleMcTwizzle & IzzySoft
 
 // XB_config.init located at http://gmconfig.googlecode.com/svn/trunk/xb_config.js
 (function() {
     window.XB_config.open = function() {
-        var that=window.XB_config;
-        if(document.evaluate("//iframe[@id='window.XB_config']",document,null,9,null).singleNodeValue) return;
+        if(document.evaluate("//iframe[@id='XB_config']",document,null,9,null).singleNodeValue) return;
         // Create frame
-        that.frame=that.create('iframe',{
-                                       'id': 'window.XB_config',
+        this.frame=this.create('iframe',{
+                                       'id': 'XB_config',
                                        'src': 'about:blank',
                                        'style' : 'position:fixed;' +
                                                  'top:0; left:0; opacity:0;' +
@@ -18,14 +17,14 @@
                                                  'max-height:95%; max-width:95%;' +
                                                  'border:1px solid #000000;' +
                                                  'overflow:auto;'});
-        document.body.appendChild(that.frame);
-	that.frame.addEventListener('load', function() {
-		var obj = window.XB_config,
-                          obj.frameDoc = this.contentDocument,
-                          frameBody = this.frameDoc.getElementsByTagName('body')[0], 
-                          create=obj.create, 
-                          settings=obj.settings,
-                          css=obj.create('style',{
+        document.body.appendChild(this.frame);
+        this.frame.onload = function() {
+            var obj = window.XB_config;
+            obj.frameDoc = obj.frame.contentDocument;
+            var frameBody = obj.frameDoc.getElementsByTagName('body')[0],
+                            create=obj.create,
+                            settings=obj.settings,
+                            css=obj.create('style',{
                                                    type:'text/css',
                                                    textContent:obj.css.basic + obj.css.stylish});
                 obj.frameDoc.getElementsByTagName('head')[0].appendChild(css);
@@ -110,7 +109,7 @@
 		
 		// Close frame on window close
 		window.addEventListener('beforeunload', function(){window.XB_config.remove(this);}, false);
-	}, false);
+	};
     };
 
     window.XB_config.close = function(save) {
@@ -158,7 +157,7 @@
     };
 
     window.XB_config.save = function() {
-      localStorage.setItem('window.XB_config', this.values.toSource());
+      localStorage.setItem('XB_config', JSON.stringify(this.values));
     };
 
     window.XB_config.reset = function(e) {

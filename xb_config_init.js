@@ -1,6 +1,6 @@
 // This is the code to include in your script
 
-var XB_config = {
+window.XB_config = {
     'init' : function() {
         for(var i=0,len=arguments.length,arg; i<len; ++i) {
             arg=arguments[i];
@@ -57,6 +57,12 @@ var XB_config = {
                 }
               }, 200);
           };
+    },
+    'read' : function() {
+      return JSON.parse(localStorage.getItem('XB_config') || '{}');
+    },
+    'get' : function(name) {
+      return this.values[name];
     },
     'create' : function(A, B, C) {
         if (!B) 
