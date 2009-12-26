@@ -4,6 +4,7 @@
 
 // XB_config.init located at http://gmconfig.googlecode.com/svn/trunk/xb_config.js
 //(function() {
+alert(typeof window.XB_config);
     window.XB_config.open = function() {
         if(document.evaluate("//iframe[@id='XB_config']",document,null,9,null).singleNodeValue) return;
         // Create frame
