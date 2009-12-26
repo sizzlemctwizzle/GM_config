@@ -3,9 +3,8 @@
 // copyright      JoeSimmons & SizzleMcTwizzle & IzzySoft
 
 // XB_config.init located at http://gmconfig.googlecode.com/svn/trunk/xb_config.js
-//(function() {
-alert(typeof window.XB_config);
-    window.XB_config.open = function() {
+  window.Loaded_XB_PROPS = {
+    'open' : function() {
         if(document.evaluate("//iframe[@id='XB_config']",document,null,9,null).singleNodeValue) return;
         // Create frame
         this.frame=this.create('iframe',{
@@ -111,9 +110,8 @@ alert(typeof window.XB_config);
 		// Close frame on window close
 		window.addEventListener('beforeunload', function(){window.XB_config.remove(this);}, false);
 	};
-    };
-
-    window.XB_config.close = function(save) {
+    },
+    'close' = function(save) {
         if(this.onClose) this.onClose(); //  Call the close() callback function
 	if(save) {
 		if(this.onSave) this.onSave(); // Call the save() callback function
@@ -151,17 +149,14 @@ alert(typeof window.XB_config);
 	if(this.frame) this.remove(this.frame);
 	this.save();
 	delete this.frame;
-    };
-
-    window.XB_config.set = function(name,val) {
+    },
+    'set' : function(name,val) {
       this.values[name] = val;
-    };
-
-    window.XB_config.save = function() {
+    },
+    'save' : function() {
       localStorage.setItem('XB_config', JSON.stringify(this.values));
-    };
-
-    window.XB_config.reset = function(e) {
+    }
+    'reset' : function(e) {
       e.preventDefault();
       var type, obj = window.XB_config, fields = obj.settings;
       for(f in fields) {
@@ -196,9 +191,8 @@ alert(typeof window.XB_config);
 				break;
 		}
 	}
-    };
-
-    window.XB_config.css.basic = 'body {background:#FFFFFF;}\n' +
+    },
+    'css' : 'body {background:#FFFFFF;}\n' +
                           '.indent40 {margin-left:40%;}\n' +
                           '* {font-family: arial, tahoma, sans-serif, myriad pro;}\n' +
                           '.field_label {font-weight:bold; margin-right:6px;}\n' +
@@ -218,9 +212,8 @@ alert(typeof window.XB_config);
                           'color:#FFFFFF;\nborder:1px solid #000000; margin:0;}\n' +
                           '.section_desc {font-size:9pt;\nbackground:#EFEFEF;\n' +
                           'color:#575757;\nborder:1px solid #CCCCCC;\nmargin:0 0 6px 0;}\n' +
-                          'input[type="radio"] {margin-right:8px;}';
-
-    window.XB_config.center = function() {
+    'input[type="radio"] {margin-right:8px;}',
+    'center' : function() {
 	var node = window.XB_config.frame, 
                    style = node.style, 
                    beforeOpacity = style.opacity;
@@ -230,24 +223,21 @@ alert(typeof window.XB_config);
 	style.top = Math.floor((window.innerHeight/2)-(node.offsetHeight/2)) + 'px';
 	style.left = Math.floor((window.innerWidth/2)-(node.offsetWidth/2)) + 'px';
 	style.opacity = '1';
-    };
-
-    window.XB_config.run = function() {
+    },
+    'run' : function() {
         var script=this.getAttribute('script');
         if(script && typeof script=='string' && script!='') {
             func = new Function(script);
             setTimeout(func, 0);
         }
-    };
-
-    window.XB_config.addEvent = function(el,ev,scr) { 
+    },
+    'addEvent' : function(el,ev,scr) { 
         el.addEventListener(ev, function() { 
                                     typeof scr == 'function' ? setTimeout(scr, 0) : eval(scr) 
                                 }, false); 
-    };
-
-    window.XB_config.remove = function(el) { 
+    },
+    XB_config.remove = function(el) { 
       if(el && el.parentNode) 
           el.parentNode.removeChild(el); 
-    };
-//})();
+    }
+  };
