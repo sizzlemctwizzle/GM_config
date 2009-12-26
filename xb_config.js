@@ -3,8 +3,8 @@
 // copyright      JoeSimmons & SizzleMcTwizzle & IzzySoft
 
 // XB_config.init located at http://gmconfig.googlecode.com/svn/trunk/xb_config.js
-(function() {
-    window.XB_config.open2 = function() {
+//(function() {
+    window.XB_config.open = function() {
         if(document.evaluate("//iframe[@id='XB_config']",document,null,9,null).singleNodeValue) return;
         // Create frame
         this.frame=this.create('iframe',{
@@ -249,4 +249,4 @@
       if(el && el.parentNode) 
           el.parentNode.removeChild(el); 
     };
- })();
+//})();
