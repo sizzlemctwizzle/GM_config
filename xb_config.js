@@ -165,10 +165,6 @@
       localStorage.setItem('window.XB_config', this.values.toSource());
     };
 
-    window.XB_config.read = function() {
-      return eval(localStorage.getItem('window.XB_config') || '({})');
-    };
-
     window.XB_config.reset = function(e) {
       e.preventDefault();
       var type, obj = window.XB_config, fields = obj.settings;
