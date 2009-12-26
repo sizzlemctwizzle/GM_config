@@ -4,12 +4,12 @@
 
 // XB_config.init located at http://gmconfig.googlecode.com/svn/trunk/xb_config.js
 (function() {
-    XB_config.open = function() {
-        var that=XB_config;
-        if(document.evaluate("//iframe[@id='XB_config']",document,null,9,null).singleNodeValue) return;
+    window.XB_config.open = function() {
+        var that=window.XB_config;
+        if(document.evaluate("//iframe[@id='window.XB_config']",document,null,9,null).singleNodeValue) return;
         // Create frame
         that.frame=that.create('iframe',{
-                                       'id': 'XB_config',
+                                       'id': 'window.XB_config',
                                        'src': 'about:blank',
                                        'style' : 'position:fixed;' +
                                                  'top:0; left:0; opacity:0;' +
@@ -20,7 +20,7 @@
                                                  'overflow:auto;'});
         document.body.appendChild(that.frame);
 	that.frame.addEventListener('load', function() {
-		var obj = XB_config,
+		var obj = window.XB_config,
                           obj.frameDoc = this.contentDocument,
                           frameBody = this.frameDoc.getElementsByTagName('body')[0], 
                           create=obj.create, 
@@ -98,8 +98,8 @@
 
 		// Add save and close buttons
 		frameBody.appendChild(obj.create('div', {id:'buttons_holder'}, [
-			obj.create('button',{id:'saveBtn',textContent:'Save',title:'Save options and close window',className:'saveclose_buttons',onclick:function(){XB_config.close(true)}}),
-			obj.create('button',{id:'cancelBtn', textContent:'Cancel',title:'Close window',className:'saveclose_buttons',onclick:function(){XB_config.close(false)}}),
+			obj.create('button',{id:'saveBtn',textContent:'Save',title:'Save options and close window',className:'saveclose_buttons',onclick:function(){window.XB_config.close(true)}}),
+			obj.create('button',{id:'cancelBtn', textContent:'Cancel',title:'Close window',className:'saveclose_buttons',onclick:function(){window.XB_config.close(false)}}),
 			obj.create('div', {className:'reset_holder block'}, 
                                    [obj.create('a',{id:'resetLink',textContent:'Restore to default',href:'#',title:'Restore settings to default configuration',className:'reset',onclick:obj.reset})
                                     ])]));
@@ -109,11 +109,11 @@
 		if (obj.onOpen) obj.onOpen(); // Call the open() callback function
 		
 		// Close frame on window close
-		window.addEventListener('beforeunload', function(){XB_config.remove(this);}, false);
+		window.addEventListener('beforeunload', function(){window.XB_config.remove(this);}, false);
 	}, false);
     };
 
-    XB_config.close = function(save) {
+    window.XB_config.close = function(save) {
         if(this.onClose) this.onClose(); //  Call the close() callback function
 	if(save) {
 		if(this.onSave) this.onSave(); // Call the save() callback function
@@ -153,25 +153,25 @@
 	delete this.frame;
     };
 
-    XB_config.set = function(name,val) {
+    window.XB_config.set = function(name,val) {
       this.values[name] = val;
     };
 
-    XB_config.get = function(name) {
+    window.XB_config.get = function(name) {
       return this.values[name];
     };
 
-    XB_config.save = function() {
-      localStorage.setItem('XB_config', this.values.toSource());
+    window.XB_config.save = function() {
+      localStorage.setItem('window.XB_config', this.values.toSource());
     };
 
-    XB_config.read = function() {
-      return eval(localStorage.getItem('XB_config') || '({})');
+    window.XB_config.read = function() {
+      return eval(localStorage.getItem('window.XB_config') || '({})');
     };
 
-    XB_config.reset = function(e) {
+    window.XB_config.reset = function(e) {
       e.preventDefault();
-      var type, obj = XB_config, fields = obj.settings;
+      var type, obj = window.XB_config, fields = obj.settings;
       for(f in fields) {
 		var field = obj.frame.contentDocument.getElementById('field_'+f);
 		if(field.type=='radio'||field.type=='text'||field.type=='checkbox') type=field.type;
@@ -206,7 +206,7 @@
 	}
     };
 
-    XB_config.css.basic = 'body {background:#FFFFFF;}\n' +
+    window.XB_config.css.basic = 'body {background:#FFFFFF;}\n' +
                           '.indent40 {margin-left:40%;}\n' +
                           '* {font-family: arial, tahoma, sans-serif, myriad pro;}\n' +
                           '.field_label {font-weight:bold; margin-right:6px;}\n' +
@@ -228,8 +228,8 @@
                           'color:#575757;\nborder:1px solid #CCCCCC;\nmargin:0 0 6px 0;}\n' +
                           'input[type="radio"] {margin-right:8px;}';
 
-    XB_config.center = function() {
-	var node = XB_config.frame, 
+    window.XB_config.center = function() {
+	var node = window.XB_config.frame, 
                    style = node.style, 
                    beforeOpacity = style.opacity;
 	if(style.display=='none') 
@@ -240,7 +240,7 @@
 	style.opacity = '1';
     };
 
-    XB_config.run = function() {
+    window.XB_config.run = function() {
         var script=this.getAttribute('script');
         if(script && typeof script=='string' && script!='') {
             func = new Function(script);
@@ -248,13 +248,13 @@
         }
     };
 
-    XB_config.addEvent = function(el,ev,scr) { 
+    window.XB_config.addEvent = function(el,ev,scr) { 
         el.addEventListener(ev, function() { 
                                     typeof scr == 'function' ? setTimeout(scr, 0) : eval(scr) 
                                 }, false); 
     };
 
-    XB_config.remove = function(el) { 
+    window.XB_config.remove = function(el) { 
       if(el && el.parentNode) 
           el.parentNode.removeChild(el); 
     };
