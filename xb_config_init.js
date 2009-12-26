@@ -51,8 +51,14 @@ window.XB_config = {
                 type:'text/javascript',
                 src:'http://gmconfig.googlecode.com/svn/trunk/xb_config.js'}));
             var checker=setInterval(function(){
-                if(window.XB_config.remove) {
+                if(window.Loaded_XB_PROPS) {
                   clearInterval(checker);
+                  for (var i in window.Loaded_XB_PROPS) {
+                    if (i == "css")
+                        window.XB_config.css.basic = window.Loaded_XB_PROPS[i];
+                    else
+                        window.XB_config[i] = window.Loaded_XB_PROPS[i];
+                  }
                   window.XB_config.open(); // call the true opener
                 }
               }, 200);
