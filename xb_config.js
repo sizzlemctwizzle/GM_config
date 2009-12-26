@@ -155,7 +155,7 @@
     },
     'save' : function() {
       localStorage.setItem('XB_config', JSON.stringify(this.values));
-    }
+    },
     'reset' : function(e) {
       e.preventDefault();
       var type, obj = window.XB_config, fields = obj.settings;
