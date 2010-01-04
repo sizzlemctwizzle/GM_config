@@ -12,17 +12,17 @@
 // ==/UserScript==
 
 // Allow non-Greasemonkey browsers to use the GM functions, re-written (from TarquinWJ)
-if (typeof GM_getValue == 'undefined' || GM_getValue('a', 'b') == 'undefined') {
+if (typeof GM_getValue == 'undefined' || typeof GM_getValue('a', 'b') == 'undefined') {
 GM_xmlhttpRequest = XMLHttpRequest;
 GM_log = (window.opera) ? opera.postError : console.log;
 if (window.opera) window._content = window;
-GM_setValue = (!localStorage) ? function( cookieName, cookieValue, lifeTime ) {
+GM_setValue = (typeof localStorage == 'undefined') ? function( cookieName, cookieValue, lifeTime ) {
 	if( !cookieName ) { return; }
 	if( lifeTime == "delete" ) { lifeTime = -10; } else { lifeTime = 31536000; }
 	document.cookie = escape( cookieName ) + "=" + escape( cookieValue ) +
 		";expires=" + ( new Date( ( new Date() ).getTime() + ( 1000 * lifeTime ) ) ).toGMTString() + ";path=/";
 } : function(name, value) { return localStorage.setItem(name, value) };
-GM_getValue = (!localStorage) ? function( cookieName, oDefault ) {
+GM_getValue = (typeof localStorage == 'undefined') ? function( cookieName, oDefault ) {
 	var cookieJar = document.cookie.split( "; " );
 	for( var x = 0; x < cookieJar.length; x++ ) {
 		var oneCookie = cookieJar[x].split( "=" );
@@ -35,7 +35,7 @@ GM_getValue = (!localStorage) ? function( cookieName, oDefault ) {
 	}
 	return oDefault;
 } : function(name, defaultValue) { return localStorage.getItem('XB_config') || defaultValue };
-GM_deleteValue = (!localStorage) ? function( oKey ) {
+GM_deleteValue = (typeof localStorage == 'undefined') ? function( oKey ) {
 	GM_setValue( oKey, '', 'delete' );
 } : function GM_deleteValue(name) { localStorage.removeItem(name) };
 
