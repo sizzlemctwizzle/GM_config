@@ -190,7 +190,7 @@ var GM_config = {
  read: function() {
     if (typeof GM_getValue == 'undefined' || typeof GM_getValue('a', 'b') == 'undefined') {
       var GM_getValue = function(name, defaultValue) { return localStorage.getItem('XB_config') || defaultValue };
-      var GM_log = function(message) { console.log(message) };
+      var GM_log = (window.opera) ? opera.postError : console.log;
       var defaultValue = '{}';
     } else
       var defaultValue = '({})';
