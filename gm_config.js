@@ -3,6 +3,7 @@
 // copyright      JoeSimmons & SizzleMcTwizzle & IzzySoft
 
 var GM_config = {
+ storage: 'GM_config', // This needs to be changed to something unique
  init: function() {
 	for(var i=0,l=arguments.length,arg; i<l; i++) {
 		arg=arguments[i];
@@ -183,7 +184,7 @@ var GM_config = {
       var GM_setValue = function(name, value) { return localStorage.setItem(name, value) };
     var stringify = typeof JSON == 'undefined' ? uneval : JSON.stringify;
     try {
-      GM_setValue('GM_config', stringify(this.values));
+      GM_setValue(GM_config.storage, stringify(this.values));
     } catch(e) {
       GM_config.log("GM_config failed to save settings!");
     }
@@ -196,7 +197,7 @@ var GM_config = {
       var defaultValue = '({})';
     var parse = typeof JSON == 'undefined' ? eval : JSON.parse;
     try {
-      var rval = parse(GM_getValue('GM_config', defaultValue));
+      var rval = parse(GM_getValue(GM_config.storage, defaultValue));
     } catch(e) {
       GM_config.log("GM_config failed to read saved settings!");
       var rval = {};
