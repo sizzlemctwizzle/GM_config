@@ -9,9 +9,12 @@ var GM_config = {
 		switch(typeof arg) {
 			case 'object': for(var j in arg) {
 				if (typeof arg[j] == 'function') {
-					if (j=='open') {this.onOpen=arg[j]; delete arg[j];}
-					else if (j=='close') {this.onClose=arg[j]; delete arg[j];}
-					else if (j=='save') {this.onSave=arg[j]; delete arg[j];}
+					if (j=='open') 
+                                          this.onOpen=arg[j];
+					else if (j=='close')
+                                          this.onClose=arg[j];
+					else if (j=='save') 
+                                          this.onSave=arg[j];
 				} else var settings = arg;
 			} break;
 			case 'function': this.onOpen = arg; break;
@@ -27,7 +30,7 @@ var GM_config = {
 		typewhite = /number|string|boolean/;
 	for (var i in settings) {
 		passed_settings[i] = settings[i];
-		passed_values[i] = (stored[i]===false && settings[i]['default']===true)? false : (((typewhite.test(typeof stored[i]))?stored[i]:false)||settings[i]['default']||'');
+		passed_values[i] = (stored[i]=='false' && settings[i]['default']===true)? false : (((typewhite.test(typeof stored[i]))?stored[i]:false)||settings[i]['default']||'');
 	}
 	this.settings = passed_settings;
 	this.values = passed_values;
@@ -38,9 +41,10 @@ var GM_config = {
  if(document.evaluate("//iframe[@id='GM_config']",document,null,9,null).singleNodeValue) return;
 	// Create frame
 	document.body.appendChild((that.frame=that.create('iframe',{id:'GM_config',src:'about:blank',style:'position:fixed; top:0; left:0; opacity:0; display:none; z-index:999; width:75%; height:75%; max-height:95%; max-width:95%; border:1px solid #000000; overflow:auto;'})));
+        that.frame.contentWindow.location = that.frame.src; // In WebKit src is ignored
 	that.frame.addEventListener('load', function(){
 		var obj = GM_config, frameBody = this.contentDocument.getElementsByTagName('body')[0], create=obj.create, settings=obj.settings;
-		obj.frame.contentDocument.getElementsByTagName('head')[0].appendChild(obj.create('style',{type:'text/css',innerHTML:obj.css.basic+obj.css.stylish}));
+		obj.frame.contentDocument.getElementsByTagName('head')[0].appendChild(obj.create('style',{type:'text/css',textContent:obj.css.basic+obj.css.stylish}));
 
 		// Add header and title
 		frameBody.appendChild(obj.create('div', {id:'header',className:'config_header block center', textContent:obj.title}));
@@ -173,10 +177,32 @@ var GM_config = {
 	return this.values[name];
  },
  save: function() {
-	GM_setValue('GM_config', this.values.toSource());
+    if (typeof GM_getValue == 'undefined' || typeof GM_getValue('a', 'b') == 'undefined') {
+      var GM_setValue = function(name, value) { return localStorage.setItem(name, value) };
+      var GM_log = function(message) { console.log(message) };
+    }
+    var stringify = typeof JSON == 'undefined' ? uneval : JSON.stringify;
+    try {
+      GM_setValue('GM_config', stringify(this.values));
+    } catch(e) {
+      GM_log("GM_config failed to save settings!");
+    }
  },
  read: function() {
-	return eval(GM_getValue('GM_config', '({})'));
+    if (typeof GM_getValue == 'undefined' || typeof GM_getValue('a', 'b') == 'undefined') {
+      var GM_getValue = function(name, defaultValue) { return localStorage.getItem('GM_config') || defaultValue };
+      var GM_log = (window.opera) ? opera.postError : console.log;
+      var defaultValue = '{}';
+    } else
+      var defaultValue = '({})';
+    var parse = typeof JSON == 'undefined' ? eval : JSON.parse;
+    try {
+      var rval = parse(GM_getValue('GM_config', defaultValue));
+    } catch(e) {
+      GM_log("GM_config failed to read saved settings!");
+      var rval = {};
+    }
+    return rval;
  },
  reset: function(e) {
 	e.preventDefault();
@@ -217,26 +243,24 @@ var GM_config = {
  values: {},
  settings: {},
  css: {
- basic: <><![CDATA[
-body {background:#FFFFFF;}
-.indent40 {margin-left:40%;}
-* {font-family: arial, tahoma, sans-serif, myriad pro;}
-.field_label {font-weight:bold; font-size:12px; margin-right:6px;}
-.block {display:block;}
-.saveclose_buttons {
-margin:16px 10px 10px 10px;
-padding:2px 12px 2px 12px;
-}
-.reset, #buttons_holder, .reset a {text-align:right; color:#000000;}
-.config_header {font-size:20pt; margin:0;}
-.config_desc, .section_desc, .reset {font-size:9pt;}
-.center {text-align:center;}
-.section_header_holder {margin-top:8px;}
-.config_var {margin:0 0 4px 0;}
-.section_header {font-size:13pt; background:#414141; color:#FFFFFF; border:1px solid #000000; margin:0;}
-.section_desc {font-size:9pt; background:#EFEFEF; color:#575757; border:1px solid #CCCCCC; margin:0 0 6px 0;}
-input[type="radio"] {margin-right:8px;}
-]]></>.toString(),
+ basic: 'body {background:#FFFFFF;}\n' +
+ '.indent40 {margin-left:40%;}\n' +
+ '* {font-family: arial, tahoma, sans-serif, myriad pro;}\n' +
+ '.field_label {font-weight:bold; font-size:12px; margin-right:6px;}\n' +
+ '.block {display:block;}\n' +
+ '.saveclose_buttons {\n' +
+ 'margin:16px 10px 10px 10px;\n' +
+ 'padding:2px 12px 2px 12px;\n' +
+ '}\n' +
+ '.reset, #buttons_holder, .reset a {text-align:right; color:#000000;}\n' +
+ '.config_header {font-size:20pt; margin:0;}\n' +
+ '.config_desc, .section_desc, .reset {font-size:9pt;}\n' +
+ '.center {text-align:center;}\n' +
+ '.section_header_holder {margin-top:8px;}\n' +
+ '.config_var {margin:0 0 4px 0;}\n' +
+ '.section_header {font-size:13pt; background:#414141; color:#FFFFFF; border:1px solid #000000; margin:0;}\n' +
+ '.section_desc {font-size:9pt; background:#EFEFEF; color:#575757; border:1px solid #CCCCCC; margin:0 0 6px 0;}\n' +
+ 'input[type="radio"] {margin-right:8px;}',
  stylish: ''},
  create: function(a,b) {
 	var ret=window.document.createElement(a);
