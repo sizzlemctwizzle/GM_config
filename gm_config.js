@@ -1,5 +1,5 @@
 // GM_config
-// version        1.2.2
+// version        1.2.3
 // copyright      JoeSimmons & SizzleMcTwizzle & IzzySoft
 
 var GM_config = {
@@ -176,22 +176,21 @@ var GM_config = {
  get: function(name) {
 	return this.values[name];
  },
+ isGM: typeof GM_getValue != 'undefined' && typeof GM_getValue('a', 'b') != 'undefined',
+ log: (!GM_config.isGM) ? ((window.opera) ? opera.postError : console.log) : GM_log,
  save: function() {
-    if (typeof GM_getValue == 'undefined' || typeof GM_getValue('a', 'b') == 'undefined') {
+    if (!GM_config.isGM)
       var GM_setValue = function(name, value) { return localStorage.setItem(name, value) };
-      var GM_log = function(message) { console.log(message) };
-    }
     var stringify = typeof JSON == 'undefined' ? uneval : JSON.stringify;
     try {
       GM_setValue('GM_config', stringify(this.values));
     } catch(e) {
-      GM_log("GM_config failed to save settings!");
+      GM_config.log("GM_config failed to save settings!");
     }
  },
  read: function() {
-    if (typeof GM_getValue == 'undefined' || typeof GM_getValue('a', 'b') == 'undefined') {
+    if (!GM_config.isGM) {
       var GM_getValue = function(name, defaultValue) { return localStorage.getItem('GM_config') || defaultValue };
-      var GM_log = (window.opera) ? opera.postError : console.log;
       var defaultValue = '{}';
     } else
       var defaultValue = '({})';
@@ -199,7 +198,7 @@ var GM_config = {
     try {
       var rval = parse(GM_getValue('GM_config', defaultValue));
     } catch(e) {
-      GM_log("GM_config failed to read saved settings!");
+      GM_config.log("GM_config failed to read saved settings!");
       var rval = {};
     }
     return rval;
