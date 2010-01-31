@@ -281,11 +281,11 @@ var GM_config = {
 	style.opacity = '1';
  },
  run: function() {
- var script=this.getAttribute('script');
- if(script && typeof script=='string' && script!='') {
- func = new Function(script);
- setTimeout(func, 0);
- }
+    var script=this.getAttribute('script');
+    if(script && typeof script=='string' && script!='') {
+      func = new Function(script);
+      setTimeout(func, 0);
+    }
  },
  addEvent: function(el,ev,scr) { el.addEventListener(ev, function() { typeof scr == 'function' ? setTimeout(scr, 0) : eval(scr) }, false); },
  remove: function(el) { if(el && el.parentNode) el.parentNode.removeChild(el); }
