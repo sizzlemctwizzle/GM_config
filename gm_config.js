@@ -178,28 +178,28 @@ var GM_config = {
 	return this.values[name];
  },
  isGM: typeof GM_getValue != 'undefined' && typeof GM_getValue('a', 'b') != 'undefined',
- log: (!GM_config.isGM) ? ((window.opera) ? opera.postError : console.log) : GM_log,
+ log: (!this.isGM) ? ((window.opera) ? opera.postError : console.log) : GM_log,
  save: function() {
-    if (!GM_config.isGM)
+    if (!this.isGM)
       var GM_setValue = function(name, value) { return localStorage.setItem(name, value) };
     var stringify = typeof JSON == 'undefined' ? uneval : JSON.stringify;
     try {
-      GM_setValue(GM_config.storage, stringify(this.values));
+      GM_setValue(this.storage, stringify(this.values));
     } catch(e) {
-      GM_config.log("GM_config failed to save settings!");
+      this.log("GM_config failed to save settings!");
     }
  },
  read: function() {
-    if (!GM_config.isGM) {
-      var GM_getValue = function(name, defaultValue) { return localStorage.getItem('GM_config') || defaultValue };
+    if (!this.isGM) {
+      var GM_getValue = function(name, defaultValue) { return localStorage.getItem(name) || defaultValue };
       var defaultValue = '{}';
     } else
       var defaultValue = '({})';
     var parse = typeof JSON == 'undefined' ? eval : JSON.parse;
     try {
-      var rval = parse(GM_getValue(GM_config.storage, defaultValue));
+      var rval = parse(GM_getValue(this.storage, defaultValue));
     } catch(e) {
-      GM_config.log("GM_config failed to read saved settings!");
+      this.log("GM_config failed to read saved settings!");
       var rval = {};
     }
     return rval;
