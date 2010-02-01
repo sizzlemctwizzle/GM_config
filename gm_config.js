@@ -1,5 +1,5 @@
 // GM_config
-// version        1.2.3
+// version        1.2.4
 // copyright      JoeSimmons & SizzleMcTwizzle & IzzySoft
 
 var GM_config = {
@@ -178,29 +178,29 @@ var GM_config = {
 	return this.values[name];
  },
  isGM: typeof GM_getValue != 'undefined' && typeof GM_getValue('a', 'b') != 'undefined',
- log: (!this.isGM) ? ((window.opera) ? opera.postError : console.log) : GM_log,
+ log: (this.isGM) ? GM_log : ((window.opera) ? opera.postError : console.log),
  save: function() {
-    if (!this.isGM)
-      var GM_setValue = function(name, value) { return localStorage.setItem(name, value) };
-    var stringify = typeof JSON == 'undefined' ? uneval : JSON.stringify;
     try {
-      GM_setValue(this.storage, stringify(this.values));
+      var val = (typeof JSON == 'object' ? JSON.stringify : uneval)(this.values);
+      (this.isGM?GM_setValue:(function(name,value){return localStorage.setItem(name,value)}))(this.storage,val);
     } catch(e) {
       this.log("GM_config failed to save settings!");
     }
  },
  read: function() {
-    if (!this.isGM) {
-      var GM_getValue = function(name, defaultValue) { return localStorage.getItem(name) || defaultValue };
-      var defaultValue = '{}';
-    } else
-      var defaultValue = '({})';
-    var parse = typeof JSON == 'undefined' ? eval : JSON.parse;
     try {
-      var rval = parse(GM_getValue(this.storage, defaultValue));
+      var val = (this.isGM?GM_getValue:(function(name,def){return localStorage.getItem(name)||def}))(this.storage,'{}'), rval;
+      if (typeof JSON == 'object')
+        try {
+          rval = JSON.parse(val);
+        } catch(e) {
+          rval = eval(val);
+        }
+      else
+        rval = eval('(' + val + ')');
     } catch(e) {
       this.log("GM_config failed to read saved settings!");
-      var rval = {};
+      rval = {};
     }
     return rval;
  },
