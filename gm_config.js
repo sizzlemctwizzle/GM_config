@@ -1,11 +1,11 @@
 // GM_config
-// version        1.2.4
+// version        1.2.5
 // copyright      JoeSimmons & SizzleMcTwizzle & IzzySoft
 
 var GM_config = {
- storage: 'GM_config', // This needs to be changed to something unique
+ storage: 'GM_config', // This needs to be changed to something unique for localStorage
  init: function() {
-	for(var i=0,l=arguments.length,arg; i<l; i++) {
+	for(var i=0,l=arguments.length,arg; i<l; ++i) {
 		arg=arguments[i];
 		switch(typeof arg) {
 			case 'object': for(var j in arg) {
@@ -31,7 +31,7 @@ var GM_config = {
 		typewhite = /number|string|boolean/;
 	for (var i in settings) {
 		passed_settings[i] = settings[i];
-		passed_values[i] = (stored[i]=='false' && settings[i]['default']===true)? false : (((typewhite.test(typeof stored[i]))?stored[i]:false)||settings[i]['default']||'');
+		passed_values[i] = (typeof stored[i] == "undefined" ? settings[i]['default'] : (stored[i]=='false' && settings[i]['default']===true) ? false : (typewhite.test(typeof stored[i]) ? stored[i] : (typeof settings[i]['default'] == "undefined" ? '' : settings[i]['default'])));
 	}
 	this.settings = passed_settings;
 	this.values = passed_values;
@@ -179,17 +179,17 @@ var GM_config = {
  },
  isGM: typeof GM_getValue != 'undefined' && typeof GM_getValue('a', 'b') != 'undefined',
  log: (this.isGM) ? GM_log : ((window.opera) ? opera.postError : console.log),
- save: function() {
+ save: function(store, obj) {
     try {
-      var val = (typeof JSON == 'object' ? JSON.stringify : uneval)(this.values);
-      (this.isGM?GM_setValue:(function(name,value){return localStorage.setItem(name,value)}))(this.storage,val);
+      var val = (typeof JSON == 'object' ? JSON.stringify : uneval)((obj||this.values));
+      (this.isGM?GM_setValue:(function(name,value){return localStorage.setItem(name,value)}))((store||this.storage),val);
     } catch(e) {
       this.log("GM_config failed to save settings!");
     }
  },
- read: function() {
+ read: function(store) {
     try {
-      var val = (this.isGM?GM_getValue:(function(name,def){return localStorage.getItem(name)||def}))(this.storage,'{}'), rval;
+      var val = (this.isGM?GM_getValue:(function(name,def){return localStorage.getItem(name)||def}))((store||this.storage), '{}'), rval;
       if (typeof JSON == 'object')
         try {
           rval = JSON.parse(val);
