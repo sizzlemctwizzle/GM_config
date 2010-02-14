@@ -279,13 +279,13 @@ reset: function(e) {
                 break;
             case 'div':
                 var radios = field.getElementsByTagName('input');
-                if(radios.length>0) {
+                if(radios.length>0)
                     for(var i=radios.length-1; i>=0; i--)
                         if(radios[i].value==obj.settings[f]['default']) 
                             radios[i].checked=true;	
-                }
                 break;
 	}
+    }
 },
 values: {},
 settings: {},
