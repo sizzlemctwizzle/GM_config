@@ -112,8 +112,8 @@ var GM_config = {
                 settings = obj.settings;
 
             // Append the style which is our default style plus the user style
-            obj.frame.contentDocument.getElementsByTagName('head'[0].appendChild(
-                obj.create('style', {
+            obj.frame.contentDocument.getElementsByTagName('head'[0].appendChild(obj.create('style', 
+            {
                 type: 'text/css',
                 textContent: obj.css.basic + obj.css.stylish
             }));
