@@ -1,60 +1,109 @@
 // GM_config
-// version        1.2.5
+// version        1.2.6
 // copyright      JoeSimmons & SizzleMcTwizzle & IzzySoft
+
+/* Instructions
+GM_config is now cross-browser compatible.
+
+To use it in a Greasemonkey-only user script you can just @include it.
+
+To use it in a cross-browser user script you will need to manually
+include the code at the beginning of your user script. In this case
+it is also very important you change the "storage" value below to
+something unique to prevent collisions between scripts. Also remeber
+that in this case that stored settings will only be accessable on
+the same domain they were saved.
+*/
 
 var GM_config = {
  storage: 'GM_config', // This needs to be changed to something unique for localStorage
  init: function() {
-	for(var i=0,l=arguments.length,arg; i<l; ++i) {
+        // loop through GM_config.init() arguements
+	for(var i = 0, l = arguments.length, arg; i < l; ++i) {
 		arg=arguments[i];
 		switch(typeof arg) {
-			case 'object': for(var j in arg) {
-				if (typeof arg[j] == 'function') {
-					if (j=='open') 
-                                          this.onOpen=arg[j];
-					else if (j=='close')
-                                          this.onClose=arg[j];
-					else if (j=='save') 
-                                          this.onSave=arg[j];
-				} else var settings = arg;
+                        case 'object': for(var j in arg) { // could be a callback functions or settings object
+                                           if (typeof arg[j] != "function") { // we are in the settings object
+                                               var settings = arg; // store settings object
+                                               break; // leave the loop
+                                           } // otherwise we must be in the callback functions object
+                                           switch(j) {
+                                               case "open": 
+                                                   this.onOpen=arg[j]; break; // called when frame is gone
+                                               case "close": 
+                                                   this.onClose=arg[j]; break; // called when settings have been saved
+                                               case "save": 
+                                                   this.onSave=arg[j]; break; // store the settings objects
+                                           }
+                                               
 			} break;
-			case 'function': this.onOpen = arg; break;
-			case 'string': if(arg.indexOf('{')!=-1&&arg.indexOf('}')!=-1) var css = arg;
-				else this.title = arg;
-				break;
+                        case 'function': this.onOpen = arg; break; // passing a bare function is set to open callback
+                        // could be custom CSS or the title string
+			case 'string': if(arg.indexOf('{') != -1 && arg.indexOf('}') != -1) 
+                                           var css = arg;
+                                       else 
+                                           this.title = arg;
+                                           break;
 		}
 	}
-	if(!this.title) this.title = 'Settings - Anonymous Script';
-	var stored = this.read(),
+	if(!this.title) this.title = 'Settings - Anonymous Script'; // if title wasn't passed through init()
+	var stored = this.read(), // read the stored settings
 		passed_settings = {},
 		passed_values = {},
 		typewhite = /number|string|boolean/;
-	for (var i in settings) {
-		passed_settings[i] = settings[i];
-		passed_values[i] = (typeof stored[i] == "undefined" ? settings[i]['default'] : (stored[i]=='false' && settings[i]['default']===true) ? false : (typewhite.test(typeof stored[i]) ? stored[i] : (typeof settings[i]['default'] == "undefined" ? '' : settings[i]['default'])));
+	for (var i in settings) { // for each setting
+            passed_settings[i] = settings[i];
+
+            // The code below translates to:
+            // if a setting was passed to init but wasn't stored then 
+            //      if a default value wasn't passed through init() then use null
+            //      else use the default value passed through init()
+            // else use the stored value
+            var value = typeof stored[i] == "undefined" ? (typeof settings[i]['default'] == "undefined" ? null : settings[i]['default']) : stored[i];
+            
+            // If the value isn't stored and no default was passed through init()
+            // try to predict a default value based on the type
+            if (value === null) {
+                switch(settings[i].type) {
+                    case 'radio': case 'select':
+                        value = settings[i].options[0]; break;
+                    case 'checkbox':
+                        value = false; break;
+                    case 'int': case 'float':
+                        value = 0; break;
+                    default:
+                        value = '';
+                }
+            }
+            passed_values[i] = value;
 	}
-	this.settings = passed_settings;
-	this.values = passed_values;
-	if (css) this.css.stylish = css;
+	this.settings = passed_settings; // store the settings object
+	this.values = passed_values; // store the values
+	if (css) this.css.stylish = css; // store the custom style
  },
- open: function() {
- var that=GM_config;
- if(document.evaluate("//iframe[@id='GM_config']",document,null,9,null).singleNodeValue) return;
-	// Create frame
-	document.body.appendChild((that.frame=that.create('iframe',{id:'GM_config',src:'about:blank',style:'position:fixed; top:0; left:0; opacity:0; display:none; z-index:999; width:75%; height:75%; max-height:95%; max-width:95%; border:1px solid #000000; overflow:auto;'})));
-        that.frame.contentWindow.location = that.frame.src; // In WebKit src is ignored
-	that.frame.addEventListener('load', function(){
-		var obj = GM_config, frameBody = this.contentDocument.getElementsByTagName('body')[0], create=obj.create, settings=obj.settings;
-		obj.frame.contentDocument.getElementsByTagName('head')[0].appendChild(obj.create('style',{type:'text/css',textContent:obj.css.basic+obj.css.stylish}));
+ open: function() { // call GM_config.open() from your script to open the menu
+    // Die if the menu is already open on this page
+    if(document.evaluate("//iframe[@id='GM_config']",document,null,9,null).singleNodeValue) return;
+
+    // Create frame
+    document.body.appendChild((this.frame=this.create('iframe',{id:'GM_config', style:'position:fixed; top:0; left:0; opacity:0; display:none; z-index:999; width:75%; height:75%; max-height:95%; max-width:95%; border:1px solid #000000; overflow:auto;'})));
+    this.frame.src = 'about:blank'; // In WebKit src can't be set until it is added to the page
+    this.frame.addEventListener('load', function(){ // we wait for the ifram to load before we can modify it
+        
+        var obj = GM_config, frameBody = this.contentDocument.getElementsByTagName('body')[0], create=obj.create, settings=obj.settings;
+        
+        // Append the style which is our default style plus the user style
+        obj.frame.contentDocument.getElementsByTagName('head')[0].appendChild(obj.create('style',{type:'text/css',textContent:obj.css.basic+obj.css.stylish}));
 
 		// Add header and title
 		frameBody.appendChild(obj.create('div', {id:'header',className:'config_header block center', textContent:obj.title}));
 
 		// Append elements
 		var anch = frameBody, secNo = 0; // anchor to append elements
-		for (var i in settings) {
+		for (var i in settings) { // loop through settings object
 			var type, field = settings[i], Options = field.options, label = field.label, value = obj.values[i];
-			if (field.section) {
+
+			if (field.section) { // the start of a new section
 				anch = frameBody.appendChild(create('div', {className:'section_header_holder', kids:[
 				  create('div', {className:'section_header center',innerHTML:field.section[0]})],
 				  id:'section_'+secNo}));
@@ -81,7 +130,7 @@ var GM_config = {
 					break;
 				case 'select':
 					var options = new Array();
-					for (var j in Options) options.push(create('option',{textContent:Options[j],value:j,selected:(value?(value==j):(Options[j]==field['default']))}));
+					for (var j in Options) options.push(create('option',{textContent:Options[j],value:j,selected:Options[j]==value?true:false}));
 					anch.appendChild(create('div', {title:field.title||'',kids:[
 						create('span', {textContent:label, className:'field_label'}),
 						create('select',{id:'field_'+i,kids:options})
@@ -90,7 +139,7 @@ var GM_config = {
 				case 'checkbox':
 					anch.appendChild(create('div', {title:field.title||'',kids:[
 						create('label', {textContent:label, className:'field_label', "for":'field_'+i}),
-						create('input', {id:'field_'+i,type:'checkbox',value:value,checked:!value||value==''?false:true})
+						create('input', {id:'field_'+i,type:'checkbox',value:value,checked:value})
 					], className: 'config_var'}));
 					break;
 				case 'button':
@@ -181,7 +230,7 @@ var GM_config = {
  log: (this.isGM) ? GM_log : ((window.opera) ? opera.postError : console.log),
  save: function(store, obj) {
     try {
-      var val = (typeof JSON == 'object' ? JSON.stringify : uneval)((obj||this.values));
+      var val = JSON.stringify(obj||this.values);
       (this.isGM?GM_setValue:(function(name,value){return localStorage.setItem(name,value)}))((store||this.storage),val);
     } catch(e) {
       this.log("GM_config failed to save settings!");
@@ -190,14 +239,7 @@ var GM_config = {
  read: function(store) {
     try {
       var val = (this.isGM?GM_getValue:(function(name,def){return localStorage.getItem(name)||def}))((store||this.storage), '{}'), rval;
-      if (typeof JSON == 'object')
-        try {
-          rval = JSON.parse(val);
-        } catch(e) {
-          rval = eval(val);
-        }
-      else
-        rval = eval('(' + val + ')');
+      rval = JSON.parse(val);
     } catch(e) {
       this.log("GM_config failed to read saved settings!");
       rval = {};
