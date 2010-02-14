@@ -1,5 +1,5 @@
 // GM_config
-// version        1.2.6
+// version        1.2.7
 // copyright      JoeSimmons & SizzleMcTwizzle & IzzySoft
 /* Instructions
 GM_config is now cross-browser compatible.
@@ -454,63 +454,64 @@ var GM_config = {
                             radios[i].checked = true;
                 break;
             }
-        },
-        values: {},
-        settings: {},
-        css: {
-            basic: 'body {background:#FFFFFF;}\n' + '.indent40 {margin-left:40%;}\n' + 
-                   '* {font-family: arial, tahoma, sans-serif, myriad pro;}\n' + 
-                   '.field_label {font-weight:bold; font-size:12px; margin-right:6px;}\n' + 
-                   '.block {display:block;}\n' + '.saveclose_buttons {\n' + 
-                   'margin:16px 10px 10px 10px;\n' + 'padding:2px 12px 2px 12px;\n' + 
-                   '}\n.reset, #buttons_holder, .reset a {text-align:right; color:#000000;}\n' +
-                   '.config_header {font-size:20pt; margin:0;}\n' + 
-                   '.config_desc, .section_desc, .reset {font-size:9pt;}\n' + 
-                   '.center {text-align:center;}\n.section_header_holder {margin-top:8px;}\n' +
-                   '.config_var {margin:0 0 4px 0;}\n.section_header {font-size:13pt;' +
-                   'background:#414141; color:#FFFFFF; border:1px solid #000000; margin:0;}\n' +
-                   '.section_desc {font-size:9pt; background:#EFEFEF; color:#575757; ' + 
-                   'border:1px solid #CCCCCC; margin:0 0 6px 0;}\n' + 'input[type="radio"]' +
-                   ' {margin-right:8px;}',
-            stylish: ''
-        },
-        create: function (a, b) {
-            var ret = window.document.createElement(a);
-            if (b) for (var prop in b) {
-                if (prop.indexOf('on') == 0) 
-                    ret.addEventListener(prop.substring(2), b[prop], false);
-                else if (prop == "kids" && (prop = b[prop])) 
-                    for (var i = 0; i < prop.length; i++) ret.appendChild(prop[i]);
-                else if (",style,accesskey,id,name,src,href,for".indexOf("," + 
-                         prop.toLowerCase()) != -1) ret.setAttribute(prop, b[prop]);
-                else ret[prop] = b[prop];
-            }
-            return ret;
-        },
-        center: function () {
-            var node = GM_config.frame,
-                style = node.style,
-                beforeOpacity = style.opacity;
-            if (style.display == 'none') style.opacity = '0';
-            style.display = '';
-            style.top = Math.floor((window.innerHeight / 2) - (node.offsetHeight / 2)) + 'px';
-            style.left = Math.floor((window.innerWidth / 2) - (node.offsetWidth / 2)) + 'px';
-            style.opacity = '1';
-        },
-        run: function () {
-            var script = this.getAttribute('script');
-            if (script && typeof script == 'string' && script != '') {
-                func = new Function(script);
-                setTimeout(func, 0);
-            }
-        },
-        addEvent: function (el, ev, scr) {
-            el.addEventListener(ev, function () {
-                typeof scr == 'function' ? setTimeout(scr, 0) : eval(scr)
-            },
-            false);
-        },
-        remove: function (el) {
-            if (el && el.parentNode) el.parentNode.removeChild(el);
         }
+    },
+    values: {},
+    settings: {},
+    css: {
+        basic: 'body {background:#FFFFFF;}\n' + '.indent40 {margin-left:40%;}\n' + 
+               '* {font-family: arial, tahoma, sans-serif, myriad pro;}\n' + 
+               '.field_label {font-weight:bold; font-size:12px; margin-right:6px;}\n' + 
+               '.block {display:block;}\n' + '.saveclose_buttons {\n' + 
+               'margin:16px 10px 10px 10px;\n' + 'padding:2px 12px 2px 12px;\n' + 
+               '}\n.reset, #buttons_holder, .reset a {text-align:right; color:#000000;}\n' +
+               '.config_header {font-size:20pt; margin:0;}\n' + 
+               '.config_desc, .section_desc, .reset {font-size:9pt;}\n' + 
+               '.center {text-align:center;}\n.section_header_holder {margin-top:8px;}\n' +
+               '.config_var {margin:0 0 4px 0;}\n.section_header {font-size:13pt;' +
+               'background:#414141; color:#FFFFFF; border:1px solid #000000; margin:0;}\n' +
+               '.section_desc {font-size:9pt; background:#EFEFEF; color:#575757; ' + 
+               'border:1px solid #CCCCCC; margin:0 0 6px 0;}\n' + 'input[type="radio"]' +
+               ' {margin-right:8px;}',
+        stylish: ''
+    },
+    create: function (a, b) {
+        var ret = window.document.createElement(a);
+        if (b) for (var prop in b) {
+            if (prop.indexOf('on') == 0) 
+                ret.addEventListener(prop.substring(2), b[prop], false);
+            else if (prop == "kids" && (prop = b[prop])) 
+                for (var i = 0; i < prop.length; i++) ret.appendChild(prop[i]);
+            else if (",style,accesskey,id,name,src,href,for".indexOf("," + 
+                     prop.toLowerCase()) != -1) ret.setAttribute(prop, b[prop]);
+            else ret[prop] = b[prop];
+        }
+        return ret;
+    },
+    center: function () {
+        var node = GM_config.frame,
+            style = node.style,
+            beforeOpacity = style.opacity;
+        if (style.display == 'none') style.opacity = '0';
+        style.display = '';
+        style.top = Math.floor((window.innerHeight / 2) - (node.offsetHeight / 2)) + 'px';
+        style.left = Math.floor((window.innerWidth / 2) - (node.offsetWidth / 2)) + 'px';
+        style.opacity = '1';
+    },
+    run: function () {
+        var script = this.getAttribute('script');
+        if (script && typeof script == 'string' && script != '') {
+            func = new Function(script);
+            setTimeout(func, 0);
+        }
+    },
+    addEvent: function (el, ev, scr) {
+        el.addEventListener(ev, function () {
+            typeof scr == 'function' ? setTimeout(scr, 0) : eval(scr)
+        },
+        false);
+    },
+    remove: function (el) {
+        if (el && el.parentNode) el.parentNode.removeChild(el);
+    }
 };
