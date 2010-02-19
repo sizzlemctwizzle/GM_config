@@ -4,7 +4,7 @@
 /* Instructions
 GM_config is now cross-browser compatible.
 
-To use it in a Greasemonkey-only user script you can just @include it.
+To use it in a Greasemonkey-only user script you can just @require it.
 
 To use it in a cross-browser user script you will need to manually
 include the code at the beginning of your user script. In this case
