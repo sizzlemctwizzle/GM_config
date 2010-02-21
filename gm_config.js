@@ -406,10 +406,10 @@ var GM_config = {
     },
     read: function (store) {
         try {
-            var val = (this.isGM ? GM_getValue : (function (name, def) {
-                return localStorage.getItem(name) || def
-            }))((store || this.storage), '{}'),
-                rval;
+            var val = (isGM ? GM_getValue : (function(name, def){
+                      var s=localStorage.getItem(name); 
+                      return s == null ? def : s
+            }))((store||this.storage), ‘{}’), rval;
             rval = JSON.parse(val);
         } catch(e) {
             this.log("GM_config failed to read saved settings!");
