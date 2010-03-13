@@ -1,5 +1,5 @@
 // GM_config
-// version        1.2.7
+// version        1.2.8
 // copyright      JoeSimmons & SizzleMcTwizzle & IzzySoft
 /* Instructions
 GM_config is now cross-browser compatible.
@@ -396,24 +396,41 @@ var GM_config = {
     log: (this.isGM) ? GM_log : ((window.opera) ? opera.postError : console.log),
     save: function (store, obj) {
         try {
-            var val = JSON.stringify(obj || this.values);
-            (this.isGM ? GM_setValue : (function (name, value) {
-                return localStorage.setItem(name, value)
-            }))((store || this.storage), val);
+            if (!this.isGM)
+                var setValue = function (name, value) {
+                                       return localStorage.setItem(name, value);
+                               },
+                    stringify = JSON.stringify; // We only support JSON parser outside GM
+      
+            else
+                var setValue = GM_setValue,
+                    stringify = typeof JSON == "undefined" ? 
+                                    function(obj) { 
+                                        return obj.toSource();
+                                    } : JSON.stringify;
+            setValue(store || this.storage, stringify(obj || this.values));
         } catch(e) {
             this.log("GM_config failed to save settings!");
         }
     },
     read: function (store) {
         try {
-            var val = (isGM ? GM_getValue : (function(name, def){
-                      var s=localStorage.getItem(name); 
-                      return s == null ? def : s
-            }))((store||this.storage), '{}'), rval;
-            rval = JSON.parse(val);
+            if (!this.isGM)
+                var getValue = function(name, def){
+                                      var s = localStorage.getItem(name); 
+                                      return s == null ? def : s
+                                  },
+                    parser = JSON.parse; // We only support JSON parser outside GM
+            else
+                var getValue = GM_getValue,
+                    parser = typeof JSON == "undefined" ? 
+                                 function(jsonData) {
+                                     return (new Function('return ' + jsonData + ';'))(); 
+                                 } : JSON.parse;
+            var rval = parser(getValue(store || this.storage, '{}'));
         } catch(e) {
             this.log("GM_config failed to read saved settings!");
-            rval = {};
+            var rval = {};
         }
         return rval;
     },
