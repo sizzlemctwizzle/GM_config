@@ -1,5 +1,5 @@
 // GM_config
-// version        1.2.8
+// version        1.2.9
 // copyright      JoeSimmons & SizzleMcTwizzle & IzzySoft
 /* Instructions
 GM_config is now cross-browser compatible.
@@ -29,13 +29,13 @@ var GM_config = {
                         break; // leave the loop
                     } // otherwise we must be in the callback functions object
                     switch (j) {
-                    case "open":
+                    case "open": // called when the frame is opened and loaded
                         this.onOpen = arg[j];
-                        break; // called when frame is gone
-                    case "close":
+                        break; 
+                    case "close": // called when frame is gone
                         this.onClose = arg[j];
-                        break; // called when settings have been saved
-                    case "save":
+                        break;
+                    case "save": // called when settings have been saved
                         this.onSave = arg[j];
                         break; // store the settings objects
                     }
@@ -328,7 +328,9 @@ var GM_config = {
 
             obj.center(); // Show and center iframe
             window.addEventListener('resize', obj.center, false); // Center frame on resize
-            if (obj.onOpen) obj.onOpen(); // Call the open() callback function
+            if (obj.onOpen) obj.onOpen(GM_config.frame.contentDocument, 
+                                       GM_config.frame.contentWindow, 
+                                       GM_config.frame); // Call the open() callback function
             // Close frame on window close
             window.addEventListener('beforeunload', function () {
                 GM_config.remove(this);
