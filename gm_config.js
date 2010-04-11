@@ -9,8 +9,8 @@ To use it in a Greasemonkey-only user script you can just @require it.
 To use it in a cross-browser user script you will need to manually
 include the code at the beginning of your user script. In this case
 it is also very important you change the "storage" value below to
-something unique to prevent collisions between scripts. Also remeber
-that in this case that stored settings will only be accessable on
+something unique to prevent collisions between scripts. Also remember
+that in this case that stored settings will only be accessible on
 the same domain they were saved.
 */
 
@@ -18,7 +18,7 @@ var GM_config = {
     storage: 'GM_config',
     // This needs to be changed to something unique for localStorage
     init: function () {
-        // loop through GM_config.init() arguements
+        // loop through GM_config.init() arguments
         for (var i = 0, l = arguments.length, arg; i < l; ++i) {
             arg = arguments[i];
             switch (typeof arg) {
@@ -104,7 +104,7 @@ var GM_config = {
                    'border:1px solid #000000; overflow:auto;'
         })));
         this.frame.src = 'about:blank'; // In WebKit src can't be set until it is added to the page
-        // we wait for the ifram to load before we can modify it
+        // we wait for the iframe to load before we can modify it
         this.frame.addEventListener('load', function () {
             var obj = GM_config,
                 frameBody = this.contentDocument.getElementsByTagName('body')[0],
