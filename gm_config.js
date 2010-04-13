@@ -478,21 +478,22 @@ var GM_config = {
     values: {},
     settings: {},
     css: {
-        basic: 'body {background:#FFFFFF;}\n' + '.indent40 {margin-left:40%;}\n' + 
-               '* {font-family: arial, tahoma, sans-serif, myriad pro;}\n' + 
-               '.field_label {font-weight:bold; font-size:12px; margin-right:6px;}\n' + 
-               '.block {display:block;}\n' + '.saveclose_buttons {\n' + 
-               'margin:16px 10px 10px 10px;\n' + 'padding:2px 12px 2px 12px;\n' + 
-               '}\n.reset, #buttons_holder, .reset a {text-align:right; color:#000000;}\n' +
-               '.config_header {font-size:20pt; margin:0;}\n' + 
-               '.config_desc, .section_desc, .reset {font-size:9pt;}\n' + 
-               '.center {text-align:center;}\n.section_header_holder {margin-top:8px;}\n' +
-               '.config_var {margin:0 0 4px 0;}\n.section_header {font-size:13pt;' +
-               'background:#414141; color:#FFFFFF; border:1px solid #000000; margin:0;}\n' +
-               '.section_desc {font-size:9pt; background:#EFEFEF; color:#575757; ' + 
-               'border:1px solid #CCCCCC; margin:0 0 6px 0;}\n' + 'input[type="radio"]' +
-               ' {margin-right:8px;}',
-        stylish: ''
+        basic:       "* { font-family: arial,tahoma,myriad pro,sans-serif; }"
+            + '\n' + "body { background: #FFF; }"
+            + '\n' + "input[type='radio'] { margin-right: 8px; }"
+            + '\n' + ".indent40 { margin-left: 40%; }"
+            + '\n' + ".field_label { font-weight: bold; font-size: 12px; margin-right: 6px; }"
+            + '\n' + ".block { display: block; }"
+            + '\n' + ".saveclose_buttons { margin: 16px 10px 10px; padding: 2px 12px; }"
+            + '\n' + ".reset, .reset a, #buttons_holder { text-align: right; color: #000; }"
+            + '\n' + ".config_header { font-size: 20pt; margin: 0; }"
+            + '\n' + ".config_desc, .section_desc, .reset { font-size: 9pt; }"
+            + '\n' + ".center { text-align: center; }"
+            + '\n' + ".section_header_holder { margin-top: 8px; }"
+            + '\n' + ".config_var { margin: 0 0 4px; }"
+            + '\n' + ".section_header { font-size: 13pt; background: #414141; color: #FFF; border: 1px solid #000; margin: 0; }"
+            + '\n' + ".section_desc { font-size: 9pt; background: #EFEFEF; color: #575757; border: 1px solid #CCC; margin: 0 0 6px; }",
+        stylish: ""
     },
     create: function (a, b) {
         var ret = window.document.createElement(a);
