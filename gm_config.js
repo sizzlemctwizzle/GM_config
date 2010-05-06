@@ -1,5 +1,5 @@
 // GM_config
-// version        1.2.9
+// version        1.3.0
 // copyright      JoeSimmons & SizzleMcTwizzle & IzzySoft
 /* Instructions
 GM_config is now cross-browser compatible.
@@ -12,87 +12,160 @@ it is also very important you change the "storage" value below to
 something unique to prevent collisions between scripts. Also remember
 that in this case that stored settings will only be accessible on
 the same domain they were saved.
+
+In GM_config version 1.3 or greater, you can now create multiple instances
+of GM_config using the GM_configStruct constructor. You can also pass your
+settings to the constructor rather than init. For compatiblity with older
+usage, the GM_config variable is pre-populated with an instance of GM_config.
+
+If you are going to use multiple instances of GM_config you need to modify the 
+"storage" property so that they use seperate storage spaces and the values don't
+overwrite one another. In this case you are forced to pass settings through init().
 */
 
-var GM_config = {
-    storage: 'GM_config',
-    // This needs to be changed to something unique for localStorage
-    init: function () {
-        // loop through GM_config.init() arguments
-        for (var i = 0, l = arguments.length, arg; i < l; ++i) {
-            arg = arguments[i];
-            switch (typeof arg) {
-            case 'object':
-                for (var j in arg) { // could be a callback functions or settings object
-                    if (typeof arg[j] != "function") { // we are in the settings object
-                        var settings = arg; // store settings object
-                        break; // leave the loop
-                    } // otherwise we must be in the callback functions object
-                    switch (j) {
-                    case "open": // called when the frame is opened and loaded
-                        this.onOpen = arg[j];
-                        break; 
-                    case "close": // called when frame is gone
-                        this.onClose = arg[j];
-                        break;
-                    case "save": // called when settings have been saved
-                        this.onSave = arg[j];
-                        break; // store the settings objects
-                    }
+function GM_configStruct() {
+    // define a few properties
+    this.storage = 'GM_config'; // Changed to something unique for localStorage
+    this.isGM = typeof GM_getValue != 'undefined' && 
+                typeof GM_getValue('a', 'b') != 'undefined';
+    this.values = {};
+    this.settings = {};
+    this.css = {
+        basic:       "* { font-family: arial,tahoma,myriad pro,sans-serif; }"
+            + '\n' + "body { background: #FFF; }"
+            + '\n' + "input[type='radio'] { margin-right: 8px; }"
+            + '\n' + ".indent40 { margin-left: 40%; }"
+            + '\n' + ".field_label { font-weight: bold; font-size: 12px; margin-right: 6px; }"
+            + '\n' + ".block { display: block; }"
+            + '\n' + ".saveclose_buttons { margin: 16px 10px 10px; padding: 2px 12px; }"
+            + '\n' + ".reset, .reset a, #buttons_holder { text-align: right; color: #000; }"
+            + '\n' + ".config_header { font-size: 20pt; margin: 0; }"
+            + '\n' + ".config_desc, .section_desc, .reset { font-size: 9pt; }"
+            + '\n' + ".center { text-align: center; }"
+            + '\n' + ".section_header_holder { margin-top: 8px; }"
+            + '\n' + ".config_var { margin: 0 0 4px; }"
+            + '\n' + ".section_header { font-size: 13pt; background: #414141; color: #FFF; border: 1px solid #000; margin: 0; }"
+            + '\n' + ".section_desc { font-size: 9pt; background: #EFEFEF; color: #575757; border: 1px solid #CCC; margin: 0 0 6px; }",
+        stylish: ""
+    };
+
+    // Define value storing and reading API
+    if (!this.isGM) {
+        this.setValue = function (name, value) {
+                                       return localStorage.setItem(name, value);
+                        };
+        this.getValue = function(name, def){
+                            var s = localStorage.getItem(name); 
+                            return s == null ? def : s
+                        };
+
+        // We only support JSON parser outside GM
+        this.stringify = JSON.stringify;
+        this.parser = JSON.parse;
+    } else {
+        this.setValue = GM_setValue;
+        this.getValue = GM_getValue;
+        this.stringify = typeof JSON == "undefined" ? 
+                             function(obj) { 
+                                 return obj.toSource();
+                             } : JSON.stringify;
+        this.parser = typeof JSON == "undefined" ? 
+                          function(jsonData) {
+                              return (new Function('return ' + jsonData + ';'))(); 
+                          } : JSON.parse;
+    }
+
+    // call init() if settings were passed to constructor
+    if (arguments.length)
+        GM_configInit(this, arguments);
+}
+
+// This is the initializer function
+function GM_configInit(obj, args) {
+    // loop through GM_config.init() arguments
+    for (var i = 0, l = args.length, arg; i < l; ++i) {
+        arg = args[i];
+        switch (typeof arg) {
+        case 'object':
+            for (var j in arg) { // could be a callback functions or settings object
+                if (typeof arg[j] != "function") { // we are in the settings object
+                    var settings = arg; // store settings object
+                    break; // leave the loop
+                } // otherwise we must be in the callback functions object
+                switch (j) {
+                case "open": // called when the frame is opened and loaded
+                    obj.onOpen = arg[j];
+                    break; 
+                case "close": // called when frame is gone
+                    obj.onClose = arg[j];
+                    break;
+                case "save": // called when settings have been saved
+                    obj.onSave = arg[j];
+                    break; // store the settings objects
                 }
+            }
+            break;
+        case 'function':
+            obj.onOpen = arg;
+            break; // passing a bare function is set to open callback
+            // could be custom CSS or the title string
+        case 'string':
+            if (arg.indexOf('{') != -1 && arg.indexOf('}') != -1) 
+                var css = arg;
+            else 
+                obj.title = arg;
+            break;
+        }
+    }
+    // if title wasn't passed through init()
+    if (!obj.title) 
+        obj.title = 'Settings - Anonymous Script';
+    var stored = obj.read(), // read the stored settings
+        passed_settings = {},
+        passed_values = {};
+    for (var i in settings) { // for each setting
+        passed_settings[i] = settings[i];
+
+        // if a setting was passed to init but wasn't stored then 
+        //      if a default value wasn't passed through init() then use null
+        //      else use the default value passed through init()
+        // else use the stored value
+        var value = typeof stored[i] == "undefined" ? 
+                        typeof settings[i]['default'] == "undefined" ? null 
+                        : settings[i]['default'] 
+                    : stored[i];
+
+        // If the value isn't stored and no default was passed through init()
+        // try to predict a default value based on the type
+        if (value === null) {
+            switch (settings[i].type) {
+            case 'radio': case 'select':
+                value = settings[i].options[0];
                 break;
-            case 'function':
-                this.onOpen = arg;
-                break; // passing a bare function is set to open callback
-                // could be custom CSS or the title string
-            case 'string':
-                if (arg.indexOf('{') != -1 && arg.indexOf('}') != -1) var css = arg;
-                else this.title = arg;
+            case 'checkbox':
+                value = false;
                 break;
+            case 'int': case 'float':
+                value = 0;
+                break;
+            default:
+                value = '';
             }
         }
-        // if title wasn't passed through init()
-        if (!this.title) this.title = 'Settings - Anonymous Script';
-        var stored = this.read(), // read the stored settings
-            passed_settings = {},
-            passed_values = {};
-        for (var i in settings) { // for each setting
-            passed_settings[i] = settings[i];
+        passed_values[i] = value;
+    }
+    obj.settings = passed_settings; // store the settings object
+    obj.values = passed_values; // store the values
+    if (css) 
+        obj.css.stylish = css; // store the custom style
+}
 
-            // if a setting was passed to init but wasn't stored then 
-            //      if a default value wasn't passed through init() then use null
-            //      else use the default value passed through init()
-            // else use the stored value
-            var value = typeof stored[i] == "undefined" ? 
-                            typeof settings[i]['default'] == "undefined" ? null 
-                            : settings[i]['default'] 
-                        : stored[i];
-
-            // If the value isn't stored and no default was passed through init()
-            // try to predict a default value based on the type
-            if (value === null) {
-                switch (settings[i].type) {
-                case 'radio': case 'select':
-                    value = settings[i].options[0];
-                    break;
-                case 'checkbox':
-                    value = false;
-                    break;
-                case 'int': case 'float':
-                    value = 0;
-                    break;
-                default:
-                    value = '';
-                }
-            }
-            passed_values[i] = value;
-        }
-        this.settings = passed_settings; // store the settings object
-        this.values = passed_values; // store the values
-        if (css) this.css.stylish = css; // store the custom style
-    },
+GM_configStruct.prototype = {
+    // Support old method of initalizing
+    init: function() { GM_configInit(this, arguments); },
     open: function () { // call GM_config.open() from your script to open the menu
         // Die if the menu is already open on this page
+        // You can multiple instances but they can't be open at the same time
         if (document.evaluate("//iframe[@id='GM_config']", 
                                document, null, 9, null).singleNodeValue) return;
 
@@ -328,9 +401,10 @@ var GM_config = {
 
             obj.center(); // Show and center iframe
             window.addEventListener('resize', obj.center, false); // Center frame on resize
-            if (obj.onOpen) obj.onOpen(GM_config.frame.contentDocument, 
-                                       GM_config.frame.contentWindow, 
-                                       GM_config.frame); // Call the open() callback function
+            if (obj.onOpen) 
+                obj.onOpen(GM_config.frame.contentDocument, 
+                           GM_config.frame.contentWindow, 
+                           GM_config.frame); // Call the open() callback function
             // Close frame on window close
             window.addEventListener('beforeunload', function () {
                 GM_config.remove(this);
@@ -381,12 +455,15 @@ var GM_config = {
                     break;
                 }
             }
-            if (this.onSave) this.onSave(); // Call the save() callback function
+            if (this.onSave) 
+                this.onSave(); // Call the save() callback function
             this.save();
         }
-        if (this.frame) this.remove(this.frame);
+        if (this.frame) 
+            this.remove(this.frame);
         delete this.frame;
-        if (this.onClose) this.onClose(); //  Call the close() callback function
+        if (this.onClose) 
+            this.onClose(); //  Call the close() callback function
     },
     set: function (name, val) {
         this.values[name] = val;
@@ -394,42 +471,17 @@ var GM_config = {
     get: function (name) {
         return this.values[name];
     },
-    isGM: typeof GM_getValue != 'undefined' && typeof GM_getValue('a', 'b') != 'undefined',
     log: (this.isGM) ? GM_log : ((window.opera) ? opera.postError : console.log),
     save: function (store, obj) {
         try {
-            if (!this.isGM)
-                var setValue = function (name, value) {
-                                       return localStorage.setItem(name, value);
-                               },
-                    stringify = JSON.stringify; // We only support JSON parser outside GM
-      
-            else
-                var setValue = GM_setValue,
-                    stringify = typeof JSON == "undefined" ? 
-                                    function(obj) { 
-                                        return obj.toSource();
-                                    } : JSON.stringify;
-            setValue(store || this.storage, stringify(obj || this.values));
+            this.setValue(store || this.storage, this.stringify(obj || this.values));
         } catch(e) {
             this.log("GM_config failed to save settings!");
         }
     },
     read: function (store) {
         try {
-            if (!this.isGM)
-                var getValue = function(name, def){
-                                      var s = localStorage.getItem(name); 
-                                      return s == null ? def : s
-                                  },
-                    parser = JSON.parse; // We only support JSON parser outside GM
-            else
-                var getValue = GM_getValue,
-                    parser = typeof JSON == "undefined" ? 
-                                 function(jsonData) {
-                                     return (new Function('return ' + jsonData + ';'))(); 
-                                 } : JSON.parse;
-            var rval = parser(getValue(store || this.storage, '{}'));
+            var rval = this.parser(this.getValue(store || this.storage, '{}'));
         } catch(e) {
             this.log("GM_config failed to read saved settings!");
             var rval = {};
@@ -475,26 +527,6 @@ var GM_config = {
             }
         }
     },
-    values: {},
-    settings: {},
-    css: {
-        basic:       "* { font-family: arial,tahoma,myriad pro,sans-serif; }"
-            + '\n' + "body { background: #FFF; }"
-            + '\n' + "input[type='radio'] { margin-right: 8px; }"
-            + '\n' + ".indent40 { margin-left: 40%; }"
-            + '\n' + ".field_label { font-weight: bold; font-size: 12px; margin-right: 6px; }"
-            + '\n' + ".block { display: block; }"
-            + '\n' + ".saveclose_buttons { margin: 16px 10px 10px; padding: 2px 12px; }"
-            + '\n' + ".reset, .reset a, #buttons_holder { text-align: right; color: #000; }"
-            + '\n' + ".config_header { font-size: 20pt; margin: 0; }"
-            + '\n' + ".config_desc, .section_desc, .reset { font-size: 9pt; }"
-            + '\n' + ".center { text-align: center; }"
-            + '\n' + ".section_header_holder { margin-top: 8px; }"
-            + '\n' + ".config_var { margin: 0 0 4px; }"
-            + '\n' + ".section_header { font-size: 13pt; background: #414141; color: #FFF; border: 1px solid #000; margin: 0; }"
-            + '\n' + ".section_desc { font-size: 9pt; background: #EFEFEF; color: #575757; border: 1px solid #CCC; margin: 0 0 6px; }",
-        stylish: ""
-    },
     create: function (a, b) {
         var ret = window.document.createElement(a);
         if (b) for (var prop in b) {
@@ -535,3 +567,8 @@ var GM_config = {
         if (el && el.parentNode) el.parentNode.removeChild(el);
     }
 };
+
+// Create default instance of GM_config
+// If you are including this code in your script you can pass
+// settings to constructor instead of calling GM_config.init()
+var GM_config = new GM_configStruct();
