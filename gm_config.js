@@ -1,5 +1,5 @@
 // GM_config
-// version        1.3.0
+// version        1.3.1
 // copyright      JoeSimmons & SizzleMcTwizzle & IzzySoft
 /* Instructions
 GM_config is now cross-browser compatible.
@@ -177,9 +177,10 @@ GM_configStruct.prototype = {
                    'border:1px solid #000000; overflow:auto;'
         })));
         this.frame.src = 'about:blank'; // In WebKit src can't be set until it is added to the page
+        var configObj = this;
         // we wait for the iframe to load before we can modify it
         this.frame.addEventListener('load', function () {
-            var obj = GM_config,
+            var obj = configObj,
                 frameBody = this.contentDocument.getElementsByTagName('body')[0],
                 create = obj.create,
                 settings = obj.settings;
@@ -372,7 +373,7 @@ GM_configStruct.prototype = {
                     title: 'Save options and close window',
                     className: 'saveclose_buttons',
                     onclick: function () {
-                        GM_config.close(true)
+                        obj.close(true)
                     }
                 }),
                     obj.create('button', {
@@ -381,7 +382,7 @@ GM_configStruct.prototype = {
                     title: 'Close window',
                     className: 'saveclose_buttons',
                     onclick: function () {
-                        GM_config.close(false)
+                        obj.close(false)
                     }
                 }),
                     obj.create('div', {
@@ -402,12 +403,12 @@ GM_configStruct.prototype = {
             obj.center(); // Show and center iframe
             window.addEventListener('resize', obj.center, false); // Center frame on resize
             if (obj.onOpen) 
-                obj.onOpen(GM_config.frame.contentDocument, 
-                           GM_config.frame.contentWindow, 
-                           GM_config.frame); // Call the open() callback function
+                obj.onOpen(obj.frame.contentDocument, 
+                           obj.frame.contentWindow, 
+                           obj.frame); // Call the open() callback function
             // Close frame on window close
             window.addEventListener('beforeunload', function () {
-                GM_config.remove(this);
+                obj.remove(this);
             },
             false);
         },
@@ -490,7 +491,7 @@ GM_configStruct.prototype = {
     },
     reset: function (e) {
         e.preventDefault();
-        var type, obj = GM_config,
+        var type, obj = this,
             fields = obj.settings;
         for (f in fields) {
             var field = obj.frame.contentDocument.getElementById('field_' + f);
@@ -541,7 +542,7 @@ GM_configStruct.prototype = {
         return ret;
     },
     center: function () {
-        var node = GM_config.frame,
+        var node = this.frame,
             style = node.style,
             beforeOpacity = style.opacity;
         if (style.display == 'none') style.opacity = '0';
