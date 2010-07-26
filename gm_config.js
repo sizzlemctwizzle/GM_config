@@ -388,9 +388,9 @@ GM_configStruct.prototype = {
                     kids: [
                         obj.create('a', {
                         id: 'GM_config_resetLink',
-                        textContent: 'Restore to default',
+                        textContent: 'Reset to defaults',
                         href: '#',
-                        title: 'Restore settings to default configuration',
+                        title: 'Reset settings to default configuration',
                         className: 'reset',
                         onclick: function(e) { obj.reset(e) }
                     })
