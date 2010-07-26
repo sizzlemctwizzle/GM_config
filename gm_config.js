@@ -479,13 +479,20 @@ GM_configStruct.prototype = {
                     break;
                 }
             }
+
+            this.save();
+
             if (this.onSave) 
                 this.onSave(); // Call the save() callback function
-            this.save();
         }
-        if (this.frame) 
-            this.remove(this.frame);
-        delete this.frame;
+
+        // If frame is an iframe the remove it
+        if (this.frame.contentDocument) {
+          this.remove(this.frame);
+          this.frame = null;
+        } else // else wipe its content
+          this.frame.innerHTML = "";
+
         if (this.onClose) 
             this.onClose(); //  Call the close() callback function
     },
