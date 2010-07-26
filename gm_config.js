@@ -574,13 +574,6 @@ GM_configStruct.prototype = {
         style.left = Math.floor((window.innerWidth / 2) - (node.offsetWidth / 2)) + 'px';
         style.opacity = '1';
     },
-    run: function () {
-        var script = this.getAttribute('script');
-        if (script && typeof script == 'string' && script != '') {
-            func = new Function(script);
-            setTimeout(func, 0);
-        }
-    },
     addEvent: function (el, ev, scr) {
         el.addEventListener(ev, function () {
             typeof scr == 'function' ? setTimeout(scr, 0) : eval(scr)
