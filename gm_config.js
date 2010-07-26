@@ -1,5 +1,5 @@
 // GM_config
-// version        1.3.2
+// version        1.4.0
 // copyright      JoeSimmons & SizzleMcTwizzle & IzzySoft
 /* Instructions
 GM_config is now cross-browser compatible.
@@ -28,8 +28,7 @@ function GM_configStruct() {
     this.storage = 'GM_config'; // Changed to something unique for localStorage
     this.isGM = typeof GM_getValue != 'undefined' && 
                 typeof GM_getValue('a', 'b') != 'undefined';
-    this.values = {};
-    this.settings = {};
+    this.fields = {};
     this.css = {
         basic:       "#GM_config * { font-family: arial,tahoma,myriad pro,sans-serif; }"
             + '\n' + "#GM_config { background: #FFF; }"
@@ -126,50 +125,21 @@ function GM_configInit(obj, args) {
     }
     // if title wasn't passed through init()
     if (!obj.title) 
-        obj.title = 'Settings - Anonymous Script';
-    var stored = obj.read(), // read the stored settings
-        passed_settings = {},
-        passed_values = {};
-    for (var i in settings) { // for each setting
-        passed_settings[i] = settings[i];
+      obj.title = 'Settings - Anonymous Script';
 
-        // if a setting was passed to init but wasn't stored then 
-        //      if a default value wasn't passed through init() then use null
-        //      else use the default value passed through init()
-        // else use the stored value
-        var value = typeof stored[i] == "undefined" ? 
-                        typeof settings[i]['default'] == "undefined" ? null 
-                        : settings[i]['default'] 
-                    : stored[i];
+    var stored = obj.read(); // read the stored settings
+    // for each setting create a field object
+    for (var id in settings)
+      obj.fields[id] = new GM_configField(settings[id], stored[id], id);
 
-        // If the value isn't stored and no default was passed through init()
-        // try to predict a default value based on the type
-        if (value === null) {
-            switch (settings[i].type) {
-            case 'radio': case 'select':
-                value = settings[i].options[0];
-                break;
-            case 'checkbox':
-                value = false;
-                break;
-            case 'int': case 'float':
-                value = 0;
-                break;
-            default:
-                value = '';
-            }
-        }
-        passed_values[i] = value;
-    }
-    obj.settings = passed_settings; // store the settings object
-    obj.values = passed_values; // store the values
     if (css) 
-        obj.css.stylish = css; // store the custom style
+      obj.css.stylish = css; // store the custom style
 }
 
 GM_configStruct.prototype = {
     // Support old method of initalizing
     init: function() { GM_configInit(this, arguments); },
+
     open: function () { // call GM_config.open() from your script to open the menu
         // Die if the menu is already open on this page
         // You can multiple instances but they can't be open at the same time
@@ -181,7 +151,7 @@ GM_configStruct.prototype = {
             var obj = configObj,
                 frameBody = body,
                 create = obj.create,
-                settings = obj.settings;
+                fields = obj.fields;
 
             // Append the style which is our default style plus the user style
             head.appendChild(
@@ -198,167 +168,31 @@ GM_configStruct.prototype = {
             }));
 
             // Append elements
-            var anch = frameBody,
-                secNo = 0; // anchor to append elements
-            for (var i in settings) { // loop through settings object
-                var type, field = settings[i],
-                    Options = field.options,
-                    label = field.label,
-                    value = obj.values[i];
+            var section = frameBody,
+                secNum = 0; // Section count
 
-                if (field.section) { // the start of a new section
-                    anch = frameBody.appendChild(create('div', {
-                        className: 'section_header_holder',
-                        kids: [
-                            create('div', {
-                            className: 'section_header center',
-                            innerHTML: field.section[0]
-                        })],
-                        id: 'GM_config_section_' + secNo
-                    }));
-                    if (field.section[1]) anch.appendChild(create('p', {
-                        className: 'section_desc center',
-                        innerHTML: field.section[1]
-                    }));
-                    ++secNo;
-                }
-                switch (field.type) {
-                case 'textarea':
-                    anch.appendChild(create('div', {
-                        title: field.title || '',
-                        kids: [
-                            create('span', {
-                            textContent: label,
-                            className: 'field_label'
-                        }),
-                            create('textarea', {
-                            id: 'GM_config_field_' + i,
-                            innerHTML: value,
-                            cols: (field.cols ? field.cols : 20),
-                            rows: (field.rows ? field.rows : 2)
-                        })
-                            ],
-                        className: 'config_var'
-                    }));
-                    break;
-                case 'radio':
-                    var boxes = [];
-                    for (var j = 0, len = Options.length; j < len; j++) {
-                        boxes.push(create('span', {
-                            textContent: Options[j]
-                        }));
-                        boxes.push(create('input', {
-                            value: Options[j],
-                            type: 'radio',
-                            name: i,
-                            checked: Options[j] == value ? true : false
-                        }));
-                    }
-                    anch.appendChild(create('div', {
-                        title: field.title || '',
-                        kids: [
-                            create('span', {
-                            textContent: label,
-                            className: 'field_label'
-                        }),
-                            create('div', {
-                            id: 'GM_config_field_' + i,
-                            kids: boxes
-                        })
-                            ],
-                        className: 'config_var'
-                    }));
-                    break;
-                case 'select':
-                    var options = new Array();
-                    for (var j in Options)
-                    options.push(create('option', {
-                        textContent: Options[j],
-                        value: j,
-                        selected: Options[j] == value ? true : false
-                    }));
-                    anch.appendChild(create('div', {
-                        title: field.title || '',
-                        kids: [
-                            create('span', {
-                            textContent: label,
-                            className: 'field_label'
-                        }),
-                            create('select', {
-                            id: 'GM_config_field_' + i,
-                            kids: options
-                        })
-                            ],
-                        className: 'config_var'
-                    }));
-                    break;
-                case 'checkbox':
-                    anch.appendChild(create('div', {
-                        title: field.title || '',
-                        kids: [
-                            create('label', {
-                            textContent: label,
-                            className: 'field_label',
-                            "for": 'GM_config_field_' + i
-                        }),
-                            create('input', {
-                            id: 'GM_config_field_' + i,
-                            type: 'checkbox',
-                            value: value,
-                            checked: value
-                        })
-                            ],
-                        className: 'config_var'
-                    }));
-                    break;
-                case 'button':
-                    var tmp;
-                    anch.appendChild(create('div', {
-                        kids: [
-                            (tmp = create('input', {
-                            id: 'GM_config_field_' + i,
-                            type: 'button',
-                            value: label,
-                            size: (field.size ? field.size : 25),
-                            title: field.title || ''
-                        }))
-                            ],
-                        className: 'config_var'
-                    }));
-                    if (field.script) obj.addEvent(tmp, 'click', field.script);
-                    break;
-                case 'hidden':
-                    anch.appendChild(create('div', {
-                        title: field.title || '',
-                        kids: [
-                            create('input', {
-                            id: 'GM_config_field_' + i,
-                            type: 'hidden',
-                            value: value
-                        })
-                            ],
-                        className: 'config_var'
-                    }));
-                    break;
-                default:
-                    // type = text, int, or float
-                    anch.appendChild(create('div', {
-                        title: field.title || '',
-                        kids: [
-                            create('span', {
-                            textContent: label,
-                            className: 'field_label'
-                        }),
-                            create('input', {
-                            id: 'GM_config_field_' + i,
-                            type: 'text',
-                            value: value,
-                            size: (field.size ? field.size : 25)
-                        })
-                            ],
-                        className: 'config_var'
-                    }));
-                }
+            // loop through fields
+            for (var i in fields) {
+              var field = fields[i].settings;
+              if (field.section) { // the start of a new section
+                section = frameBody.appendChild(create('div', {
+                  className: 'section_header_holder',
+                  kids: [
+                    create('div', {
+                      className: 'section_header center',
+                      innerHTML: field.section[0]
+                  })],
+                  id: 'GM_config_section_' + secNum++
+                }));
+
+                if (field.section[1]) 
+                  section.appendChild(create('p', {
+                    className: 'section_desc center',
+                    innerHTML: field.section[1]
+                  }));
+              }
+                
+              section.appendChild(fields[i].toNode());
             }
 
             // Add save and close buttons
@@ -392,7 +226,7 @@ GM_configStruct.prototype = {
                         href: '#',
                         title: 'Restore settings to default configuration',
                         className: 'reset',
-                        onclick: obj.reset
+                        onclick: function(e) { obj.reset(e) }
                     })
                         ]
                 })]
@@ -436,122 +270,106 @@ GM_configStruct.prototype = {
             }, false);
         }
     },
+
     close: function (save) {
         if (save) {
-            var type, fields = this.settings,
-                isNum = /^[\d\.]+$/,
-                typewhite = /radio|text|hidden|checkbox/;
-            for (f in fields) {
-                var doc = this.frame.contentDocument || this.frame.ownerDocument,
-                    field = doc.getElementById('field_' + f);
-                if (typewhite.test(field.type)) type = field.type;
-                else type = field.tagName.toLowerCase();
-                switch (type) {
-                case 'text':
-                    this.values[f] = (this.settings[f].type == 'text') ? field.value :
-                                     (((isNum.test(field.value || field.value == '0')) &&
-                                     (this.settings[f].type == 'int' || this.settings[f].type 
-                                      == 'float')) ? parseFloat(field.value) : false);
-                    if (this.values[f] === false) {
-                        alert('Invalid type for field: ' + f + '\nPlease use type: ' + 
-                              this.settings[f].type);
-                        return;
-                    }
-                    break;
-                case 'hidden':
-                    this.values[f] = field.value.toString();
-                    break;
-                case 'textarea':
-                    this.values[f] = field.value;
-                    break;
-                case 'checkbox':
-                    this.values[f] = field.checked;
-                    break;
-                case 'select':
-                    this.values[f] = field[field.selectedIndex].value;
-                    break;
-                case 'div':
-                    var radios = field.getElementsByTagName('input');
-                    if (radios.length > 0) 
-                        for (var i = radios.length - 1; i >= 0; i--) 
-                            if (radios[i].checked) 
-                                this.values[f] = radios[i].value;
-                    break;
-                }
-            }
+            for (id in this.fields)
+              if (!this.fields[id].toValue(this.frame.contentDocument || this.frame.ownerDocument))
+                return; // invalid value encountered
+
+            this.save();
+
             if (this.onSave) 
                 this.onSave(); // Call the save() callback function
-            this.save();
         }
         if (this.frame) 
             this.remove(this.frame);
+
         delete this.frame;
         if (this.onClose) 
             this.onClose(); //  Call the close() callback function
     },
+
     set: function (name, val) {
-        this.values[name] = val;
+        this.fields[name].value = val;
     },
+
     get: function (name) {
-        return this.values[name];
+        return this.fields[name].value;
     },
+
     log: (this.isGM) ? GM_log : ((window.opera) ? opera.postError : console.log),
+
     save: function (store, obj) {
-        try {
-            this.setValue(store || this.storage, this.stringify(obj || this.values));
-        } catch(e) {
-            this.log("GM_config failed to save settings!");
-        }
+      if (!obj) {
+        var values = {};
+        for (var id in this.fields)
+          values[id] = this.fields[id].value;
+      }
+
+      try {
+        this.setValue(store || this.storage, this.stringify(obj || values));
+      } catch(e) {
+        this.log("GM_config failed to save settings!");
+      }
     },
+
     read: function (store) {
-        try {
-            var rval = this.parser(this.getValue(store || this.storage, '{}'));
-        } catch(e) {
-            this.log("GM_config failed to read saved settings!");
-            var rval = {};
-        }
-        return rval;
+      try {
+        var rval = this.parser(this.getValue(store || this.storage, '{}'));
+      } catch(e) {
+        this.log("GM_config failed to read saved settings!");
+        var rval = {};
+      }
+      return rval;
     },
+
     reset: function (e) {
         e.preventDefault();
         var type, obj = this,
-            fields = obj.settings;
-        for (f in fields) {
+            fields = obj.fields;
+        for (id in fields) {
             var doc = this.frame.contentDocument || this.frame.ownerDocument,
-                field = doc.getElementById('field_' + f);
-            if (field.type == 'radio' || field.type == 'text' || 
-                field.type == 'checkbox') type = field.type;
-            else type = field.tagName.toLowerCase();
+                fieldEl = doc.getElementById('GM_config_field_' + id),
+                field = fields[id].settings;
+
+            if (fieldEl.type == 'radio' || fieldEl.type == 'text' || 
+                fieldEl.type == 'checkbox') 
+              type = fieldEl.type;
+            else 
+              type = fieldEl.tagName.toLowerCase();
+
             switch (type) {
-            case 'text':
-                field.value = obj.settings[f]['default'] || '';
+              case 'text':
+                fieldEl.value = field['default'] || '';
                 break;
-            case 'hidden':
-                field.value = obj.settings[f]['default'] || '';
+              case 'hidden':
+                fieldEl.value = field['default'] || '';
                 break;
-            case 'textarea':
-                field.value = obj.settings[f]['default'] || '';
+              case 'textarea':
+                fieldEl.value = field['default'] || '';
                 break;
-            case 'checkbox':
-                field.checked = obj.settings[f]['default'] || false;
+              case 'checkbox':
+                fieldEl.checked = field['default'] || false;
                 break;
-            case 'select':
-                if (obj.settings[f]['default']) {
-                    for (var i = field.options.length - 1; i >= 0; i--)
-                        if (field.options[i].value == obj.settings[f]['default']) 
-                            field.selectedIndex = i;
-                } else field.selectedIndex = 0;
+              case 'select':
+                if (field['default']) {
+                    for (var i = fieldEl.options.length - 1; i >= 0; i--)
+                        if (fieldEl.options[i].value == field['default']) 
+                            fieldEl.selectedIndex = i;
+                } else fieldEl.selectedIndex = 0;
                 break;
-            case 'div':
-                var radios = field.getElementsByTagName('input');
+              case 'div':
+                var radios = fieldEl.getElementsByTagName('input');
                 if (radios.length > 0) 
                     for (var i = radios.length - 1; i >= 0; i--) 
-                        if (radios[i].value == obj.settings[f]['default']) 
+                        if (radios[i].value == field['default']) 
                             radios[i].checked = true;
                 break;
             }
         }
     },
+
     create: function (a, b) {
         var ret = window.document.createElement(a);
         if (b) for (var prop in b) {
@@ -565,6 +383,7 @@ GM_configStruct.prototype = {
         }
         return ret;
     },
+
     center: function () {
         var node = this.frame,
             style = node.style,
@@ -575,15 +394,264 @@ GM_configStruct.prototype = {
         style.left = Math.floor((window.innerWidth / 2) - (node.offsetWidth / 2)) + 'px';
         style.opacity = '1';
     },
+
     addEvent: function (el, ev, scr) {
         el.addEventListener(ev, function () {
             typeof scr == 'function' ? setTimeout(scr, 0) : eval(scr)
         },
         false);
     },
+
     remove: function (el) {
         if (el && el.parentNode) el.parentNode.removeChild(el);
     }
+};
+
+function GM_configField(settings, stored, id) {
+  // Store the field's settings
+  this.settings = settings;
+  this.id = id;
+  
+  // if a setting was passed to init but wasn't stored then 
+  //      if a default value wasn't passed through init() then use null
+  //      else use the default value passed through init()
+  // else use the stored value
+  var value = typeof stored == "undefined" ? 
+                typeof settings['default'] == "undefined" ? null 
+                : settings['default'] 
+              : stored;
+
+  // If the value isn't stored and no default was passed through init()
+  // try to predict a default value based on the type
+  if (value === null) {
+    switch (settings.type) {
+      case 'radio': case 'select':
+        value = settings.options[0];
+        break;
+      case 'checkbox':
+        value = false;
+        break;
+      case 'int': case 'float':
+        value = 0;
+        break;
+      default:
+        value = '';
+    }
+  }
+
+  // Store the field's value
+  this.value = value;
+}
+
+GM_configField.prototype = {
+  isNum: /^[\d\.]+$/,
+
+  typewhite: /radio|text|hidden|checkbox/,
+
+  create: GM_configStruct.prototype.create,
+
+  toNode: function() {
+    var field = this.settings,
+        value = this.value,
+        options = field.options,
+        label = field.label,
+        id = this.id;
+        create = this.create;
+
+    switch (field.type) {
+      case 'textarea':
+        return create('div', {
+          title: field.title || '',
+          kids: [
+            create('span', {
+              textContent: label,
+              className: 'field_label'
+            }),
+            create('textarea', {
+              id: 'GM_config_field_' + this.id,
+              innerHTML: value,
+              cols: (field.cols ? field.cols : 20),
+              rows: (field.rows ? field.rows : 2)
+            })
+          ],
+          className: 'config_var'
+        });
+        break;
+      case 'radio':
+        var retNode = create('div', {
+          title: field.title || '',
+          kids: [
+            create('span', {
+              textContent: label,
+              className: 'field_label'
+            }),
+          ],
+          className: 'config_var'
+        });
+
+        var wrap = create('div', {
+          id: 'GM_config_field_' + id,
+        });
+
+        for (var i = 0, len = options.length; i < len; ++i) {
+          wrap.appendChild(create('span', {
+            textContent: options[i]
+          }));
+          wrap.appendChild(create('input', {
+            value: options[i],
+            type: 'radio',
+            name: id,
+            checked: options[i] == value ? true : false
+          }));
+        }
+
+        retNode.appendChild(wrap);
+        return retNode;
+        break;
+      case 'select':
+        var retNode = create('div', {
+          title: field.title || '',
+          kids: [
+            create('span', {
+              textContent: label,
+              className: 'field_label'
+            })
+          ],
+          className: 'config_var'
+        });
+
+        var wrap = create('select', {
+          id: 'GM_config_field_' + id,
+        });
+
+        for (var i in options)
+          wrap.appendChild(create('option', {
+            textContent: options[i],
+            value: i,
+            selected: options[i] == value ? true : false
+          }));
+
+        retNode.appendChild(wrap);
+        return retNode;
+        break;
+      case 'checkbox':
+        return create('div', {
+          title: field.title || '',
+          kids: [
+            create('label', {
+              textContent: label,
+              className: 'field_label',
+              'for': 'GM_config_field_' + id
+            }),
+            create('input', {
+              id: 'GM_config_field_' + id,
+              type: 'checkbox',
+              value: value,
+              checked: value
+            })
+          ],
+          className: 'config_var'
+        });
+        break;
+      case 'button':
+        var tmp,
+            retNode = create('div', {
+          kids: [
+            (tmp = create('input', {
+               id: 'GM_config_field_' + id,
+               type: 'button',
+               value: label,
+               size: (field.size ? field.size : 25),
+               title: field.title || ''
+            }))
+          ],
+          className: 'config_var'
+        });
+
+        if (field.script) 
+          obj.addEvent(tmp, 'click', field.script);
+
+        return retNode;
+        break;
+      case 'hidden':
+        return create('div', {
+          title: field.title || '',
+          kids: [
+            create('input', {
+              id: 'GM_config_field_' + id,
+              type: 'hidden',
+              value: value
+            })
+          ],
+          className: 'config_var'
+        });
+        break;
+      default:
+        // type = text, int, or float
+        return create('div', {
+          title: field.title || '',
+          kids: [
+            create('span', {
+              textContent: label,
+              className: 'field_label'
+            }),
+            create('input', {
+              id: 'GM_config_field_' + id,
+              type: 'text',
+              value: value,
+              size: (field.size ? field.size : 25)
+            })
+          ],
+          className: 'config_var'
+        });
+    }
+  },
+
+  toValue: function(doc) {
+    var fieldEl = doc.getElementById('GM_config_field_' + this.id),
+        field = this.settings,
+        type;
+
+    if (this.typewhite.test(fieldEl.type)) 
+      type = fieldEl.type;
+    else 
+      type = fieldEl.tagName.toLowerCase();
+
+    switch (type) {
+      case 'text':
+        this.value = (field.type == 'text') ? fieldEl.value :
+          (((this.isNum.test(fieldEl.value || fieldEl.value == '0')) &&
+            (field.type == 'int' || field.type == 'float')) ? parseFloat(fieldEl.value) : null);
+
+        if (fields[f].value === null) {
+          alert('Invalid type for field: ' + this.id + '\nPlease use type: ' + 
+                field.type);
+          return false;
+        }
+        break;
+      case 'hidden':
+        this.value = fieldEl.value.toString();
+        break;
+      case 'textarea':
+        this.value = fieldEl.value;
+        break;
+      case 'checkbox':
+        this.value = fieldEl.checked;
+        break;
+      case 'select':
+        this.value = fieldEl[fieldEl.selectedIndex].value;
+        break;
+      case 'div':
+        var radios = fieldEl.getElementsByTagName('input');
+        if (radios.length > 0) 
+          for (var i = radios.length - 1; i >= 0; i--) 
+            if (radios[i].checked) 
+              this.value = radios[i].value;
+        break;
+    }
+
+    return true; // value read successfully
+  }
 };
 
 // Create default instance of GM_config
