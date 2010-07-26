@@ -221,12 +221,12 @@ GM_configStruct.prototype = {
                     className: 'reset_holder block',
                     kids: [
                         obj.create('a', {
-                        id: 'GM_config_resetLink',
-                        textContent: 'Restore to default',
-                        href: '#',
-                        title: 'Restore settings to default configuration',
-                        className: 'reset',
-                        onclick: function(e) { obj.reset(e) }
+                          id: 'GM_config_resetLink',
+                          textContent: 'Restore to default',
+                          href: '#',
+                          title: 'Restore settings to default configuration',
+                          className: 'reset',
+                          onclick: function(e) { obj.reset(e) }
                     })
                         ]
                 })]
@@ -326,11 +326,12 @@ GM_configStruct.prototype = {
 
     reset: function (e) {
         e.preventDefault();
-        var type, obj = this,
-            fields = obj.fields;
+        var type, 
+            obj = this,
+            fields = obj.fields,
+            doc = obj.frame.contentDocument || obj.frame.ownerDocument;
         for (id in fields) {
-            var doc = this.frame.contentDocument || this.frame.ownerDocument,
-                fieldEl = doc.getElementById('GM_config_field_' + id),
+            var fieldEl = doc.getElementById('GM_config_field_' + id),
                 field = fields[id].settings;
 
             if (fieldEl.type == 'radio' || fieldEl.type == 'text' || 
