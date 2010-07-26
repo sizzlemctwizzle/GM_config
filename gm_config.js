@@ -1,5 +1,5 @@
 // GM_config
-// version        1.3.2
+// version        1.3.3
 // copyright      JoeSimmons & SizzleMcTwizzle & IzzySoft
 /* Instructions
 GM_config is now cross-browser compatible.
@@ -392,7 +392,7 @@ GM_configStruct.prototype = {
                         href: '#',
                         title: 'Restore settings to default configuration',
                         className: 'reset',
-                        onclick: obj.reset
+                        onclick: function(e) { obj.reset(e) }
                     })
                         ]
                 })]
@@ -443,7 +443,7 @@ GM_configStruct.prototype = {
                 typewhite = /radio|text|hidden|checkbox/;
             for (f in fields) {
                 var doc = this.frame.contentDocument || this.frame.ownerDocument,
-                    field = doc.getElementById('field_' + f);
+                    field = doc.getElementById('GM_config_field_' + f);
                 if (typewhite.test(field.type)) type = field.type;
                 else type = field.tagName.toLowerCase();
                 switch (type) {
@@ -514,11 +514,12 @@ GM_configStruct.prototype = {
     },
     reset: function (e) {
         e.preventDefault();
-        var type, obj = this,
-            fields = obj.settings;
+        var type, 
+            obj = this,
+            fields = obj.settings,
+            doc = obj.frame.contentDocument || obj.frame.ownerDocument;
         for (f in fields) {
-            var doc = this.frame.contentDocument || this.frame.ownerDocument,
-                field = doc.getElementById('field_' + f);
+            var field = doc.getElementById('GM_config_field_' + f);
             if (field.type == 'radio' || field.type == 'text' || 
                 field.type == 'checkbox') type = field.type;
             else type = field.tagName.toLowerCase();
