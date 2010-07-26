@@ -38,7 +38,7 @@ function GM_configStruct() {
             + '\n' + "#GM_config .field_label { font-weight: bold; font-size: 12px; margin-right: 6px; }"
             + '\n' + "#GM_config .block { display: block; }"
             + '\n' + "#GM_config .saveclose_buttons { margin: 16px 10px 10px; padding: 2px 12px; }"
-            + '\n' + "#GM_config .reset, .reset a, #buttons_holder { text-align: right; color: #000; }"
+            + '\n' + "#GM_config .reset, .reset a, #GM_config_buttons_holder { text-align: right; color: #000; }"
             + '\n' + "#GM_config .config_header { font-size: 20pt; margin: 0; }"
             + '\n' + "#GM_config .config_desc, .section_desc, .reset { font-size: 9pt; }"
             + '\n' + "#GM_config .center { text-align: center; }"
@@ -192,7 +192,7 @@ GM_configStruct.prototype = {
 
             // Add header and title
             frameBody.appendChild(obj.create('div', {
-                id: 'header',
+                id: 'GM_config_header',
                 className: 'config_header block center',
                 textContent: obj.title
             }));
@@ -214,7 +214,7 @@ GM_configStruct.prototype = {
                             className: 'section_header center',
                             innerHTML: field.section[0]
                         })],
-                        id: 'section_' + secNo
+                        id: 'GM_config_section_' + secNo
                     }));
                     if (field.section[1]) anch.appendChild(create('p', {
                         className: 'section_desc center',
@@ -232,7 +232,7 @@ GM_configStruct.prototype = {
                             className: 'field_label'
                         }),
                             create('textarea', {
-                            id: 'field_' + i,
+                            id: 'GM_config_field_' + i,
                             innerHTML: value,
                             cols: (field.cols ? field.cols : 20),
                             rows: (field.rows ? field.rows : 2)
@@ -262,7 +262,7 @@ GM_configStruct.prototype = {
                             className: 'field_label'
                         }),
                             create('div', {
-                            id: 'field_' + i,
+                            id: 'GM_config_field_' + i,
                             kids: boxes
                         })
                             ],
@@ -285,7 +285,7 @@ GM_configStruct.prototype = {
                             className: 'field_label'
                         }),
                             create('select', {
-                            id: 'field_' + i,
+                            id: 'GM_config_field_' + i,
                             kids: options
                         })
                             ],
@@ -299,10 +299,10 @@ GM_configStruct.prototype = {
                             create('label', {
                             textContent: label,
                             className: 'field_label',
-                            "for": 'field_' + i
+                            "for": 'GM_config_field_' + i
                         }),
                             create('input', {
-                            id: 'field_' + i,
+                            id: 'GM_config_field_' + i,
                             type: 'checkbox',
                             value: value,
                             checked: value
@@ -316,7 +316,7 @@ GM_configStruct.prototype = {
                     anch.appendChild(create('div', {
                         kids: [
                             (tmp = create('input', {
-                            id: 'field_' + i,
+                            id: 'GM_config_field_' + i,
                             type: 'button',
                             value: label,
                             size: (field.size ? field.size : 25),
@@ -332,7 +332,7 @@ GM_configStruct.prototype = {
                         title: field.title || '',
                         kids: [
                             create('input', {
-                            id: 'field_' + i,
+                            id: 'GM_config_field_' + i,
                             type: 'hidden',
                             value: value
                         })
@@ -350,7 +350,7 @@ GM_configStruct.prototype = {
                             className: 'field_label'
                         }),
                             create('input', {
-                            id: 'field_' + i,
+                            id: 'GM_config_field_' + i,
                             type: 'text',
                             value: value,
                             size: (field.size ? field.size : 25)
@@ -363,10 +363,10 @@ GM_configStruct.prototype = {
 
             // Add save and close buttons
             frameBody.appendChild(obj.create('div', {
-                id: 'buttons_holder',
+                id: 'GM_config_buttons_holder',
                 kids: [
                     obj.create('button', {
-                    id: 'saveBtn',
+                    id: 'GM_config_saveBtn',
                     textContent: 'Save',
                     title: 'Save options and close window',
                     className: 'saveclose_buttons',
@@ -375,7 +375,7 @@ GM_configStruct.prototype = {
                     }
                 }),
                     obj.create('button', {
-                    id: 'cancelBtn',
+                    id: 'GM_config_cancelBtn',
                     textContent: 'Cancel',
                     title: 'Close window',
                     className: 'saveclose_buttons',
@@ -387,7 +387,7 @@ GM_configStruct.prototype = {
                     className: 'reset_holder block',
                     kids: [
                         obj.create('a', {
-                        id: 'resetLink',
+                        id: 'GM_config_resetLink',
                         textContent: 'Restore to default',
                         href: '#',
                         title: 'Restore settings to default configuration',
