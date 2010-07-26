@@ -412,8 +412,9 @@ GM_configStruct.prototype = {
 
         // Either use the element passed to init() or create an iframe
         var defaultStyle = 'position:fixed; top:0; left:0; opacity:0; display:none; z-index:999;' +
-                           ' width:75%; height:75%; max-height:95%; max-width:95%; ' +
-                           'border:1px solid #000000; overflow:auto;';
+                           'width:75%; height:75%; max-height:95%; max-width:95%;' +
+                           'border:1px solid #000000; overflow:auto; bottom: auto;'
+                           'right: auto; margin: 0; padding: 0;';
         if (this.frame) {
           this.frame.id = 'GM_config';
           this.frame.setAttribute('style', defaultStyle);
