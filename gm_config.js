@@ -1,5 +1,5 @@
 // GM_config
-// version        1.3.1
+// version        1.3.2
 // copyright      JoeSimmons & SizzleMcTwizzle & IzzySoft
 /* Instructions
 GM_config is now cross-browser compatible.
@@ -31,21 +31,21 @@ function GM_configStruct() {
     this.values = {};
     this.settings = {};
     this.css = {
-        basic:       "* { font-family: arial,tahoma,myriad pro,sans-serif; }"
-            + '\n' + "body { background: #FFF; }"
-            + '\n' + "input[type='radio'] { margin-right: 8px; }"
-            + '\n' + ".indent40 { margin-left: 40%; }"
-            + '\n' + ".field_label { font-weight: bold; font-size: 12px; margin-right: 6px; }"
-            + '\n' + ".block { display: block; }"
-            + '\n' + ".saveclose_buttons { margin: 16px 10px 10px; padding: 2px 12px; }"
-            + '\n' + ".reset, .reset a, #buttons_holder { text-align: right; color: #000; }"
-            + '\n' + ".config_header { font-size: 20pt; margin: 0; }"
-            + '\n' + ".config_desc, .section_desc, .reset { font-size: 9pt; }"
-            + '\n' + ".center { text-align: center; }"
-            + '\n' + ".section_header_holder { margin-top: 8px; }"
-            + '\n' + ".config_var { margin: 0 0 4px; }"
-            + '\n' + ".section_header { font-size: 13pt; background: #414141; color: #FFF; border: 1px solid #000; margin: 0; }"
-            + '\n' + ".section_desc { font-size: 9pt; background: #EFEFEF; color: #575757; border: 1px solid #CCC; margin: 0 0 6px; }",
+        basic:       "#GM_config * { font-family: arial,tahoma,myriad pro,sans-serif; }"
+            + '\n' + "#GM_config { background: #FFF; }"
+            + '\n' + "#GM_config input[type='radio'] { margin-right: 8px; }"
+            + '\n' + "#GM_config .indent40 { margin-left: 40%; }"
+            + '\n' + "#GM_config .field_label { font-weight: bold; font-size: 12px; margin-right: 6px; }"
+            + '\n' + "#GM_config .block { display: block; }"
+            + '\n' + "#GM_config .saveclose_buttons { margin: 16px 10px 10px; padding: 2px 12px; }"
+            + '\n' + "#GM_config .reset, .reset a, #buttons_holder { text-align: right; color: #000; }"
+            + '\n' + "#GM_config .config_header { font-size: 20pt; margin: 0; }"
+            + '\n' + "#GM_config .config_desc, .section_desc, .reset { font-size: 9pt; }"
+            + '\n' + "#GM_config .center { text-align: center; }"
+            + '\n' + "#GM_config .section_header_holder { margin-top: 8px; }"
+            + '\n' + "#GM_config .config_var { margin: 0 0 4px; }"
+            + '\n' + "#GM_config .section_header { font-size: 13pt; background: #414141; color: #FFF; border: 1px solid #000; margin: 0; }"
+            + '\n' + "#GM_config .section_desc { font-size: 9pt; background: #EFEFEF; color: #575757; border: 1px solid #CCC; margin: 0 0 6px; }",
         stylish: ""
     };
 
@@ -85,6 +85,13 @@ function GM_configInit(obj, args) {
     // loop through GM_config.init() arguments
     for (var i = 0, l = args.length, arg; i < l; ++i) {
         arg = args[i];
+
+        // An element to use as the config window
+        if (typeof arg.appendChild == "function") {
+          obj.frame = arg;
+          continue;
+        }
+
         switch (typeof arg) {
         case 'object':
             for (var j in arg) { // could be a callback functions or settings object
@@ -168,25 +175,16 @@ GM_configStruct.prototype = {
         // You can multiple instances but they can't be open at the same time
         if (document.evaluate("//iframe[@id='GM_config']", 
                                document, null, 9, null).singleNodeValue) return;
-
-        // Create frame
-        document.body.appendChild((this.frame = this.create('iframe', {
-            id: 'GM_config',
-            style: 'position:fixed; top:0; left:0; opacity:0; display:none; z-index:999;' +
-                   ' width:75%; height:75%; max-height:95%; max-width:95%; ' +
-                   'border:1px solid #000000; overflow:auto;'
-        })));
-        this.frame.src = 'about:blank'; // In WebKit src can't be set until it is added to the page
         var configObj = this;
-        // we wait for the iframe to load before we can modify it
-        this.frame.addEventListener('load', function () {
+
+        function buildConfigWin (body, head) {
             var obj = configObj,
-                frameBody = this.contentDocument.getElementsByTagName('body')[0],
+                frameBody = body,
                 create = obj.create,
                 settings = obj.settings;
 
             // Append the style which is our default style plus the user style
-            obj.frame.contentDocument.getElementsByTagName('head')[0].appendChild(
+            head.appendChild(
                 obj.create('style', {
                 type: 'text/css',
                 textContent: obj.css.basic + obj.css.stylish
@@ -403,16 +401,39 @@ GM_configStruct.prototype = {
             obj.center(); // Show and center iframe
             window.addEventListener('resize', obj.center, false); // Center frame on resize
             if (obj.onOpen) 
-                obj.onOpen(obj.frame.contentDocument, 
-                           obj.frame.contentWindow, 
+                obj.onOpen(obj.frame.contentDocument || obj.frame.ownerDocument,
+                           obj.frame.contentWindow || window, 
                            obj.frame); // Call the open() callback function
             // Close frame on window close
             window.addEventListener('beforeunload', function () {
                 obj.remove(this);
-            },
-            false);
-        },
-        false);
+            }, false);
+        }
+
+        // Either use the element passed to init() or create an iframe
+        var defaultStyle = 'position:fixed; top:0; left:0; opacity:0; display:none; z-index:999;' +
+                           ' width:75%; height:75%; max-height:95%; max-width:95%; ' +
+                           'border:1px solid #000000; overflow:auto;';
+        if (this.frame) {
+          this.frame.id = 'GM_config';
+          this.frame.setAttribute('style', defaultStyle);
+          buildConfigWin(this.frame, this.frame.ownerDocument.getElementsByTagName('head')[0]);
+        } else {
+           // Create frame
+          document.body.appendChild((this.frame = this.create('iframe', {
+            id: 'GM_config',
+            style: defaultStyle
+          })));
+
+          this.frame.src = 'about:blank'; // In WebKit src can't be set until it is added to the page
+          // we wait for the iframe to load before we can modify it
+          this.frame.addEventListener('load', function(e) {
+              var frame = configObj.frame;
+              var body = frame.contentDocument.getElementsByTagName('body')[0];
+              body.id = 'GM_config'; // Allows for prefixing styles with "#GM_config"
+              buildConfigWin(body, frame.contentDocument.getElementsByTagName('head')[0]);
+            }, false);
+        }
     },
     close: function (save) {
         if (save) {
@@ -420,7 +441,8 @@ GM_configStruct.prototype = {
                 isNum = /^[\d\.]+$/,
                 typewhite = /radio|text|hidden|checkbox/;
             for (f in fields) {
-                var field = this.frame.contentDocument.getElementById('field_' + f);
+                var doc = this.frame.contentDocument || this.frame.ownerDocument,
+                    field = doc.getElementById('field_' + f);
                 if (typewhite.test(field.type)) type = field.type;
                 else type = field.tagName.toLowerCase();
                 switch (type) {
@@ -494,7 +516,8 @@ GM_configStruct.prototype = {
         var type, obj = this,
             fields = obj.settings;
         for (f in fields) {
-            var field = obj.frame.contentDocument.getElementById('field_' + f);
+            var doc = this.frame.contentDocument || this.frame.ownerDocument,
+                field = doc.getElementById('field_' + f);
             if (field.type == 'radio' || field.type == 'text' || 
                 field.type == 'checkbox') type = field.type;
             else type = field.tagName.toLowerCase();
