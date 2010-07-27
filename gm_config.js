@@ -1,6 +1,7 @@
-// GM_config
-// version        1.4.0
-// copyright      JoeSimmons & SizzleMcTwizzle & IzzySoft
+// @name              GM_config
+// @version           1.4.0
+// @contributors      JoeSimmons & SizzleMcTwizzle & IzzySoft & MartiMartz
+
 /* Instructions
 GM_config is now cross-browser compatible.
 
@@ -43,8 +44,10 @@ function GM_configStruct() {
             + '\n' + "#GM_config .center { text-align: center; }"
             + '\n' + "#GM_config .section_header_holder { margin-top: 8px; }"
             + '\n' + "#GM_config .config_var { margin: 0 0 4px; }"
-            + '\n' + "#GM_config .section_header { font-size: 13pt; background: #414141; color: #FFF; border: 1px solid #000; margin: 0; }"
-            + '\n' + "#GM_config .section_desc { font-size: 9pt; background: #EFEFEF; color: #575757; border: 1px solid #CCC; margin: 0 0 6px; }",
+            + '\n' + "#GM_config .section_header { font-size: 13pt; background: #414141; color: #FFF;" 
+            + '\n' +  "border: 1px solid #000; margin: 0; }"
+            + '\n' + "#GM_config .section_desc { font-size: 9pt; background: #EFEFEF; color: #575757;"
+            + '\n' + "border: 1px solid #CCC; margin: 0 0 6px; }",
         stylish: ""
     };
 
