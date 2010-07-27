@@ -204,29 +204,25 @@ GM_configStruct.prototype = {
                     textContent: 'Save',
                     title: 'Save options and close window',
                     className: 'saveclose_buttons',
-                    onclick: function () {
-                        obj.close(true)
-                    }
+                    onclick: function () { obj.save() }
                 }),
                     obj.create('button', {
-                    id: 'GM_config_cancelBtn',
-                    textContent: 'Cancel',
+                    id: 'GM_config_closeBtn',
+                    textContent: 'Close',
                     title: 'Close window',
                     className: 'saveclose_buttons',
-                    onclick: function () {
-                        obj.close(false)
-                    }
+                    onclick: function () { obj.close() }
                 }),
                     obj.create('div', {
                     className: 'reset_holder block',
                     kids: [
                         obj.create('a', {
-                          id: 'GM_config_resetLink',
-                          textContent: 'Restore to default',
-                          href: '#',
-                          title: 'Restore settings to default configuration',
-                          className: 'reset',
-                          onclick: function(e) { obj.reset(e) }
+                        id: 'GM_config_resetLink',
+                        textContent: 'Reset to defaults',
+                        href: '#',
+                        title: 'Reset settings to default configuration',
+                        className: 'reset',
+                        onclick: function(e) { obj.reset(e) }
                     })
                         ]
                 })]
@@ -242,6 +238,9 @@ GM_configStruct.prototype = {
             window.addEventListener('beforeunload', function () {
                 obj.remove(this);
             }, false);
+
+            // Now that everything is loaded, make it visible
+            obj.frame.style.display = "block";
         }
 
         // Either use the element passed to init() or create an iframe
@@ -271,23 +270,29 @@ GM_configStruct.prototype = {
         }
     },
 
-    close: function (save) {
-        if (save) {
-            for (id in this.fields)
-              if (!this.fields[id].toValue(this.frame.contentDocument || this.frame.ownerDocument))
-                return; // invalid value encountered
+    save: function () {
+      for (id in this.fields)
+        if (!this.fields[id].toValue(this.frame.contentDocument || this.frame.ownerDocument))
+          return; // invalid value encountered
 
-            this.save();
+      this.write();
 
-            if (this.onSave) 
-                this.onSave(); // Call the save() callback function
-        }
-        if (this.frame) 
-            this.remove(this.frame);
+      if (this.onSave) 
+        this.onSave(); // Call the save() callback function
+    },
 
-        delete this.frame;
-        if (this.onClose) 
-            this.onClose(); //  Call the close() callback function
+    close: function() {
+      // If frame is an iframe then remove it
+      if (this.frame.contentDocument) {
+        this.remove(this.frame);
+        this.frame = null;
+      } else { // else wipe its content
+        this.frame.innerHTML = "";
+        this.frame.style.display = "none";
+      }
+
+      if (this.onClose) 
+        this.onClose(); //  Call the close() callback function
     },
 
     set: function (name, val) {
@@ -300,7 +305,7 @@ GM_configStruct.prototype = {
 
     log: (this.isGM) ? GM_log : ((window.opera) ? opera.postError : console.log),
 
-    save: function (store, obj) {
+    write: function (store, obj) {
       if (!obj) {
         var values = {};
         for (var id in this.fields)
@@ -326,10 +331,10 @@ GM_configStruct.prototype = {
 
     reset: function (e) {
         e.preventDefault();
-        var type, 
-            obj = this,
-            fields = obj.fields,
-            doc = obj.frame.contentDocument || obj.frame.ownerDocument;
+        var fields = this.fields,
+            doc = this.frame.contentDocument || this.frame.ownerDocument,
+            type;
+
         for (id in fields) {
             var fieldEl = doc.getElementById('GM_config_field_' + id),
                 field = fields[id].settings;
