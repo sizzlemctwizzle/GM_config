@@ -1,5 +1,5 @@
 // GM_config
-// version        1.3.3
+// version        1.3.4
 // copyright      JoeSimmons & SizzleMcTwizzle & IzzySoft
 /* Instructions
 GM_config is now cross-browser compatible.
@@ -370,18 +370,14 @@ GM_configStruct.prototype = {
                     textContent: 'Save',
                     title: 'Save options and close window',
                     className: 'saveclose_buttons',
-                    onclick: function () {
-                        obj.close(true)
-                    }
+                    onclick: function () { obj.save() }
                 }),
                     obj.create('button', {
-                    id: 'GM_config_cancelBtn',
-                    textContent: 'Cancel',
+                    id: 'GM_config_closeBtn',
+                    textContent: 'Close',
                     title: 'Close window',
                     className: 'saveclose_buttons',
-                    onclick: function () {
-                        obj.close(false)
-                    }
+                    onclick: function () { obj.close() }
                 }),
                     obj.create('div', {
                     className: 'reset_holder block',
@@ -436,8 +432,7 @@ GM_configStruct.prototype = {
             }, false);
         }
     },
-    close: function (save) {
-        if (save) {
+    save: function () {
             var type, fields = this.settings,
                 isNum = /^[\d\.]+$/,
                 typewhite = /radio|text|hidden|checkbox/;
@@ -480,18 +475,20 @@ GM_configStruct.prototype = {
                 }
             }
 
-            this.save();
+            this.write();
 
             if (this.onSave) 
                 this.onSave(); // Call the save() callback function
-        }
-
+    },
+    close: function() {
         // If frame is an iframe the remove it
         if (this.frame.contentDocument) {
           this.remove(this.frame);
           this.frame = null;
-        } else // else wipe its content
+        } else { // else wipe its content
           this.frame.innerHTML = "";
+          this.frame.style.display = "none";
+        }
 
         if (this.onClose) 
             this.onClose(); //  Call the close() callback function
@@ -503,7 +500,7 @@ GM_configStruct.prototype = {
         return this.values[name];
     },
     log: (this.isGM) ? GM_log : ((window.opera) ? opera.postError : console.log),
-    save: function (store, obj) {
+    write: function (store, obj) {
         try {
             this.setValue(store || this.storage, this.stringify(obj || this.values));
         } catch(e) {
