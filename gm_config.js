@@ -481,7 +481,7 @@ GM_configStruct.prototype = {
                 this.onSave(); // Call the save() callback function
     },
     close: function() {
-        // If frame is an iframe the remove it
+        // If frame is an iframe then remove it
         if (this.frame.contentDocument) {
           this.remove(this.frame);
           this.frame = null;
