@@ -404,6 +404,9 @@ GM_configStruct.prototype = {
             window.addEventListener('beforeunload', function () {
                 obj.remove(this);
             }, false);
+
+            // Now that everything is loaded, make it visible
+            obj.frame.style.display = "block";
         }
 
         // Either use the element passed to init() or create an iframe
