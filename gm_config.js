@@ -142,9 +142,10 @@ GM_configStruct.prototype = {
 
     open: function () { // call GM_config.open() from your script to open the menu
         // Die if the menu is already open on this page
-        // You can multiple instances but they can't be open at the same time
-        if (document.evaluate("//iframe[@id='GM_config']", 
-                               document, null, 9, null).singleNodeValue) return;
+        // You can have multiple instances but they can't be open at the same time
+        var match = document.getElementById('GM_config');
+        if (match && (match.tagName == "IFRAME" || match.childNodes.length > 0)) return;
+
         var configObj = this;
 
         function buildConfigWin (body, head) {
