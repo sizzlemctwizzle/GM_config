@@ -633,7 +633,7 @@ GM_configField.prototype = {
           (((this.isNum.test(fieldEl.value || fieldEl.value == '0')) &&
             (field.type == 'int' || field.type == 'float')) ? parseFloat(fieldEl.value) : null);
 
-        if (fields[f].value === null) {
+        if (this.value === null) {
           alert('Invalid type for field: ' + this.id + '\nPlease use type: ' + 
                 field.type);
           return false;
