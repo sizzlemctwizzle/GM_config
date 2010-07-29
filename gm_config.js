@@ -236,7 +236,7 @@ GM_configStruct.prototype = {
     // Either use the element passed to init() or create an iframe
     var defaultStyle = 'position:fixed; top:0; left:0; opacity:0; display:none; z-index:999;' +
                        'width:75%; height:75%; max-height:95%; max-width:95%;' +
-                       'border:1px solid #000000; overflow:auto; bottom: auto;'
+                       'border:1px solid #000000; overflow:auto; bottom: auto;' +
                        'right: auto; margin: 0; padding: 0;';
     if (this.frame) {
       this.frame.id = 'GM_config';
@@ -480,7 +480,7 @@ GM_configField.prototype = {
         break;
       case 'radio':
         var wrap = create('div', {
-          id: 'GM_config_field_' + id,
+          id: 'GM_config_field_' + id
         });
 
         for (var i = 0, len = options.length; i < len; ++i) {
@@ -500,7 +500,7 @@ GM_configField.prototype = {
         break;
       case 'select':
         var wrap = create('select', {
-          id: 'GM_config_field_' + id,
+          id: 'GM_config_field_' + id
         });
 
         for (var i in options)
