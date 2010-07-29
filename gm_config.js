@@ -395,12 +395,6 @@ GM_configStruct.prototype = {
     style.opacity = '1';
   },
 
-  addEvent: function (el, ev, scr) {
-    el.addEventListener(ev, function () {
-      typeof scr == 'function' ? setTimeout(scr, 0) : eval(scr)
-    }, false);
-  },
-
   remove: function (el) {
     if (el && el.parentNode) el.parentNode.removeChild(el);
   }
@@ -529,8 +523,11 @@ GM_configField.prototype = {
           title: field.title || ''
         });
 
-        if (field.script) 
-          obj.addEvent(btn, 'click', field.script);
+        if (field.script)
+          btn.addEventListener('click', function () {
+            var scr = field.script;
+            typeof scr == 'function' ? setTimeout(scr, 0) : eval(scr);
+          }, false);
 
         retNode.appendChild(btn);
         break;
