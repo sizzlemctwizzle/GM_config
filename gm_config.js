@@ -361,7 +361,7 @@ GM_configStruct.prototype = {
     }
   },
 
-  create: function (a, b) {
+  create: function () {
     switch(arguments.length) {
       case 1:
         var A = document.createTextNode(arguments[0]);
