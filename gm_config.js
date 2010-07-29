@@ -2,28 +2,7 @@
 // @version           1.4.1
 // @contributors      JoeSimmons & SizzleMcTwizzle & IzzySoft & MartiMartz
 
-/* Instructions
-GM_config is now cross-browser compatible.
-
-To use it in a Greasemonkey-only user script you can just @require it.
-
-To use it in a cross-browser user script you will need to manually
-include the code at the beginning of your user script. In this case
-it is also very important you change the "storage" value below to
-something unique to prevent collisions between scripts. Also remember
-that in this case that stored settings will only be accessible on
-the same domain they were saved.
-
-In GM_config version 1.3 or greater, you can now create multiple instances
-of GM_config using the GM_configStruct constructor. You can also pass your
-settings to the constructor rather than init. For compatiblity with older
-usage, the GM_config variable is pre-populated with an instance of GM_config.
-
-If you are going to use multiple instances of GM_config you need to modify the 
-"storage" property so that they use seperate storage spaces and the values don't
-overwrite one another. In this case you are forced to pass settings through init().
-*/
-
+// The GM_config constructor
 function GM_configStruct() {
     // define a few properties
     this.storage = 'GM_config'; // Changed to something unique for localStorage
@@ -143,32 +122,34 @@ GM_configStruct.prototype = {
     // Support old method of initalizing
     init: function() { GM_configInit(this, arguments); },
 
-    open: function () { // call GM_config.open() from your script to open the menu
+    // call GM_config.open() from your script to open the menu
+    open: function () {
         // Die if the menu is already open on this page
         // You can have multiple instances but they can't be open at the same time
         var match = document.getElementById('GM_config');
         if (match && (match.tagName == "IFRAME" || match.childNodes.length > 0)) return;
 
+        // Sometime "this" gets overwritten so create an alias
         var config = this;
 
+        // Function to build the mighty config window :)
         function buildConfigWin (body, head) {
-            var obj = config,
-                frameBody = body,
-                create = obj.create,
-                fields = obj.fields;
+            var frameBody = body,
+                create = config.create,
+                fields = config.fields;
 
             // Append the style which is our default style plus the user style
             head.appendChild(
                 create('style', {
                 type: 'text/css',
-                textContent: obj.css.basic + obj.css.stylish
+                textContent: config.css.basic + config.css.stylish
             }));
 
             // Add header and title
             frameBody.appendChild(create('div', {
                 id: 'GM_config_header',
                 className: 'config_header block center',
-                textContent: obj.title
+                textContent: config.title
             }));
 
             // Append elements
@@ -207,7 +188,7 @@ GM_configStruct.prototype = {
                 textContent: 'Save',
                 title: 'Save options and close window',
                 className: 'saveclose_buttons',
-                onclick: function () { obj.save() }
+                onclick: function () { config.save() }
               }),
 
               create('button', {
@@ -215,35 +196,38 @@ GM_configStruct.prototype = {
                 textContent: 'Close',
                 title: 'Close window',
                 className: 'saveclose_buttons',
-                onclick: function () { obj.close() }
+                onclick: function () { config.close() }
               }),
 
               create('div', 
                 {className: 'reset_holder block'},
 
+                // Reset link
                 create('a', {
                   id: 'GM_config_resetLink',
                   textContent: 'Reset to defaults',
                   href: '#',
                   title: 'Reset settings to default configuration',
                   className: 'reset',
-                  onclick: function(e) { obj.reset(e) }
+                  onclick: function(e) { e.preventDefault(); config.reset() }
                 })
            )));
 
-           obj.center(); // Show and center iframe
-            window.addEventListener('resize', obj.center, false); // Center frame on resize
-            if (obj.onOpen) 
-                obj.onOpen(obj.frame.contentDocument || obj.frame.ownerDocument,
-                           obj.frame.contentWindow || window, 
-                           obj.frame); // Call the open() callback function
+           config.center(); // Show and center iframe
+           window.addEventListener('resize', config.center, false); // Center frame on resize
+
+           if (config.onOpen) 
+             config.onOpen(config.frame.contentDocument || config.frame.ownerDocument,
+                           config.frame.contentWindow || window, 
+                           config.frame); // Call the open() callback function
+
             // Close frame on window close
             window.addEventListener('beforeunload', function () {
-                obj.remove(this);
+                config.remove(this);
             }, false);
 
             // Now that everything is loaded, make it visible
-            obj.frame.style.display = "block";
+            config.frame.style.display = "block";
         }
 
         // Either use the element passed to init() or create an iframe
@@ -309,6 +293,7 @@ GM_configStruct.prototype = {
     log: (this.isGM) ? GM_log : ((window.opera) ? opera.postError : console.log),
 
     write: function (store, obj) {
+      // Build a list of values to save
       if (!obj) {
         var values = {};
         for (var id in this.fields)
@@ -332,51 +317,50 @@ GM_configStruct.prototype = {
       return rval;
     },
 
-    reset: function (e) {
-        e.preventDefault();
-        var fields = this.fields,
-            doc = this.frame.contentDocument || this.frame.ownerDocument,
-            type;
+    reset: function () {
+      var fields = this.fields,
+          doc = this.frame.contentDocument || this.frame.ownerDocument,
+          type;
 
-        for (id in fields) {
-            var fieldEl = doc.getElementById('GM_config_field_' + id),
-                field = fields[id].settings;
+      for (id in fields) {
+        var fieldEl = doc.getElementById('GM_config_field_' + id),
+            field = fields[id].settings;
 
-            if (fieldEl.type == 'radio' || fieldEl.type == 'text' || 
-                fieldEl.type == 'checkbox') 
-              type = fieldEl.type;
-            else 
-              type = fieldEl.tagName.toLowerCase();
+        if (fieldEl.type == 'radio' || fieldEl.type == 'text' || 
+            fieldEl.type == 'checkbox') 
+          type = fieldEl.type;
+        else 
+          type = fieldEl.tagName.toLowerCase();
 
-            switch (type) {
-              case 'text':
-                fieldEl.value = field['default'] || '';
-                break;
-              case 'hidden':
-                fieldEl.value = field['default'] || '';
-                break;
-              case 'textarea':
-                fieldEl.value = field['default'] || '';
-                break;
-              case 'checkbox':
-                fieldEl.checked = field['default'] || false;
-                break;
-              case 'select':
-                if (field['default']) {
-                    for (var i = fieldEl.options.length - 1; i >= 0; i--)
-                        if (fieldEl.options[i].value == field['default']) 
-                            fieldEl.selectedIndex = i;
-                } else fieldEl.selectedIndex = 0;
-                break;
-              case 'div':
-                var radios = fieldEl.getElementsByTagName('input');
-                if (radios.length > 0) 
-                    for (var i = radios.length - 1; i >= 0; i--) 
-                        if (radios[i].value == field['default']) 
-                            radios[i].checked = true;
-                break;
-            }
+        switch (type) {
+          case 'text':
+            fieldEl.value = field['default'] || '';
+            break;
+          case 'hidden':
+            fieldEl.value = field['default'] || '';
+            break;
+          case 'textarea':
+            fieldEl.value = field['default'] || '';
+            break;
+          case 'checkbox':
+            fieldEl.checked = field['default'] || false;
+            break;
+          case 'select':
+            if (field['default']) {
+              for (var i = 0, len = fieldEl.options.length; i < len; ++i)
+                if (fieldEl.options[i].value == field['default']) 
+                  fieldEl.selectedIndex = i;
+            } else 
+              fieldEl.selectedIndex = 0;
+            break;
+          case 'div':
+            var radios = fieldEl.getElementsByTagName('input'); 
+            for (var i = 0, len = radios.length; i < len; ++i) 
+              if (radios[i].value == field['default']) 
+                radios[i].checked = true;
+            break;
         }
+      }
     },
 
     create: function (a, b) {
@@ -403,26 +387,24 @@ GM_configStruct.prototype = {
     },
 
     center: function () {
-        var node = this.frame,
-            style = node.style,
-            beforeOpacity = style.opacity;
-        if (style.display == 'none') 
-          style.opacity = '0';
-        style.display = '';
-        style.top = Math.floor((window.innerHeight / 2) - (node.offsetHeight / 2)) + 'px';
-        style.left = Math.floor((window.innerWidth / 2) - (node.offsetWidth / 2)) + 'px';
-        style.opacity = '1';
+      var node = this.frame,
+          style = node.style,
+          beforeOpacity = style.opacity;
+      if (style.display == 'none') style.opacity = '0';
+      style.display = '';
+      style.top = Math.floor((window.innerHeight / 2) - (node.offsetHeight / 2)) + 'px';
+      style.left = Math.floor((window.innerWidth / 2) - (node.offsetWidth / 2)) + 'px';
+      style.opacity = '1';
     },
 
     addEvent: function (el, ev, scr) {
-        el.addEventListener(ev, function () {
-            typeof scr == 'function' ? setTimeout(scr, 0) : eval(scr)
-        },
-        false);
+      el.addEventListener(ev, function () {
+        typeof scr == 'function' ? setTimeout(scr, 0) : eval(scr)
+      }, false);
     },
 
     remove: function (el) {
-        if (el && el.parentNode) el.parentNode.removeChild(el);
+      if (el && el.parentNode) el.parentNode.removeChild(el);
     }
 };
 
@@ -619,6 +601,4 @@ GM_configField.prototype = {
 };
 
 // Create default instance of GM_config
-// If you are including this code in your script you can pass
-// settings to constructor instead of calling GM_config.init()
 var GM_config = new GM_configStruct();
