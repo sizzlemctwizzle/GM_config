@@ -261,8 +261,9 @@ GM_configStruct.prototype = {
   },
 
   save: function () {
-    for (id in this.fields)
-      if (!this.fields[id].toValue(this.frame.contentDocument || this.frame.ownerDocument))
+    var fields = this.fields;
+    for (id in fields)
+      if (!fields[id].toValue(this.frame.contentDocument || this.frame.ownerDocument))
         return; // invalid value encountered
 
     this.write();
@@ -298,9 +299,10 @@ GM_configStruct.prototype = {
   write: function (store, obj) {
     // Build a list of values to save
     if (!obj) {
-      var values = {};
-      for (var id in this.fields)
-        values[id] = this.fields[id].value;
+      var values = {},
+          fields = this.fields;
+      for (var id in fields)
+        values[id] = fields[id].value;
     }
 
     try {
