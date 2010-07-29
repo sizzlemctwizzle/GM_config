@@ -158,8 +158,8 @@ GM_configStruct.prototype = {
           secNum = 0; // Section count
 
       // loop through fields
-      for (var i in fields) {
-        var field = fields[i].settings;
+      for (var id in fields) {
+        var field = fields[id].settings;
 
         if (field.section) { // the start of a new section
           section = frameBody.appendChild(create('div', {
@@ -177,8 +177,9 @@ GM_configStruct.prototype = {
               innerHTML: field.section[1]
             }));
         }
-       
-        section.appendChild(fields[i].toNode());
+
+        // Create field elements and append to current section
+        section.appendChild(fields[id].toNode());
       }
 
       // Add save and close buttons
