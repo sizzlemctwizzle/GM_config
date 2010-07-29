@@ -1,5 +1,5 @@
 // @name              GM_config
-// @version           1.4.0
+// @version           1.4.1
 // @contributors      JoeSimmons & SizzleMcTwizzle & IzzySoft & MartiMartz
 
 /* Instructions
@@ -149,23 +149,23 @@ GM_configStruct.prototype = {
         var match = document.getElementById('GM_config');
         if (match && (match.tagName == "IFRAME" || match.childNodes.length > 0)) return;
 
-        var configObj = this;
+        var config = this;
 
         function buildConfigWin (body, head) {
-            var obj = configObj,
+            var obj = config,
                 frameBody = body,
                 create = obj.create,
                 fields = obj.fields;
 
             // Append the style which is our default style plus the user style
             head.appendChild(
-                obj.create('style', {
+                create('style', {
                 type: 'text/css',
                 textContent: obj.css.basic + obj.css.stylish
             }));
 
             // Add header and title
-            frameBody.appendChild(obj.create('div', {
+            frameBody.appendChild(create('div', {
                 id: 'GM_config_header',
                 className: 'config_header block center',
                 textContent: obj.title
@@ -180,14 +180,13 @@ GM_configStruct.prototype = {
               var field = fields[i].settings;
               if (field.section) { // the start of a new section
                 section = frameBody.appendChild(create('div', {
-                  className: 'section_header_holder',
-                  kids: [
-                    create('div', {
-                      className: 'section_header center',
-                      innerHTML: field.section[0]
-                  })],
-                  id: 'GM_config_section_' + secNum++
-                }));
+                    className: 'section_header_holder',
+                    id: 'GM_config_section_' + secNum++
+                  },
+                  create('div', {
+                    className: 'section_header center',
+                    innerHTML: field.section[0]
+                })));
 
                 if (field.section[1]) 
                   section.appendChild(create('p', {
@@ -200,39 +199,39 @@ GM_configStruct.prototype = {
             }
 
             // Add save and close buttons
-            frameBody.appendChild(obj.create('div', {
-                id: 'GM_config_buttons_holder',
-                kids: [
-                    obj.create('button', {
-                    id: 'GM_config_saveBtn',
-                    textContent: 'Save',
-                    title: 'Save options and close window',
-                    className: 'saveclose_buttons',
-                    onclick: function () { obj.save() }
-                }),
-                    obj.create('button', {
-                    id: 'GM_config_closeBtn',
-                    textContent: 'Close',
-                    title: 'Close window',
-                    className: 'saveclose_buttons',
-                    onclick: function () { obj.close() }
-                }),
-                    obj.create('div', {
-                    className: 'reset_holder block',
-                    kids: [
-                        obj.create('a', {
-                        id: 'GM_config_resetLink',
-                        textContent: 'Reset to defaults',
-                        href: '#',
-                        title: 'Reset settings to default configuration',
-                        className: 'reset',
-                        onclick: function(e) { obj.reset(e) }
-                    })
-                        ]
-                })]
-            }));
+            frameBody.appendChild(create('div',
+              {id: 'GM_config_buttons_holder'},
 
-            obj.center(); // Show and center iframe
+              create('button', {
+                id: 'GM_config_saveBtn',
+                textContent: 'Save',
+                title: 'Save options and close window',
+                className: 'saveclose_buttons',
+                onclick: function () { obj.save() }
+              }),
+
+              create('button', {
+                id: 'GM_config_closeBtn',
+                textContent: 'Close',
+                title: 'Close window',
+                className: 'saveclose_buttons',
+                onclick: function () { obj.close() }
+              }),
+
+              create('div', 
+                {className: 'reset_holder block'},
+
+                create('a', {
+                  id: 'GM_config_resetLink',
+                  textContent: 'Reset to defaults',
+                  href: '#',
+                  title: 'Reset settings to default configuration',
+                  className: 'reset',
+                  onclick: function(e) { obj.reset(e) }
+                })
+           )));
+
+           obj.center(); // Show and center iframe
             window.addEventListener('resize', obj.center, false); // Center frame on resize
             if (obj.onOpen) 
                 obj.onOpen(obj.frame.contentDocument || obj.frame.ownerDocument,
@@ -266,11 +265,11 @@ GM_configStruct.prototype = {
           this.frame.src = 'about:blank'; // In WebKit src can't be set until it is added to the page
           // we wait for the iframe to load before we can modify it
           this.frame.addEventListener('load', function(e) {
-              var frame = configObj.frame;
+              var frame = config.frame;
               var body = frame.contentDocument.getElementsByTagName('body')[0];
               body.id = 'GM_config'; // Allows for prefixing styles with "#GM_config"
               buildConfigWin(body, frame.contentDocument.getElementsByTagName('head')[0]);
-            }, false);
+          }, false);
         }
     },
 
@@ -381,24 +380,34 @@ GM_configStruct.prototype = {
     },
 
     create: function (a, b) {
-        var ret = window.document.createElement(a);
-        if (b) for (var prop in b) {
-            if (prop.indexOf('on') == 0) 
-                ret.addEventListener(prop.substring(2), b[prop], false);
-            else if (prop == "kids" && (prop = b[prop])) 
-                for (var i = 0; i < prop.length; i++) ret.appendChild(prop[i]);
-            else if (",style,accesskey,id,name,src,href,for".indexOf("," + 
-                     prop.toLowerCase()) != -1) ret.setAttribute(prop, b[prop]);
-            else ret[prop] = b[prop];
-        }
-        return ret;
+      switch(arguments.length) {
+        case 1:
+          var A = document.createTextNode(arguments[0]);
+          break;
+        default:
+          var A = document.createElement(arguments[0]),
+              B = arguments[1];
+          for (var b in B) {
+            if (b.indexOf("on") == 0)
+              A.addEventListener(b.substring(2), B[b], false);
+            else if (",style,accesskey,id,name,src,href,which".indexOf("," +
+                     b.toLowerCase()) != -1)
+              A.setAttribute(b, B[b]);
+            else
+              A[b] = B[b];
+          }
+          for (var i = 2, len = arguments.length; i < len; ++i)
+            A.appendChild(arguments[i]);
+      }
+      return A;
     },
 
     center: function () {
         var node = this.frame,
             style = node.style,
             beforeOpacity = style.opacity;
-        if (style.display == 'none') style.opacity = '0';
+        if (style.display == 'none') 
+          style.opacity = '0';
         style.display = '';
         style.top = Math.floor((window.innerHeight / 2) - (node.offsetHeight / 2)) + 'px';
         style.left = Math.floor((window.innerWidth / 2) - (node.offsetWidth / 2)) + 'px';
@@ -468,37 +477,25 @@ GM_configField.prototype = {
         id = this.id;
         create = this.create;
 
+    var retNode = create('div', { className: 'config_var', 
+          title: field.title || '' });
+
+    if (field.type != "hidden" || field.type != "button")
+      retNode.appendChild(create('span', {
+        textContent: label,
+        className: 'field_label'
+      }));
+
     switch (field.type) {
       case 'textarea':
-        return create('div', {
-          title: field.title || '',
-          kids: [
-            create('span', {
-              textContent: label,
-              className: 'field_label'
-            }),
-            create('textarea', {
-              id: 'GM_config_field_' + this.id,
-              innerHTML: value,
-              cols: (field.cols ? field.cols : 20),
-              rows: (field.rows ? field.rows : 2)
-            })
-          ],
-          className: 'config_var'
-        });
+        retNode.appendChild(create('textarea', {
+          id: 'GM_config_field_' + this.id,
+          innerHTML: value,
+          cols: (field.cols ? field.cols : 20),
+          rows: (field.rows ? field.rows : 2)
+        }));
         break;
       case 'radio':
-        var retNode = create('div', {
-          title: field.title || '',
-          kids: [
-            create('span', {
-              textContent: label,
-              className: 'field_label'
-            }),
-          ],
-          className: 'config_var'
-        });
-
         var wrap = create('div', {
           id: 'GM_config_field_' + id,
         });
@@ -507,6 +504,7 @@ GM_configField.prototype = {
           wrap.appendChild(create('span', {
             textContent: options[i]
           }));
+
           wrap.appendChild(create('input', {
             value: options[i],
             type: 'radio',
@@ -516,20 +514,8 @@ GM_configField.prototype = {
         }
 
         retNode.appendChild(wrap);
-        return retNode;
         break;
       case 'select':
-        var retNode = create('div', {
-          title: field.title || '',
-          kids: [
-            create('span', {
-              textContent: label,
-              className: 'field_label'
-            })
-          ],
-          className: 'config_var'
-        });
-
         var wrap = create('select', {
           id: 'GM_config_field_' + id,
         });
@@ -542,79 +528,47 @@ GM_configField.prototype = {
           }));
 
         retNode.appendChild(wrap);
-        return retNode;
         break;
       case 'checkbox':
-        return create('div', {
-          title: field.title || '',
-          kids: [
-            create('label', {
-              textContent: label,
-              className: 'field_label',
-              'for': 'GM_config_field_' + id
-            }),
-            create('input', {
-              id: 'GM_config_field_' + id,
-              type: 'checkbox',
-              value: value,
-              checked: value
-            })
-          ],
-          className: 'config_var'
-        });
+        retNode.appendChild(create('input', {
+          id: 'GM_config_field_' + id,
+          type: 'checkbox',
+          value: value,
+          checked: value
+        }));
         break;
       case 'button':
-        var tmp,
-            retNode = create('div', {
-          kids: [
-            (tmp = create('input', {
-               id: 'GM_config_field_' + id,
-               type: 'button',
-               value: label,
-               size: (field.size ? field.size : 25),
-               title: field.title || ''
-            }))
-          ],
-          className: 'config_var'
+        var btn = create('input', {
+          id: 'GM_config_field_' + id,
+          type: 'button',
+          value: label,
+          size: (field.size ? field.size : 25),
+          title: field.title || ''
         });
 
         if (field.script) 
-          obj.addEvent(tmp, 'click', field.script);
+          obj.addEvent(btn, 'click', field.script);
 
-        return retNode;
+        retNode.appendChild(btn);
         break;
       case 'hidden':
-        return create('div', {
-          title: field.title || '',
-          kids: [
-            create('input', {
-              id: 'GM_config_field_' + id,
-              type: 'hidden',
-              value: value
-            })
-          ],
-          className: 'config_var'
-        });
+        retNode.appendChild(create('input', {
+          id: 'GM_config_field_' + id,
+          type: 'hidden',
+          value: value
+        }));
         break;
       default:
         // type = text, int, or float
-        return create('div', {
-          title: field.title || '',
-          kids: [
-            create('span', {
-              textContent: label,
-              className: 'field_label'
-            }),
-            create('input', {
+        retNode.appendChild(create('input', {
               id: 'GM_config_field_' + id,
               type: 'text',
               value: value,
               size: (field.size ? field.size : 25)
-            })
-          ],
-          className: 'config_var'
-        });
+        }));    
     }
+
+    return retNode;
   },
 
   toValue: function(doc) {
