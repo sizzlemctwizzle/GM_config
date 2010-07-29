@@ -4,62 +4,62 @@
 
 // The GM_config constructor
 function GM_configStruct() {
-    // define a few properties
-    this.storage = 'GM_config'; // Changed to something unique for localStorage
-    this.isGM = typeof GM_getValue != 'undefined' && 
-                typeof GM_getValue('a', 'b') != 'undefined';
-    this.fields = {};
-    this.css = {
-      basic:     "#GM_config * { font-family: arial,tahoma,myriad pro,sans-serif; }"
-        + '\n' + "#GM_config { background: #FFF; }"
-        + '\n' + "#GM_config input[type='radio'] { margin-right: 8px; }"
-        + '\n' + "#GM_config .indent40 { margin-left: 40%; }"
-        + '\n' + "#GM_config .field_label { font-weight: bold; font-size: 12px; margin-right: 6px; }"
-        + '\n' + "#GM_config .block { display: block; }"
-        + '\n' + "#GM_config .saveclose_buttons { margin: 16px 10px 10px; padding: 2px 12px; }"
-        + '\n' + "#GM_config .reset, #GM_config .reset a,"
-        + '\n' + "#GM_config_buttons_holder { text-align: right; color: #000; }"
-        + '\n' + "#GM_config .config_header { font-size: 20pt; margin: 0; }"
-        + '\n' + "#GM_config .config_desc, #GM_config .section_desc, #GM_config .reset { font-size: 9pt; }"
-        + '\n' + "#GM_config .center { text-align: center; }"
-        + '\n' + "#GM_config .section_header_holder { margin-top: 8px; }"
-        + '\n' + "#GM_config .config_var { margin: 0 0 4px; }"
-        + '\n' + "#GM_config .section_header { font-size: 13pt; background: #414141; color: #FFF;" 
-        + '\n' +  "border: 1px solid #000; margin: 0; }"
-        + '\n' + "#GM_config .section_desc { font-size: 9pt; background: #EFEFEF; color: #575757;"
-        + '\n' + "border: 1px solid #CCC; margin: 0 0 6px; }",
-      stylish: ""
+  // define a few properties
+  this.storage = 'GM_config'; // Changed to something unique for localStorage
+  this.isGM = typeof GM_getValue != 'undefined' && 
+              typeof GM_getValue('a', 'b') != 'undefined';
+  this.fields = {};
+  this.css = {
+    basic:     "#GM_config * { font-family: arial,tahoma,myriad pro,sans-serif; }"
+      + '\n' + "#GM_config { background: #FFF; }"
+      + '\n' + "#GM_config input[type='radio'] { margin-right: 8px; }"
+      + '\n' + "#GM_config .indent40 { margin-left: 40%; }"
+      + '\n' + "#GM_config .field_label { font-weight: bold; font-size: 12px; margin-right: 6px; }"
+      + '\n' + "#GM_config .block { display: block; }"
+      + '\n' + "#GM_config .saveclose_buttons { margin: 16px 10px 10px; padding: 2px 12px; }"
+      + '\n' + "#GM_config .reset, #GM_config .reset a,"
+      + '\n' + "#GM_config_buttons_holder { text-align: right; color: #000; }"
+      + '\n' + "#GM_config .config_header { font-size: 20pt; margin: 0; }"
+      + '\n' + "#GM_config .config_desc, #GM_config .section_desc, #GM_config .reset { font-size: 9pt; }"
+      + '\n' + "#GM_config .center { text-align: center; }"
+      + '\n' + "#GM_config .section_header_holder { margin-top: 8px; }"
+      + '\n' + "#GM_config .config_var { margin: 0 0 4px; }"
+      + '\n' + "#GM_config .section_header { font-size: 13pt; background: #414141; color: #FFF;" 
+      + '\n' +  "border: 1px solid #000; margin: 0; }"
+      + '\n' + "#GM_config .section_desc { font-size: 9pt; background: #EFEFEF; color: #575757;"
+      + '\n' + "border: 1px solid #CCC; margin: 0 0 6px; }",
+    stylish: ""
+  };
+
+  // Define value storing and reading API
+  if (!this.isGM) {
+    this.setValue = function (name, value) {
+      return localStorage.setItem(name, value);
+    };
+    this.getValue = function(name, def){
+      var s = localStorage.getItem(name); 
+      return s == null ? def : s
     };
 
-    // Define value storing and reading API
-    if (!this.isGM) {
-      this.setValue = function (name, value) {
-        return localStorage.setItem(name, value);
-      };
-      this.getValue = function(name, def){
-        var s = localStorage.getItem(name); 
-        return s == null ? def : s
-      };
+    // We only support JSON parser outside GM
+    this.stringify = JSON.stringify;
+    this.parser = JSON.parse;
+  } else {
+    this.setValue = GM_setValue;
+    this.getValue = GM_getValue;
+    this.stringify = typeof JSON == "undefined" ? 
+      function(obj) { 
+        return obj.toSource();
+    } : JSON.stringify;
+    this.parser = typeof JSON == "undefined" ? 
+      function(jsonData) {
+        return (new Function('return ' + jsonData + ';'))(); 
+    } : JSON.parse;
+  }
 
-      // We only support JSON parser outside GM
-      this.stringify = JSON.stringify;
-      this.parser = JSON.parse;
-    } else {
-      this.setValue = GM_setValue;
-      this.getValue = GM_getValue;
-      this.stringify = typeof JSON == "undefined" ? 
-        function(obj) { 
-          return obj.toSource();
-        } : JSON.stringify;
-      this.parser = typeof JSON == "undefined" ? 
-        function(jsonData) {
-          return (new Function('return ' + jsonData + ';'))(); 
-        } : JSON.parse;
-    }
-
-    // call init() if settings were passed to constructor
-    if (arguments.length)
-      GM_configInit(this, arguments);
+  // call init() if settings were passed to constructor
+  if (arguments.length)
+    GM_configInit(this, arguments);
 }
 
 // This is the initializer function
@@ -120,293 +120,294 @@ function GM_configInit(obj, args) {
 }
 
 GM_configStruct.prototype = {
-    // Support old method of initalizing
-    init: function() { GM_configInit(this, arguments); },
+  // Support old method of initalizing
+  init: function() { GM_configInit(this, arguments); },
 
-    // call GM_config.open() from your script to open the menu
-    open: function () {
-        // Die if the menu is already open on this page
-        // You can have multiple instances but they can't be open at the same time
-        var match = document.getElementById('GM_config');
-        if (match && (match.tagName == "IFRAME" || match.childNodes.length > 0)) return;
+  // call GM_config.open() from your script to open the menu
+  open: function () {
+    // Die if the menu is already open on this page
+    // You can have multiple instances but they can't be open at the same time
+    var match = document.getElementById('GM_config');
+    if (match && (match.tagName == "IFRAME" || match.childNodes.length > 0)) return;
 
-        // Sometime "this" gets overwritten so create an alias
-        var config = this;
+    // Sometime "this" gets overwritten so create an alias
+    var config = this;
 
-        // Function to build the mighty config window :)
-        function buildConfigWin (body, head) {
-            var frameBody = body,
-                create = config.create,
-                fields = config.fields;
+    // Function to build the mighty config window :)
+    function buildConfigWin (body, head) {
+      var frameBody = body,
+          create = config.create,
+          fields = config.fields;
 
-            // Append the style which is our default style plus the user style
-            head.appendChild(
-                create('style', {
-                type: 'text/css',
-                textContent: config.css.basic + config.css.stylish
-            }));
+      // Append the style which is our default style plus the user style
+      head.appendChild(
+        create('style', {
+        type: 'text/css',
+        textContent: config.css.basic + config.css.stylish
+      }));
 
-            // Add header and title
-            frameBody.appendChild(create('div', {
-                id: 'GM_config_header',
-                className: 'config_header block center',
-                textContent: config.title
-            }));
+      // Add header and title
+      frameBody.appendChild(create('div', {
+        id: 'GM_config_header',
+        className: 'config_header block center',
+        textContent: config.title
+      }));
 
-            // Append elements
-            var section = frameBody,
-                secNum = 0; // Section count
+      // Append elements
+      var section = frameBody,
+          secNum = 0; // Section count
 
-            // loop through fields
-            for (var i in fields) {
-              var field = fields[i].settings;
-              if (field.section) { // the start of a new section
-                section = frameBody.appendChild(create('div', {
-                    className: 'section_header_holder',
-                    id: 'GM_config_section_' + secNum++
-                  },
-                  create('div', {
-                    className: 'section_header center',
-                    innerHTML: field.section[0]
-                })));
+      // loop through fields
+      for (var i in fields) {
+        var field = fields[i].settings;
 
-                if (field.section[1]) 
-                  section.appendChild(create('p', {
-                    className: 'section_desc center',
-                    innerHTML: field.section[1]
-                  }));
-              }
-                
-              section.appendChild(fields[i].toNode());
-            }
-
-            // Add save and close buttons
-            frameBody.appendChild(create('div',
-              {id: 'GM_config_buttons_holder'},
-
-              create('button', {
-                id: 'GM_config_saveBtn',
-                textContent: 'Save',
-                title: 'Save options and close window',
-                className: 'saveclose_buttons',
-                onclick: function () { config.save() }
-              }),
-
-              create('button', {
-                id: 'GM_config_closeBtn',
-                textContent: 'Close',
-                title: 'Close window',
-                className: 'saveclose_buttons',
-                onclick: function () { config.close() }
-              }),
-
-              create('div', 
-                {className: 'reset_holder block'},
-
-                // Reset link
-                create('a', {
-                  id: 'GM_config_resetLink',
-                  textContent: 'Reset to defaults',
-                  href: '#',
-                  title: 'Reset settings to default configuration',
-                  className: 'reset',
-                  onclick: function(e) { e.preventDefault(); config.reset() }
-                })
-           )));
-
-           config.center(); // Show and center iframe
-           window.addEventListener('resize', config.center, false); // Center frame on resize
-
-           if (config.onOpen) 
-             config.onOpen(config.frame.contentDocument || config.frame.ownerDocument,
-                           config.frame.contentWindow || window, 
-                           config.frame); // Call the open() callback function
-
-            // Close frame on window close
-            window.addEventListener('beforeunload', function () {
-                config.remove(this);
-            }, false);
-
-            // Now that everything is loaded, make it visible
-            config.frame.style.display = "block";
-        }
-
-        // Either use the element passed to init() or create an iframe
-        var defaultStyle = 'position:fixed; top:0; left:0; opacity:0; display:none; z-index:999;' +
-                           'width:75%; height:75%; max-height:95%; max-width:95%;' +
-                           'border:1px solid #000000; overflow:auto; bottom: auto;'
-                           'right: auto; margin: 0; padding: 0;';
-        if (this.frame) {
-          this.frame.id = 'GM_config';
-          this.frame.setAttribute('style', defaultStyle);
-          buildConfigWin(this.frame, this.frame.ownerDocument.getElementsByTagName('head')[0]);
-        } else {
-           // Create frame
-          document.body.appendChild((this.frame = this.create('iframe', {
-            id: 'GM_config',
-            style: defaultStyle
+        if (field.section) { // the start of a new section
+          section = frameBody.appendChild(create('div', {
+              className: 'section_header_holder',
+              id: 'GM_config_section_' + secNum++
+            },
+            create('div', {
+              className: 'section_header center',
+              innerHTML: field.section[0]
           })));
 
-          this.frame.src = 'about:blank'; // In WebKit src can't be set until it is added to the page
-          // we wait for the iframe to load before we can modify it
-          this.frame.addEventListener('load', function(e) {
-              var frame = config.frame;
-              var body = frame.contentDocument.getElementsByTagName('body')[0];
-              body.id = 'GM_config'; // Allows for prefixing styles with "#GM_config"
-              buildConfigWin(body, frame.contentDocument.getElementsByTagName('head')[0]);
-          }, false);
+          if (field.section[1]) 
+            section.appendChild(create('p', {
+              className: 'section_desc center',
+              innerHTML: field.section[1]
+            }));
         }
-    },
-
-    save: function () {
-      for (id in this.fields)
-        if (!this.fields[id].toValue(this.frame.contentDocument || this.frame.ownerDocument))
-          return; // invalid value encountered
-
-      this.write();
-
-      if (this.onSave) 
-        this.onSave(); // Call the save() callback function
-    },
-
-    close: function() {
-      // If frame is an iframe then remove it
-      if (this.frame.contentDocument) {
-        this.remove(this.frame);
-        this.frame = null;
-      } else { // else wipe its content
-        this.frame.innerHTML = "";
-        this.frame.style.display = "none";
+       
+        section.appendChild(fields[i].toNode());
       }
 
-      if (this.onClose) 
-        this.onClose(); //  Call the close() callback function
-    },
+      // Add save and close buttons
+      frameBody.appendChild(create('div',
+        {id: 'GM_config_buttons_holder'},
 
-    set: function (name, val) {
-        this.fields[name].value = val;
-    },
+        create('button', {
+          id: 'GM_config_saveBtn',
+          textContent: 'Save',
+          title: 'Save options and close window',
+          className: 'saveclose_buttons',
+          onclick: function () { config.save() }
+        }),
 
-    get: function (name) {
-        return this.fields[name].value;
-    },
+        create('button', {
+          id: 'GM_config_closeBtn',
+          textContent: 'Close',
+          title: 'Close window',
+          className: 'saveclose_buttons',
+          onclick: function () { config.close() }
+        }),
 
-    log: (this.isGM) ? GM_log : ((window.opera) ? opera.postError : console.log),
+        create('div', 
+          {className: 'reset_holder block'},
 
-    write: function (store, obj) {
-      // Build a list of values to save
-      if (!obj) {
-        var values = {};
-        for (var id in this.fields)
-          values[id] = this.fields[id].value;
-      }
+          // Reset link
+          create('a', {
+            id: 'GM_config_resetLink',
+            textContent: 'Reset to defaults',
+            href: '#',
+            title: 'Reset settings to default configuration',
+            className: 'reset',
+            onclick: function(e) { e.preventDefault(); config.reset() }
+          })
+      )));
 
-      try {
-        this.setValue(store || this.storage, this.stringify(obj || values));
-      } catch(e) {
-        this.log("GM_config failed to save settings!");
-      }
-    },
+      config.center(); // Show and center iframe
+      window.addEventListener('resize', config.center, false); // Center frame on resize
 
-    read: function (store) {
-      try {
-        var rval = this.parser(this.getValue(store || this.storage, '{}'));
-      } catch(e) {
-        this.log("GM_config failed to read saved settings!");
-        var rval = {};
-      }
-      return rval;
-    },
+      if (config.onOpen) 
+        config.onOpen(config.frame.contentDocument || config.frame.ownerDocument,
+                      config.frame.contentWindow || window, 
+                      config.frame); // Call the open() callback function
 
-    reset: function () {
-      var fields = this.fields,
-          doc = this.frame.contentDocument || this.frame.ownerDocument,
-          type;
-
-      for (id in fields) {
-        var fieldEl = doc.getElementById('GM_config_field_' + id),
-            field = fields[id].settings;
-
-        if (fieldEl.type == 'radio' || fieldEl.type == 'text' || 
-            fieldEl.type == 'checkbox') 
-          type = fieldEl.type;
-        else 
-          type = fieldEl.tagName.toLowerCase();
-
-        switch (type) {
-          case 'text':
-            fieldEl.value = field['default'] || '';
-            break;
-          case 'hidden':
-            fieldEl.value = field['default'] || '';
-            break;
-          case 'textarea':
-            fieldEl.value = field['default'] || '';
-            break;
-          case 'checkbox':
-            fieldEl.checked = field['default'] || false;
-            break;
-          case 'select':
-            if (field['default']) {
-              for (var i = 0, len = fieldEl.options.length; i < len; ++i)
-                if (fieldEl.options[i].value == field['default']) 
-                  fieldEl.selectedIndex = i;
-            } else 
-              fieldEl.selectedIndex = 0;
-            break;
-          case 'div':
-            var radios = fieldEl.getElementsByTagName('input'); 
-            for (var i = 0, len = radios.length; i < len; ++i) 
-              if (radios[i].value == field['default']) 
-                radios[i].checked = true;
-            break;
-        }
-      }
-    },
-
-    create: function (a, b) {
-      switch(arguments.length) {
-        case 1:
-          var A = document.createTextNode(arguments[0]);
-          break;
-        default:
-          var A = document.createElement(arguments[0]),
-              B = arguments[1];
-          for (var b in B) {
-            if (b.indexOf("on") == 0)
-              A.addEventListener(b.substring(2), B[b], false);
-            else if (",style,accesskey,id,name,src,href,which".indexOf("," +
-                     b.toLowerCase()) != -1)
-              A.setAttribute(b, B[b]);
-            else
-              A[b] = B[b];
-          }
-          for (var i = 2, len = arguments.length; i < len; ++i)
-            A.appendChild(arguments[i]);
-      }
-      return A;
-    },
-
-    center: function () {
-      var node = this.frame,
-          style = node.style,
-          beforeOpacity = style.opacity;
-      if (style.display == 'none') style.opacity = '0';
-      style.display = '';
-      style.top = Math.floor((window.innerHeight / 2) - (node.offsetHeight / 2)) + 'px';
-      style.left = Math.floor((window.innerWidth / 2) - (node.offsetWidth / 2)) + 'px';
-      style.opacity = '1';
-    },
-
-    addEvent: function (el, ev, scr) {
-      el.addEventListener(ev, function () {
-        typeof scr == 'function' ? setTimeout(scr, 0) : eval(scr)
+      // Close frame on window close
+      window.addEventListener('beforeunload', function () {
+          config.remove(this);
       }, false);
-    },
 
-    remove: function (el) {
-      if (el && el.parentNode) el.parentNode.removeChild(el);
+      // Now that everything is loaded, make it visible
+      config.frame.style.display = "block";
     }
+
+    // Either use the element passed to init() or create an iframe
+    var defaultStyle = 'position:fixed; top:0; left:0; opacity:0; display:none; z-index:999;' +
+                       'width:75%; height:75%; max-height:95%; max-width:95%;' +
+                       'border:1px solid #000000; overflow:auto; bottom: auto;'
+                       'right: auto; margin: 0; padding: 0;';
+    if (this.frame) {
+      this.frame.id = 'GM_config';
+      this.frame.setAttribute('style', defaultStyle);
+      buildConfigWin(this.frame, this.frame.ownerDocument.getElementsByTagName('head')[0]);
+    } else {
+      // Create frame
+      document.body.appendChild((this.frame = this.create('iframe', {
+        id: 'GM_config',
+        style: defaultStyle
+      })));
+
+      this.frame.src = 'about:blank'; // In WebKit src can't be set until it is added to the page
+      // we wait for the iframe to load before we can modify it
+      this.frame.addEventListener('load', function(e) {
+          var frame = config.frame;
+          var body = frame.contentDocument.getElementsByTagName('body')[0];
+          body.id = 'GM_config'; // Allows for prefixing styles with "#GM_config"
+          buildConfigWin(body, frame.contentDocument.getElementsByTagName('head')[0]);
+      }, false);
+    }
+  },
+
+  save: function () {
+    for (id in this.fields)
+      if (!this.fields[id].toValue(this.frame.contentDocument || this.frame.ownerDocument))
+        return; // invalid value encountered
+
+    this.write();
+
+    if (this.onSave) 
+      this.onSave(); // Call the save() callback function
+  },
+
+  close: function() {
+    // If frame is an iframe then remove it
+    if (this.frame.contentDocument) {
+      this.remove(this.frame);
+      this.frame = null;
+    } else { // else wipe its content
+      this.frame.innerHTML = "";
+      this.frame.style.display = "none";
+    }
+
+    if (this.onClose) 
+      this.onClose(); //  Call the close() callback function
+  },
+
+  set: function (name, val) {
+    this.fields[name].value = val;
+  },
+
+  get: function (name) {
+    return this.fields[name].value;
+  },
+
+  log: (this.isGM) ? GM_log : ((window.opera) ? opera.postError : console.log),
+
+  write: function (store, obj) {
+    // Build a list of values to save
+    if (!obj) {
+      var values = {};
+      for (var id in this.fields)
+        values[id] = this.fields[id].value;
+    }
+
+    try {
+      this.setValue(store || this.storage, this.stringify(obj || values));
+    } catch(e) {
+      this.log("GM_config failed to save settings!");
+    }
+  },
+
+  read: function (store) {
+    try {
+      var rval = this.parser(this.getValue(store || this.storage, '{}'));
+    } catch(e) {
+      this.log("GM_config failed to read saved settings!");
+      var rval = {};
+    }
+    return rval;
+  },
+
+  reset: function () {
+    var fields = this.fields,
+        doc = this.frame.contentDocument || this.frame.ownerDocument,
+        type;
+
+    for (id in fields) {
+      var fieldEl = doc.getElementById('GM_config_field_' + id),
+          field = fields[id].settings;
+
+      if (fieldEl.type == 'radio' || fieldEl.type == 'text' || 
+          fieldEl.type == 'checkbox') 
+        type = fieldEl.type;
+      else 
+        type = fieldEl.tagName.toLowerCase();
+
+      switch (type) {
+        case 'text':
+          fieldEl.value = field['default'] || '';
+          break;
+        case 'hidden':
+          fieldEl.value = field['default'] || '';
+          break;
+        case 'textarea':
+          fieldEl.value = field['default'] || '';
+          break;
+        case 'checkbox':
+          fieldEl.checked = field['default'] || false;
+          break;
+        case 'select':
+          if (field['default']) {
+            for (var i = 0, len = fieldEl.options.length; i < len; ++i)
+              if (fieldEl.options[i].value == field['default']) 
+                fieldEl.selectedIndex = i;
+          } else 
+            fieldEl.selectedIndex = 0;
+          break;
+        case 'div':
+          var radios = fieldEl.getElementsByTagName('input'); 
+          for (var i = 0, len = radios.length; i < len; ++i) 
+            if (radios[i].value == field['default']) 
+              radios[i].checked = true;
+          break;
+      }
+    }
+  },
+
+  create: function (a, b) {
+    switch(arguments.length) {
+      case 1:
+        var A = document.createTextNode(arguments[0]);
+        break;
+      default:
+        var A = document.createElement(arguments[0]),
+            B = arguments[1];
+        for (var b in B) {
+          if (b.indexOf("on") == 0)
+            A.addEventListener(b.substring(2), B[b], false);
+          else if (",style,accesskey,id,name,src,href,which".indexOf("," +
+                   b.toLowerCase()) != -1)
+            A.setAttribute(b, B[b]);
+          else
+            A[b] = B[b];
+        }
+        for (var i = 2, len = arguments.length; i < len; ++i)
+          A.appendChild(arguments[i]);
+    }
+    return A;
+  },
+
+  center: function () {
+    var node = this.frame,
+        style = node.style,
+        beforeOpacity = style.opacity;
+    if (style.display == 'none') style.opacity = '0';
+    style.display = '';
+    style.top = Math.floor((window.innerHeight / 2) - (node.offsetHeight / 2)) + 'px';
+    style.left = Math.floor((window.innerWidth / 2) - (node.offsetWidth / 2)) + 'px';
+    style.opacity = '1';
+  },
+
+  addEvent: function (el, ev, scr) {
+    el.addEventListener(ev, function () {
+      typeof scr == 'function' ? setTimeout(scr, 0) : eval(scr)
+    }, false);
+  },
+
+  remove: function (el) {
+    if (el && el.parentNode) el.parentNode.removeChild(el);
+  }
 };
 
 function GM_configField(settings, stored, id) {
@@ -461,7 +462,7 @@ GM_configField.prototype = {
         create = this.create;
 
     var retNode = create('div', { className: 'config_var', 
-          title: field.title || '' });
+                                  title: field.title || '' });
 
     if (field.type != "hidden" || field.type != "button")
       retNode.appendChild(create('span', {
