@@ -591,10 +591,9 @@ GM_configField.prototype = {
         break;
       case 'div':
         var radios = fieldEl.getElementsByTagName('input');
-        if (radios.length > 0) 
-          for (var i = radios.length - 1; i >= 0; i--) 
-            if (radios[i].checked) 
-              this.value = radios[i].value;
+        for (var i = 0, len = radios.length; i < len; ++i) 
+          if (radios[i].checked)
+            this.value = radios[i].value;
         break;
     }
 
