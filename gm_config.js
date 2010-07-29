@@ -326,7 +326,8 @@ GM_configStruct.prototype = {
 
     for (id in fields) {
       var fieldEl = doc.getElementById('GM_config_field_' + id),
-          field = fields[id].settings;
+          field = fields[id].settings,
+          noDefault = typeof field['default'] == "undefined";
 
       if (fieldEl.type == 'radio' || fieldEl.type == 'text' || 
           fieldEl.type == 'checkbox') 
@@ -335,17 +336,8 @@ GM_configStruct.prototype = {
         type = fieldEl.tagName.toLowerCase();
 
       switch (type) {
-        case 'text':
-          fieldEl.value = field['default'] || '';
-          break;
-        case 'hidden':
-          fieldEl.value = field['default'] || '';
-          break;
-        case 'textarea':
-          fieldEl.value = field['default'] || '';
-          break;
         case 'checkbox':
-          fieldEl.checked = field['default'] || false;
+          fieldEl.checked = noDefault ? GM_configDefaultValue(type) : field['default'];
           break;
         case 'select':
           if (field['default']) {
@@ -360,6 +352,9 @@ GM_configStruct.prototype = {
           for (var i = 0, len = radios.length; i < len; ++i) 
             if (radios[i].value == field['default']) 
               radios[i].checked = true;
+          break;
+        default:
+          fieldEl.value = noDefault ? GM_configDefaultValue(type) : field['default'];
           break;
       }
     }
@@ -410,37 +405,40 @@ GM_configStruct.prototype = {
   }
 };
 
+function GM_configDefaultValue(type) {
+  var value;
+  switch (type) {
+    case 'radio': case 'select':
+      value = settings.options[0];
+      break;
+    case 'checkbox':
+      value = false;
+      break;
+    case 'int': case 'float':
+      value = 0;
+      break;
+    default:
+      value = '';
+  }
+
+  return value;
+}
+
 function GM_configField(settings, stored, id) {
   // Store the field's settings
   this.settings = settings;
   this.id = id;
   
   // if a setting was passed to init but wasn't stored then 
-  //      if a default value wasn't passed through init() then use null
+  //      if a default value wasn't passed through init() then 
+  //      use default value for type
   //      else use the default value passed through init()
   // else use the stored value
   var value = typeof stored == "undefined" ? 
-                typeof settings['default'] == "undefined" ? null 
+                typeof settings['default'] == "undefined" ? 
+                  GM_configDefaultValue(settings.type)
                 : settings['default'] 
               : stored;
-
-  // If the value isn't stored and no default was passed through init()
-  // try to predict a default value based on the type
-  if (value === null) {
-    switch (settings.type) {
-      case 'radio': case 'select':
-        value = settings.options[0];
-        break;
-      case 'checkbox':
-        value = false;
-        break;
-      case 'int': case 'float':
-        value = 0;
-        break;
-      default:
-        value = '';
-    }
-  }
 
   // Store the field's value
   this.value = value;
