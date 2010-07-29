@@ -10,112 +10,113 @@ function GM_configStruct() {
                 typeof GM_getValue('a', 'b') != 'undefined';
     this.fields = {};
     this.css = {
-        basic:       "#GM_config * { font-family: arial,tahoma,myriad pro,sans-serif; }"
-            + '\n' + "#GM_config { background: #FFF; }"
-            + '\n' + "#GM_config input[type='radio'] { margin-right: 8px; }"
-            + '\n' + "#GM_config .indent40 { margin-left: 40%; }"
-            + '\n' + "#GM_config .field_label { font-weight: bold; font-size: 12px; margin-right: 6px; }"
-            + '\n' + "#GM_config .block { display: block; }"
-            + '\n' + "#GM_config .saveclose_buttons { margin: 16px 10px 10px; padding: 2px 12px; }"
-            + '\n' + "#GM_config .reset, .reset a, #GM_config_buttons_holder { text-align: right; color: #000; }"
-            + '\n' + "#GM_config .config_header { font-size: 20pt; margin: 0; }"
-            + '\n' + "#GM_config .config_desc, .section_desc, .reset { font-size: 9pt; }"
-            + '\n' + "#GM_config .center { text-align: center; }"
-            + '\n' + "#GM_config .section_header_holder { margin-top: 8px; }"
-            + '\n' + "#GM_config .config_var { margin: 0 0 4px; }"
-            + '\n' + "#GM_config .section_header { font-size: 13pt; background: #414141; color: #FFF;" 
-            + '\n' +  "border: 1px solid #000; margin: 0; }"
-            + '\n' + "#GM_config .section_desc { font-size: 9pt; background: #EFEFEF; color: #575757;"
-            + '\n' + "border: 1px solid #CCC; margin: 0 0 6px; }",
-        stylish: ""
+      basic:     "#GM_config * { font-family: arial,tahoma,myriad pro,sans-serif; }"
+        + '\n' + "#GM_config { background: #FFF; }"
+        + '\n' + "#GM_config input[type='radio'] { margin-right: 8px; }"
+        + '\n' + "#GM_config .indent40 { margin-left: 40%; }"
+        + '\n' + "#GM_config .field_label { font-weight: bold; font-size: 12px; margin-right: 6px; }"
+        + '\n' + "#GM_config .block { display: block; }"
+        + '\n' + "#GM_config .saveclose_buttons { margin: 16px 10px 10px; padding: 2px 12px; }"
+        + '\n' + "#GM_config .reset, #GM_config .reset a,"
+        + '\n' + "#GM_config_buttons_holder { text-align: right; color: #000; }"
+        + '\n' + "#GM_config .config_header { font-size: 20pt; margin: 0; }"
+        + '\n' + "#GM_config .config_desc, #GM_config .section_desc, #GM_config .reset { font-size: 9pt; }"
+        + '\n' + "#GM_config .center { text-align: center; }"
+        + '\n' + "#GM_config .section_header_holder { margin-top: 8px; }"
+        + '\n' + "#GM_config .config_var { margin: 0 0 4px; }"
+        + '\n' + "#GM_config .section_header { font-size: 13pt; background: #414141; color: #FFF;" 
+        + '\n' +  "border: 1px solid #000; margin: 0; }"
+        + '\n' + "#GM_config .section_desc { font-size: 9pt; background: #EFEFEF; color: #575757;"
+        + '\n' + "border: 1px solid #CCC; margin: 0 0 6px; }",
+      stylish: ""
     };
 
     // Define value storing and reading API
     if (!this.isGM) {
-        this.setValue = function (name, value) {
-                                       return localStorage.setItem(name, value);
-                        };
-        this.getValue = function(name, def){
-                            var s = localStorage.getItem(name); 
-                            return s == null ? def : s
-                        };
+      this.setValue = function (name, value) {
+        return localStorage.setItem(name, value);
+      };
+      this.getValue = function(name, def){
+        var s = localStorage.getItem(name); 
+        return s == null ? def : s
+      };
 
-        // We only support JSON parser outside GM
-        this.stringify = JSON.stringify;
-        this.parser = JSON.parse;
+      // We only support JSON parser outside GM
+      this.stringify = JSON.stringify;
+      this.parser = JSON.parse;
     } else {
-        this.setValue = GM_setValue;
-        this.getValue = GM_getValue;
-        this.stringify = typeof JSON == "undefined" ? 
-                             function(obj) { 
-                                 return obj.toSource();
-                             } : JSON.stringify;
-        this.parser = typeof JSON == "undefined" ? 
-                          function(jsonData) {
-                              return (new Function('return ' + jsonData + ';'))(); 
-                          } : JSON.parse;
+      this.setValue = GM_setValue;
+      this.getValue = GM_getValue;
+      this.stringify = typeof JSON == "undefined" ? 
+        function(obj) { 
+          return obj.toSource();
+        } : JSON.stringify;
+      this.parser = typeof JSON == "undefined" ? 
+        function(jsonData) {
+          return (new Function('return ' + jsonData + ';'))(); 
+        } : JSON.parse;
     }
 
     // call init() if settings were passed to constructor
     if (arguments.length)
-        GM_configInit(this, arguments);
+      GM_configInit(this, arguments);
 }
 
 // This is the initializer function
 function GM_configInit(obj, args) {
-    // loop through GM_config.init() arguments
-    for (var i = 0, l = args.length, arg; i < l; ++i) {
-        arg = args[i];
+  // loop through GM_config.init() arguments
+  for (var i = 0, l = args.length, arg; i < l; ++i) {
+    arg = args[i];
 
-        // An element to use as the config window
-        if (typeof arg.appendChild == "function") {
-          obj.frame = arg;
-          continue;
-        }
-
-        switch (typeof arg) {
-        case 'object':
-            for (var j in arg) { // could be a callback functions or settings object
-                if (typeof arg[j] != "function") { // we are in the settings object
-                    var settings = arg; // store settings object
-                    break; // leave the loop
-                } // otherwise we must be in the callback functions object
-                switch (j) {
-                case "open": // called when the frame is opened and loaded
-                    obj.onOpen = arg[j];
-                    break; 
-                case "close": // called when frame is gone
-                    obj.onClose = arg[j];
-                    break;
-                case "save": // called when settings have been saved
-                    obj.onSave = arg[j];
-                    break; // store the settings objects
-                }
-            }
-            break;
-        case 'function':
-            obj.onOpen = arg;
-            break; // passing a bare function is set to open callback
-            // could be custom CSS or the title string
-        case 'string':
-            if (arg.indexOf('{') != -1 && arg.indexOf('}') != -1) 
-                var css = arg;
-            else 
-                obj.title = arg;
-            break;
-        }
+    // An element to use as the config window
+    if (typeof arg.appendChild == "function") {
+      obj.frame = arg;
+      continue;
     }
-    // if title wasn't passed through init()
-    if (!obj.title) 
-      obj.title = 'Settings - Anonymous Script';
 
-    var stored = obj.read(); // read the stored settings
-    // for each setting create a field object
-    for (var id in settings)
-      obj.fields[id] = new GM_configField(settings[id], stored[id], id);
+    switch (typeof arg) {
+      case 'object':
+        for (var j in arg) { // could be a callback functions or settings object
+          if (typeof arg[j] != "function") { // we are in the settings object
+            var settings = arg; // store settings object
+            break; // leave the loop
+          } // otherwise we must be in the callback functions object
+          switch (j) {
+            case "open": // called when the frame is opened and loaded
+              obj.onOpen = arg[j];
+              break; 
+            case "close": // called when frame is gone
+              obj.onClose = arg[j];
+              break;
+            case "save": // called when settings have been saved
+              obj.onSave = arg[j];
+              break; // store the settings objects
+          }
+        }
+        break;
+      case 'function':
+        obj.onOpen = arg;
+        break; // passing a bare function is set to open callback
+      // could be custom CSS or the title string
+      case 'string':
+        if (arg.indexOf('{') != -1 && arg.indexOf('}') != -1) 
+          var css = arg;
+        else 
+          obj.title = arg;
+        break;
+    }
+  }
+  // if title wasn't passed through init()
+  if (!obj.title) 
+    obj.title = 'Settings - Anonymous Script';
 
-    if (css) 
-      obj.css.stylish = css; // store the custom style
+  var stored = obj.read(); // read the stored settings
+  // for each setting create a field object
+  for (var id in settings)
+    obj.fields[id] = new GM_configField(settings[id], stored[id], id);
+
+  if (css) 
+    obj.css.stylish = css; // store the custom style
 }
 
 GM_configStruct.prototype = {
