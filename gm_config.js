@@ -63,14 +63,14 @@ function GM_configStruct() {
 }
 
 // This is the initializer function
-function GM_configInit(obj, args) {
+function GM_configInit(config, args) {
   // loop through GM_config.init() arguments
   for (var i = 0, l = args.length, arg; i < l; ++i) {
     arg = args[i];
 
     // An element to use as the config window
     if (typeof arg.appendChild == "function") {
-      obj.frame = arg;
+      config.frame = arg;
       continue;
     }
 
@@ -83,40 +83,40 @@ function GM_configInit(obj, args) {
           } // otherwise we must be in the callback functions object
           switch (j) {
             case "open": // called when the frame is opened and loaded
-              obj.onOpen = arg[j];
+              config.onOpen = arg[j];
               break; 
             case "close": // called when frame is gone
-              obj.onClose = arg[j];
+              config.onClose = arg[j];
               break;
             case "save": // called when settings have been saved
-              obj.onSave = arg[j];
+              config.onSave = arg[j];
               break; // store the settings objects
           }
         }
         break;
-      case 'function':
-        obj.onOpen = arg;
-        break; // passing a bare function is set to open callback
-      // could be custom CSS or the title string
-      case 'string':
+      case 'function': // passing a bare function is set to open callback
+        config.onOpen = arg;
+        break;
+      case 'string': // could be custom CSS or the title string
         if (arg.indexOf('{') != -1 && arg.indexOf('}') != -1) 
           var css = arg;
         else 
-          obj.title = arg;
+          config.title = arg;
         break;
     }
   }
   // if title wasn't passed through init()
-  if (!obj.title) 
-    obj.title = 'Settings - Anonymous Script';
+  if (!config.title) 
+    config.title = 'Settings - Anonymous Script';
 
-  var stored = obj.read(); // read the stored settings
+  var stored = config.read(); // read the stored settings
+
   // for each setting create a field object
   for (var id in settings)
-    obj.fields[id] = new GM_configField(settings[id], stored[id], id);
+    config.fields[id] = new GM_configField(settings[id], stored[id], id);
 
   if (css) 
-    obj.css.stylish = css; // store the custom style
+    config.css.stylish = css; // store the custom style
 }
 
 GM_configStruct.prototype = {
