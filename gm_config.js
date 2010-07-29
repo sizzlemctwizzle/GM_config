@@ -456,7 +456,7 @@ GM_configField.prototype = {
         value = this.value,
         options = field.options,
         label = field.label,
-        id = this.id;
+        id = this.id,
         create = this.create;
 
     var retNode = create('div', { className: 'config_var', 
