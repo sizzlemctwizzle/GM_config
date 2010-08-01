@@ -189,7 +189,7 @@ GM_configStruct.prototype = {
         create('button', {
           id: 'GM_config_saveBtn',
           textContent: 'Save',
-          title: 'Save options and close window',
+          title: 'Save settings',
           className: 'saveclose_buttons',
           onclick: function () { config.save() }
         }),
@@ -208,7 +208,7 @@ GM_configStruct.prototype = {
           // Reset link
           create('a', {
             id: 'GM_config_resetLink',
-            textContent: 'Reset to defaults',
+            textContent: 'Reset fields to default values',
             href: '#',
             title: 'Reset settings to default configuration',
             className: 'reset',
