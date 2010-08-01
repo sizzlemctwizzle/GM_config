@@ -1,5 +1,5 @@
 // @name              GM_config
-// @version           1.4.1
+// @version           1.4.2
 // @contributors      JoeSimmons & SizzleMcTwizzle & IzzySoft & MartiMartz
 
 // The GM_config constructor
@@ -9,6 +9,7 @@ function GM_configStruct() {
   this.isGM = typeof GM_getValue != 'undefined' && 
               typeof GM_getValue('a', 'b') != 'undefined';
   this.fields = {};
+  this.title = 'Settings - Anonymous Script';
   this.css = {
     basic:     "#GM_config * { font-family: arial,tahoma,myriad pro,sans-serif; }"
       + '\n' + "#GM_config { background: #FFF; }"
@@ -30,6 +31,11 @@ function GM_configStruct() {
       + '\n' + "border: 1px solid #CCC; margin: 0 0 6px; }",
     stylish: ""
   };
+
+  // Set the valid callback functions to null
+  this.onOpen = null;
+  this.onSave = null;
+  this.onClose = null;
 
   // Define value storing and reading API
   if (!this.isGM) {
@@ -80,18 +86,8 @@ function GM_configInit(config, args) {
           if (typeof arg[j] != "function") { // we are in the settings object
             var settings = arg; // store settings object
             break; // leave the loop
-          } // otherwise we must be in the callback functions object
-          switch (j) {
-            case "open": // called when the frame is opened and loaded
-              config.onOpen = arg[j];
-              break; 
-            case "close": // called when frame is gone
-              config.onClose = arg[j];
-              break;
-            case "save": // called when settings have been saved
-              config.onSave = arg[j];
-              break; // store the settings objects
-          }
+          } // otherwise it must be a callback function
+          config["on" + j.charAt(0).toUpperCase() + j.slice(1)] = arg[j];
         }
         break;
       case 'function': // passing a bare function is set to open callback
@@ -99,24 +95,18 @@ function GM_configInit(config, args) {
         break;
       case 'string': // could be custom CSS or the title string
         if (arg.indexOf('{') != -1 && arg.indexOf('}') != -1) 
-          var css = arg;
+          config.css.stylish = arg;
         else 
           config.title = arg;
         break;
     }
   }
-  // if title wasn't passed through init()
-  if (!config.title) 
-    config.title = 'Settings - Anonymous Script';
 
   var stored = config.read(); // read the stored settings
 
   // for each setting create a field object
   for (var id in settings)
     config.fields[id] = new GM_configField(settings[id], stored[id], id);
-
-  if (css) 
-    config.css.stylish = css; // store the custom style
 }
 
 GM_configStruct.prototype = {
@@ -208,9 +198,9 @@ GM_configStruct.prototype = {
           // Reset link
           create('a', {
             id: 'GM_config_resetLink',
-            textContent: 'Reset fields to default values',
+            textContent: 'Reset to defaults',
             href: '#',
-            title: 'Reset settings to default configuration',
+            title: 'Reset fields to default values',
             className: 'reset',
             onclick: function(e) { e.preventDefault(); config.reset() }
           })
