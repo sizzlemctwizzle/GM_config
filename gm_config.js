@@ -109,12 +109,12 @@ function GM_configInit(config, args) {
     }
   }
 
-  var stored = config.read(); // read the stored settings
+  if (settings) {
+    var stored = config.read(); // read the stored settings
 
-  // for each setting create a field object
-  if (settings)
-    for (var id in settings)
+    for (var id in settings) // for each setting create a field object
       config.fields[id] = new GM_configField(settings[id], stored[id], id);
+  }
 }
 
 GM_configStruct.prototype = {
@@ -460,7 +460,7 @@ GM_configField.prototype = {
     var retNode = create('div', { className: 'config_var', 
                                   title: field.title || '' });
 
-    if (field.type != "hidden" || field.type != "button")
+    if (field.type != "hidden" && field.type != "button")
       retNode.appendChild(create('span', {
         textContent: label,
         id: configId + '_' + this.id +'_field_label',
