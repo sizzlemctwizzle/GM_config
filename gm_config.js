@@ -75,7 +75,7 @@ function GM_configInit(config, args) {
   
   // If the id has changed we must modify the default style
   if (configId != 'GM_config')
-    config.css.basic = config.css.basic.replace(/#GM_config/gm, configId);
+    config.css.basic = config.css.basic.replace(/#GM_config/gm, '#' + configId);
 
   // loop through GM_config.init() arguments
   for (var i = 0, l = args.length, arg; i < l; ++i) {
@@ -455,8 +455,7 @@ GM_configField.prototype = {
         options = field.options,
         label = field.label,
         id = this.id,
-        create = this.create,
-        node;
+        create = this.create;
 
     var retNode = create('div', { className: 'config_var', 
                                   title: field.title || '' });
@@ -469,7 +468,7 @@ GM_configField.prototype = {
 
     switch (field.type) {
       case 'textarea':
-        retNode.appendChild((node = create('textarea', {
+        retNode.appendChild((this.node = create('textarea', {
           id: this.configId + '_field_' + this.id,
           innerHTML: value,
           cols: (field.cols ? field.cols : 20),
@@ -480,7 +479,7 @@ GM_configField.prototype = {
         var wrap = create('div', {
           id: this.configId + '_field_' + id
         });
-        node = wrap;
+        this.node = wrap;
 
         for (var i = 0, len = options.length; i < len; ++i) {
           wrap.appendChild(create('span', {
@@ -501,6 +500,7 @@ GM_configField.prototype = {
         var wrap = create('select', {
           id: this.configId + '_field_' + id
         });
+        this.node = wrap;
 
         for (var i in options)
           wrap.appendChild(create('option', {
@@ -512,7 +512,7 @@ GM_configField.prototype = {
         retNode.appendChild(wrap);
         break;
       case 'checkbox':
-        retNode.appendChild((node = create('input', {
+        retNode.appendChild((this.node = create('input', {
           id: this.configId + '_field_' + id,
           type: 'checkbox',
           value: value,
@@ -527,7 +527,7 @@ GM_configField.prototype = {
           size: (field.size ? field.size : 25),
           title: field.title || ''
         });
-        node = btn;
+        this.node = btn;
 
         if (field.script)
           btn.addEventListener('click', function () {
@@ -538,7 +538,7 @@ GM_configField.prototype = {
         retNode.appendChild(btn);
         break;
       case 'hidden':
-        retNode.appendChild((node = create('input', {
+        retNode.appendChild((this.node = create('input', {
           id: this.configId + '_field_' + id,
           type: 'hidden',
           value: value
@@ -546,7 +546,7 @@ GM_configField.prototype = {
         break;
       default:
         // type = text, int, or float
-        retNode.appendChild((node = create('input', {
+        retNode.appendChild((this.node = create('input', {
           id: this.configId + '_field_' + id,
           type: 'text',
           value: value,
@@ -554,7 +554,6 @@ GM_configField.prototype = {
         })));    
     }
 
-    this.node = node;
     return retNode;
   },
 
@@ -581,7 +580,7 @@ GM_configField.prototype = {
       case 'int':
         var num = Number(fieldEl.value);
         if (isNaN(num) || Math.ceil(num) != Math.floor(num)) {
-          alert('Field labeled "' + this.label + '" expects an integer value.');
+          alert('Field labeled "' + field.label + '" expects an integer value.');
           return false;
         }
         this.value = num;
@@ -589,7 +588,7 @@ GM_configField.prototype = {
       case 'float':
         var num = Number(fieldEl.value);
         if (isNaN(num)) {
-          alert('Field labeled "' + this.label + '" expects a number value.');
+          alert('Field labeled "' + field.label + '" expects a number value.');
           return false;
         }
         this.value = num;
