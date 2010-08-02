@@ -70,11 +70,12 @@ function GM_configStruct() {
 
 // This is the initializer function
 function GM_configInit(config, args) {
-  var settings = null;
+  var settings = null,
+      configId = config.id;
   
   // If the id has changed we must modify the default style
-  if (config.id != 'GM_config')
-    config.css.basic = config.css.basic.replace(/#GM_config/gm, config.id);
+  if (configId != 'GM_config')
+    config.css.basic = config.css.basic.replace(/#GM_config/gm, configId);
 
   // loop through GM_config.init() arguments
   for (var i = 0, l = args.length, arg; i < l; ++i) {
@@ -113,7 +114,7 @@ function GM_configInit(config, args) {
   // for each setting create a field object
   if (settings)
     for (var id in settings)
-      config.fields[id] = new GM_configField(settings[id], stored[id], id, config.id);
+      config.fields[id] = new GM_configField(settings[id], stored[id], id, configId);
 }
 
 GM_configStruct.prototype = {
