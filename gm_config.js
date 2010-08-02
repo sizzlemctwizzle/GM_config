@@ -261,7 +261,7 @@ GM_configStruct.prototype = {
   save: function () {
     var fields = this.fields;
     for (id in fields)
-      if (!fields[id].toValue(this.frame.contentDocument || this.frame.ownerDocument))
+      if (!fields[id].toValue())
         return; // invalid value encountered
 
     this.write();
@@ -557,7 +557,7 @@ GM_configField.prototype = {
     return retNode;
   },
 
-  toValue: function(doc) {
+  toValue: function() {
     var fieldEl = this.node,
         field = this.settings,
         type = field.type;
