@@ -71,6 +71,11 @@ function GM_configStruct() {
 // This is the initializer function
 function GM_configInit(config, args) {
   var settings = null;
+  
+  // If the id has changed we must modify the default style
+  if (config.id != 'GM_config')
+    config.css.basic = config.css.basic.replace(/#GM_config/gm, config.id);
+
   // loop through GM_config.init() arguments
   for (var i = 0, l = args.length, arg; i < l; ++i) {
     arg = args[i];
@@ -108,7 +113,7 @@ function GM_configInit(config, args) {
   // for each setting create a field object
   if (settings)
     for (var id in settings)
-      config.fields[id] = new GM_configField(settings[id], stored[id], id);
+      config.fields[id] = new GM_configField(settings[id], stored[id], id, config.id);
 }
 
 GM_configStruct.prototype = {
@@ -119,7 +124,7 @@ GM_configStruct.prototype = {
   open: function () {
     // Die if the menu is already open on this page
     // You can have multiple instances but they can't be open at the same time
-    var match = document.getElementById('GM_config');
+    var match = document.getElementById(this.id);
     if (match && (match.tagName == "IFRAME" || match.childNodes.length > 0)) return;
 
     // Sometime "this" gets overwritten so create an alias
@@ -140,7 +145,7 @@ GM_configStruct.prototype = {
 
       // Add header and title
       frameBody.appendChild(create('div', {
-        id: 'GM_config_header',
+        id: config.id + '_header',
         className: 'config_header block center',
         textContent: config.title
       }));
@@ -156,7 +161,7 @@ GM_configStruct.prototype = {
         if (field.section) { // the start of a new section
           section = frameBody.appendChild(create('div', {
               className: 'section_header_holder',
-              id: 'GM_config_section_' + secNum++
+              id: config.id + '_section_' + secNum++
             },
             create('div', {
               className: 'section_header center',
@@ -176,10 +181,10 @@ GM_configStruct.prototype = {
 
       // Add save and close buttons
       frameBody.appendChild(create('div',
-        {id: 'GM_config_buttons_holder'},
+        {id: config.id + '_buttons_holder'},
 
         create('button', {
-          id: 'GM_config_saveBtn',
+          id: config.id + '_saveBtn',
           textContent: 'Save',
           title: 'Save settings',
           className: 'saveclose_buttons',
@@ -187,7 +192,7 @@ GM_configStruct.prototype = {
         }),
 
         create('button', {
-          id: 'GM_config_closeBtn',
+          id: config.id + '_closeBtn',
           textContent: 'Close',
           title: 'Close window',
           className: 'saveclose_buttons',
@@ -199,7 +204,7 @@ GM_configStruct.prototype = {
 
           // Reset link
           create('a', {
-            id: 'GM_config_resetLink',
+            id: config.id + '_resetLink',
             textContent: 'Reset to defaults',
             href: '#',
             title: 'Reset fields to default values',
@@ -231,13 +236,13 @@ GM_configStruct.prototype = {
                        'border:1px solid #000000; overflow:auto; bottom: auto;' +
                        'right: auto; margin: 0; padding: 0;';
     if (this.frame) {
-      this.frame.id = 'GM_config';
+      this.frame.id = this.id;
       this.frame.setAttribute('style', defaultStyle);
       buildConfigWin(this.frame, this.frame.ownerDocument.getElementsByTagName('head')[0]);
     } else {
       // Create frame
       document.body.appendChild((this.frame = this.create('iframe', {
-        id: 'GM_config',
+        id: this.id,
         style: defaultStyle
       })));
 
@@ -246,7 +251,7 @@ GM_configStruct.prototype = {
       this.frame.addEventListener('load', function(e) {
           var frame = config.frame;
           var body = frame.contentDocument.getElementsByTagName('body')[0];
-          body.id = 'GM_config'; // Allows for prefixing styles with "#GM_config"
+          body.id = config.id; // Allows for prefixing styles with "#GM_config"
           buildConfigWin(body, frame.contentDocument.getElementsByTagName('head')[0]);
       }, false);
     }
@@ -415,10 +420,11 @@ function GM_configDefaultValue(type) {
   return value;
 }
 
-function GM_configField(settings, stored, id) {
+function GM_configField(settings, stored, id, configId) {
   // Store the field's settings
   this.settings = settings;
   this.id = id;
+  this.configId = configId;
   
   // if a setting was passed to init but wasn't stored then 
   //      if a default value wasn't passed through init() then 
@@ -463,7 +469,7 @@ GM_configField.prototype = {
     switch (field.type) {
       case 'textarea':
         retNode.appendChild((node = create('textarea', {
-          id: 'GM_config_field_' + this.id,
+          id: this.configId + '_field_' + this.id,
           innerHTML: value,
           cols: (field.cols ? field.cols : 20),
           rows: (field.rows ? field.rows : 2)
@@ -471,7 +477,7 @@ GM_configField.prototype = {
         break;
       case 'radio':
         var wrap = create('div', {
-          id: 'GM_config_field_' + id
+          id: this.configId + '_field_' + id
         });
         node = wrap;
 
@@ -492,7 +498,7 @@ GM_configField.prototype = {
         break;
       case 'select':
         var wrap = create('select', {
-          id: 'GM_config_field_' + id
+          id: this.configId + '_field_' + id
         });
 
         for (var i in options)
@@ -506,7 +512,7 @@ GM_configField.prototype = {
         break;
       case 'checkbox':
         retNode.appendChild((node = create('input', {
-          id: 'GM_config_field_' + id,
+          id: this.configId + '_field_' + id,
           type: 'checkbox',
           value: value,
           checked: value
@@ -514,7 +520,7 @@ GM_configField.prototype = {
         break;
       case 'button':
         var btn = create('input', {
-          id: 'GM_config_field_' + id,
+          id: this.configId + '_field_' + id,
           type: 'button',
           value: label,
           size: (field.size ? field.size : 25),
@@ -532,7 +538,7 @@ GM_configField.prototype = {
         break;
       case 'hidden':
         retNode.appendChild((node = create('input', {
-          id: 'GM_config_field_' + id,
+          id: this.configId + '_field_' + id,
           type: 'hidden',
           value: value
         })));
@@ -540,7 +546,7 @@ GM_configField.prototype = {
       default:
         // type = text, int, or float
         retNode.appendChild((node = create('input', {
-          id: 'GM_config_field_' + id,
+          id: this.configId + '_field_' + id,
           type: 'text',
           value: value,
           size: (field.size ? field.size : 25)
