@@ -5,7 +5,7 @@
 // The GM_config constructor
 function GM_configStruct() {
   // define a few properties
-  this.storage = 'GM_config'; // Changed to something unique for localStorage
+  this.id = 'GM_config';
   this.isGM = typeof GM_getValue != 'undefined' && 
               typeof GM_getValue('a', 'b') != 'undefined';
   this.fields = {};
@@ -70,6 +70,7 @@ function GM_configStruct() {
 
 // This is the initializer function
 function GM_configInit(config, args) {
+  var settings = null;
   // loop through GM_config.init() arguments
   for (var i = 0, l = args.length, arg; i < l; ++i) {
     arg = args[i];
@@ -84,7 +85,7 @@ function GM_configInit(config, args) {
       case 'object':
         for (var j in arg) { // could be a callback functions or settings object
           if (typeof arg[j] != "function") { // we are in the settings object
-            var settings = arg; // store settings object
+            settings = arg; // store settings object
             break; // leave the loop
           } // otherwise it must be a callback function
           config["on" + j.charAt(0).toUpperCase() + j.slice(1)] = arg[j];
@@ -105,8 +106,9 @@ function GM_configInit(config, args) {
   var stored = config.read(); // read the stored settings
 
   // for each setting create a field object
-  for (var id in settings)
-    config.fields[id] = new GM_configField(settings[id], stored[id], id);
+  if (settings)
+    for (var id in settings)
+      config.fields[id] = new GM_configField(settings[id], stored[id], id);
 }
 
 GM_configStruct.prototype = {
@@ -216,7 +218,7 @@ GM_configStruct.prototype = {
 
       // Close frame on window close
       window.addEventListener('beforeunload', function () {
-          config.remove(this);
+          config.close();
       }, false);
 
       // Now that everything is loaded, make it visible
@@ -272,6 +274,11 @@ GM_configStruct.prototype = {
       this.frame.style.display = "none";
     }
 
+    // Null out all the fields so we don't leak memory
+    var fields = this.fields;
+    for (id in fields)
+      fields[id].node = null;
+
     if (this.onClose) 
       this.onClose(); //  Call the close() callback function
   },
@@ -296,7 +303,7 @@ GM_configStruct.prototype = {
     }
 
     try {
-      this.setValue(store || this.storage, this.stringify(obj || values));
+      this.setValue(store || this.id, this.stringify(obj || values));
     } catch(e) {
       this.log("GM_config failed to save settings!");
     }
@@ -304,7 +311,7 @@ GM_configStruct.prototype = {
 
   read: function (store) {
     try {
-      var rval = this.parser(this.getValue(store || this.storage, '{}'));
+      var rval = this.parser(this.getValue(store || this.id, '{}'));
     } catch(e) {
       this.log("GM_config failed to read saved settings!");
       var rval = {};
@@ -318,15 +325,10 @@ GM_configStruct.prototype = {
         type;
 
     for (id in fields) {
-      var fieldEl = doc.getElementById('GM_config_field_' + id),
+      var fieldEl = fields[id].node,
           field = fields[id].settings,
-          noDefault = typeof field['default'] == "undefined";
-
-      if (fieldEl.type == 'radio' || fieldEl.type == 'text' || 
-          fieldEl.type == 'checkbox') 
-        type = fieldEl.type;
-      else 
-        type = fieldEl.tagName.toLowerCase();
+          noDefault = typeof field['default'] == "undefined",
+          type = field.type;
 
       switch (type) {
         case 'checkbox':
@@ -340,11 +342,13 @@ GM_configStruct.prototype = {
           } else 
             fieldEl.selectedIndex = 0;
           break;
-        case 'div':
+        case 'radio':
           var radios = fieldEl.getElementsByTagName('input'); 
           for (var i = 0, len = radios.length; i < len; ++i) 
             if (radios[i].value == field['default']) 
               radios[i].checked = true;
+          break;
+        case 'button' :
           break;
         default:
           fieldEl.value = noDefault ? GM_configDefaultValue(type) : field['default'];
@@ -434,9 +438,9 @@ function GM_configField(settings, stored, id) {
 GM_configField.prototype = {
   isNum: /^[\d\.]+$/,
 
-  typewhite: /radio|text|hidden|checkbox/,
-
   create: GM_configStruct.prototype.create,
+
+  node: null,
 
   toNode: function() {
     var field = this.settings,
@@ -444,7 +448,8 @@ GM_configField.prototype = {
         options = field.options,
         label = field.label,
         id = this.id,
-        create = this.create;
+        create = this.create,
+        node;
 
     var retNode = create('div', { className: 'config_var', 
                                   title: field.title || '' });
@@ -457,17 +462,18 @@ GM_configField.prototype = {
 
     switch (field.type) {
       case 'textarea':
-        retNode.appendChild(create('textarea', {
+        retNode.appendChild((node = create('textarea', {
           id: 'GM_config_field_' + this.id,
           innerHTML: value,
           cols: (field.cols ? field.cols : 20),
           rows: (field.rows ? field.rows : 2)
-        }));
+        })));
         break;
       case 'radio':
         var wrap = create('div', {
           id: 'GM_config_field_' + id
         });
+        node = wrap;
 
         for (var i = 0, len = options.length; i < len; ++i) {
           wrap.appendChild(create('span', {
@@ -499,12 +505,12 @@ GM_configField.prototype = {
         retNode.appendChild(wrap);
         break;
       case 'checkbox':
-        retNode.appendChild(create('input', {
+        retNode.appendChild((node = create('input', {
           id: 'GM_config_field_' + id,
           type: 'checkbox',
           value: value,
           checked: value
-        }));
+        })));
         break;
       case 'button':
         var btn = create('input', {
@@ -514,6 +520,7 @@ GM_configField.prototype = {
           size: (field.size ? field.size : 25),
           title: field.title || ''
         });
+        node = btn;
 
         if (field.script)
           btn.addEventListener('click', function () {
@@ -524,64 +531,64 @@ GM_configField.prototype = {
         retNode.appendChild(btn);
         break;
       case 'hidden':
-        retNode.appendChild(create('input', {
+        retNode.appendChild((node = create('input', {
           id: 'GM_config_field_' + id,
           type: 'hidden',
           value: value
-        }));
+        })));
         break;
       default:
         // type = text, int, or float
-        retNode.appendChild(create('input', {
-              id: 'GM_config_field_' + id,
-              type: 'text',
-              value: value,
-              size: (field.size ? field.size : 25)
-        }));    
+        retNode.appendChild((node = create('input', {
+          id: 'GM_config_field_' + id,
+          type: 'text',
+          value: value,
+          size: (field.size ? field.size : 25)
+        })));    
     }
 
+    this.node = node;
     return retNode;
   },
 
   toValue: function(doc) {
-    var fieldEl = doc.getElementById('GM_config_field_' + this.id),
+    var fieldEl = this.node,
         field = this.settings,
-        type;
-
-    if (this.typewhite.test(fieldEl.type)) 
-      type = fieldEl.type;
-    else 
-      type = fieldEl.tagName.toLowerCase();
+        type = field.type;
 
     switch (type) {
-      case 'text':
-        this.value = (field.type == 'text') ? fieldEl.value :
-          (((this.isNum.test(fieldEl.value || fieldEl.value == '0')) &&
-            (field.type == 'int' || field.type == 'float')) ? parseFloat(fieldEl.value) : null);
-
-        if (this.value === null) {
-          alert('Invalid type for field: ' + this.id + '\nPlease use type: ' + 
-                field.type);
-          return false;
-        }
-        break;
-      case 'hidden':
-        this.value = fieldEl.value.toString();
-        break;
-      case 'textarea':
-        this.value = fieldEl.value;
-        break;
       case 'checkbox':
         this.value = fieldEl.checked;
         break;
       case 'select':
         this.value = fieldEl[fieldEl.selectedIndex].value;
         break;
-      case 'div':
+      case 'radio':
         var radios = fieldEl.getElementsByTagName('input');
         for (var i = 0, len = radios.length; i < len; ++i) 
           if (radios[i].checked)
             this.value = radios[i].value;
+        break;
+      case 'button':
+        break;
+      case 'int':
+        var num = Number(fieldEl.value);
+        if (isNaN(num) || Math.ceil(num) != Math.floor(num)) {
+          alert('Field labeled "' + this.label + '" expects an integer value.');
+          return false;
+        }
+        this.value = num;
+        break;
+      case 'float':
+        var num = Number(fieldEl.value);
+        if (isNaN(num)) {
+          alert('Field labeled "' + this.label + '" expects a number value.');
+          return false;
+        }
+        this.value = num;
+        break;
+      default:
+        this.value = fieldEl.value;
         break;
     }
 
