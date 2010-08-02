@@ -114,7 +114,7 @@ function GM_configInit(config, args) {
   // for each setting create a field object
   if (settings)
     for (var id in settings)
-      config.fields[id] = new GM_configField(settings[id], stored[id], id, configId);
+      config.fields[id] = new GM_configField(settings[id], stored[id], id);
 }
 
 GM_configStruct.prototype = {
@@ -135,7 +135,8 @@ GM_configStruct.prototype = {
     function buildConfigWin (body, head) {
       var frameBody = body,
           create = config.create,
-          fields = config.fields;
+          fields = config.fields,
+          configId = config.id;
 
       // Append the style which is our default style plus the user style
       head.appendChild(
@@ -146,7 +147,7 @@ GM_configStruct.prototype = {
 
       // Add header and title
       frameBody.appendChild(create('div', {
-        id: config.id + '_header',
+        id: configId + '_header',
         className: 'config_header block center',
         textContent: config.title
       }));
@@ -162,7 +163,7 @@ GM_configStruct.prototype = {
         if (field.section) { // the start of a new section
           section = frameBody.appendChild(create('div', {
               className: 'section_header_holder',
-              id: config.id + '_section_' + secNum++
+              id: configId + '_section_' + secNum++
             },
             create('div', {
               className: 'section_header center',
@@ -177,15 +178,15 @@ GM_configStruct.prototype = {
         }
 
         // Create field elements and append to current section
-        section.appendChild(fields[id].toNode());
+        section.appendChild(fields[id].toNode(configId));
       }
 
       // Add save and close buttons
       frameBody.appendChild(create('div',
-        {id: config.id + '_buttons_holder'},
+        {id: configId + '_buttons_holder'},
 
         create('button', {
-          id: config.id + '_saveBtn',
+          id: configId + '_saveBtn',
           textContent: 'Save',
           title: 'Save settings',
           className: 'saveclose_buttons',
@@ -193,7 +194,7 @@ GM_configStruct.prototype = {
         }),
 
         create('button', {
-          id: config.id + '_closeBtn',
+          id: configId + '_closeBtn',
           textContent: 'Close',
           title: 'Close window',
           className: 'saveclose_buttons',
@@ -205,7 +206,7 @@ GM_configStruct.prototype = {
 
           // Reset link
           create('a', {
-            id: config.id + '_resetLink',
+            id: configId + '_resetLink',
             textContent: 'Reset to defaults',
             href: '#',
             title: 'Reset fields to default values',
@@ -252,7 +253,7 @@ GM_configStruct.prototype = {
       this.frame.addEventListener('load', function(e) {
           var frame = config.frame;
           var body = frame.contentDocument.getElementsByTagName('body')[0];
-          body.id = config.id; // Allows for prefixing styles with "#GM_config"
+          body.id = configId; // Allows for prefixing styles with "#GM_config"
           buildConfigWin(body, frame.contentDocument.getElementsByTagName('head')[0]);
       }, false);
     }
@@ -331,25 +332,25 @@ GM_configStruct.prototype = {
         type;
 
     for (id in fields) {
-      var fieldEl = fields[id].node,
+      var node = fields[id].node,
           field = fields[id].settings,
           noDefault = typeof field['default'] == "undefined",
           type = field.type;
 
       switch (type) {
         case 'checkbox':
-          fieldEl.checked = noDefault ? GM_configDefaultValue(type) : field['default'];
+          node.checked = noDefault ? GM_configDefaultValue(type) : field['default'];
           break;
         case 'select':
           if (field['default']) {
-            for (var i = 0, len = fieldEl.options.length; i < len; ++i)
-              if (fieldEl.options[i].value == field['default']) 
-                fieldEl.selectedIndex = i;
+            for (var i = 0, len = node.options.length; i < len; ++i)
+              if (node.options[i].value == field['default']) 
+                node.selectedIndex = i;
           } else 
-            fieldEl.selectedIndex = 0;
+            node.selectedIndex = 0;
           break;
         case 'radio':
-          var radios = fieldEl.getElementsByTagName('input'); 
+          var radios = node.getElementsByTagName('input'); 
           for (var i = 0, len = radios.length; i < len; ++i) 
             if (radios[i].value == field['default']) 
               radios[i].checked = true;
@@ -357,7 +358,7 @@ GM_configStruct.prototype = {
         case 'button' :
           break;
         default:
-          fieldEl.value = noDefault ? GM_configDefaultValue(type) : field['default'];
+          node.value = noDefault ? GM_configDefaultValue(type) : field['default'];
           break;
       }
     }
@@ -421,11 +422,10 @@ function GM_configDefaultValue(type) {
   return value;
 }
 
-function GM_configField(settings, stored, id, configId) {
+function GM_configField(settings, stored, id) {
   // Store the field's settings
   this.settings = settings;
   this.id = id;
-  this.configId = configId;
   
   // if a setting was passed to init but wasn't stored then 
   //      if a default value wasn't passed through init() then 
@@ -449,7 +449,7 @@ GM_configField.prototype = {
 
   node: null,
 
-  toNode: function() {
+  toNode: function(configId) {
     var field = this.settings,
         value = this.value,
         options = field.options,
@@ -463,13 +463,14 @@ GM_configField.prototype = {
     if (field.type != "hidden" || field.type != "button")
       retNode.appendChild(create('span', {
         textContent: label,
+        id: configId + '_' + this.id +'_field_label',
         className: 'field_label'
       }));
 
     switch (field.type) {
       case 'textarea':
         retNode.appendChild((this.node = create('textarea', {
-          id: this.configId + '_field_' + this.id,
+          id: configId + '_field_' + this.id,
           innerHTML: value,
           cols: (field.cols ? field.cols : 20),
           rows: (field.rows ? field.rows : 2)
@@ -477,7 +478,7 @@ GM_configField.prototype = {
         break;
       case 'radio':
         var wrap = create('div', {
-          id: this.configId + '_field_' + id
+          id: configId + '_field_' + id
         });
         this.node = wrap;
 
@@ -498,7 +499,7 @@ GM_configField.prototype = {
         break;
       case 'select':
         var wrap = create('select', {
-          id: this.configId + '_field_' + id
+          id: configId + '_field_' + id
         });
         this.node = wrap;
 
@@ -513,7 +514,7 @@ GM_configField.prototype = {
         break;
       case 'checkbox':
         retNode.appendChild((this.node = create('input', {
-          id: this.configId + '_field_' + id,
+          id: configId + '_field_' + id,
           type: 'checkbox',
           value: value,
           checked: value
@@ -521,7 +522,7 @@ GM_configField.prototype = {
         break;
       case 'button':
         var btn = create('input', {
-          id: this.configId + '_field_' + id,
+          id: configId + '_field_' + id,
           type: 'button',
           value: label,
           size: (field.size ? field.size : 25),
@@ -539,7 +540,7 @@ GM_configField.prototype = {
         break;
       case 'hidden':
         retNode.appendChild((this.node = create('input', {
-          id: this.configId + '_field_' + id,
+          id: configId + '_field_' + id,
           type: 'hidden',
           value: value
         })));
@@ -547,7 +548,7 @@ GM_configField.prototype = {
       default:
         // type = text, int, or float
         retNode.appendChild((this.node = create('input', {
-          id: this.configId + '_field_' + id,
+          id: configId + '_field_' + id,
           type: 'text',
           value: value,
           size: (field.size ? field.size : 25)
@@ -558,19 +559,19 @@ GM_configField.prototype = {
   },
 
   toValue: function() {
-    var fieldEl = this.node,
+    var node = this.node,
         field = this.settings,
         type = field.type;
 
     switch (type) {
       case 'checkbox':
-        this.value = fieldEl.checked;
+        this.value = node.checked;
         break;
       case 'select':
-        this.value = fieldEl[fieldEl.selectedIndex].value;
+        this.value = node[node.selectedIndex].value;
         break;
       case 'radio':
-        var radios = fieldEl.getElementsByTagName('input');
+        var radios = node.getElementsByTagName('input');
         for (var i = 0, len = radios.length; i < len; ++i) 
           if (radios[i].checked)
             this.value = radios[i].value;
@@ -578,7 +579,7 @@ GM_configField.prototype = {
       case 'button':
         break;
       case 'int':
-        var num = Number(fieldEl.value);
+        var num = Number(node.value);
         if (isNaN(num) || Math.ceil(num) != Math.floor(num)) {
           alert('Field labeled "' + field.label + '" expects an integer value.');
           return false;
@@ -586,7 +587,7 @@ GM_configField.prototype = {
         this.value = num;
         break;
       case 'float':
-        var num = Number(fieldEl.value);
+        var num = Number(node.value);
         if (isNaN(num)) {
           alert('Field labeled "' + field.label + '" expects a number value.');
           return false;
@@ -594,7 +595,7 @@ GM_configField.prototype = {
         this.value = num;
         break;
       default:
-        this.value = fieldEl.value;
+        this.value = node.value;
         break;
     }
 
