@@ -105,11 +105,13 @@ GM_configStruct.prototype = {
           section = frameBody.appendChild(create('div', {
               className: 'section_header_holder',
               id: configId + '_section_' + secNum++
-            },
-            create('div', {
+            }));
+
+          if (field.section[0])
+            section.appendChild(create('div', {
               className: 'section_header center',
               innerHTML: field.section[0]
-          })));
+            }));
 
           if (field.section[1]) 
             section.appendChild(create('p', {
@@ -460,7 +462,6 @@ GM_configField.prototype = {
     var field = this.settings,
         value = this.value,
         options = field.options,
-        label = field.label,
         id = this.id,
         create = this.create;
 
@@ -468,9 +469,11 @@ GM_configField.prototype = {
           id: configId + '_' + this.id + '_var',
           title: field.title || '' });
 
-    if (field.type != "hidden" && field.type != "button")
+    if (field.type != "hidden" &&
+        field.type != "button" &&
+        typeof field.label == "string")
       retNode.appendChild(create('span', {
-        textContent: label,
+        textContent: field.label,
         id: configId + '_' + this.id +'_field_label',
         className: 'field_label'
       }));
@@ -532,7 +535,7 @@ GM_configField.prototype = {
         var btn = create('input', {
           id: configId + '_field_' + id,
           type: 'button',
-          value: label,
+          value: field.label,
           size: (field.size ? field.size : 25),
           title: field.title || ''
         });
