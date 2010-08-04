@@ -465,7 +465,8 @@ GM_configField.prototype = {
         create = this.create;
 
     var retNode = create('div', { className: 'config_var', 
-                                  title: field.title || '' });
+          id: configId + '_' + this.id + '_var',
+          title: field.title || '' });
 
     if (field.type != "hidden" && field.type != "button")
       retNode.appendChild(create('span', {
