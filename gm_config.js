@@ -104,20 +104,23 @@ GM_configStruct.prototype = {
         if (field.section) { // the start of a new section
           section = frameBody.appendChild(create('div', {
               className: 'section_header_holder',
-              id: configId + '_section_' + secNum++
+              id: configId + '_section_' + secNum
             }));
 
-          if (field.section[0])
+          if (typeof field.section[0] == "string")
             section.appendChild(create('div', {
               className: 'section_header center',
+              id: configId + '_section_header_' + secNum,
               innerHTML: field.section[0]
             }));
 
-          if (field.section[1]) 
+          if (typeof field.section[1] == "string") 
             section.appendChild(create('p', {
               className: 'section_desc center',
+              id: configId + '_section_desc_' + secNum,
               innerHTML: field.section[1]
             }));
+          ++secNum;
         }
 
         // Create field elements and append to current section
