@@ -1,5 +1,5 @@
 // @name              GM_config
-// @version           1.4.2
+// @version           1.4.3
 // @contributors      JoeSimmons & SizzleMcTwizzle & IzzySoft & MartiMartz
 
 // The GM_config constructor
@@ -206,9 +206,16 @@ GM_configStruct.prototype = {
 
   save: function () {
     var fields = this.fields;
-    for (id in fields)
-      if (!fields[id].toValue())
-        return; // invalid value encountered
+    for (id in fields) {
+      var field = fields[id],
+          val = field.toValue();
+
+      if (val === null) { // invalid value encountered
+        this.readVals = {};
+        return;
+      } else if (field.settings.type != "button")
+        this.readVals[id] = val;
+    }
 
     this.write();
 
@@ -243,22 +250,13 @@ GM_configStruct.prototype = {
     return this.fields[name].value;
   },
 
-  log: (this.isGM) ? GM_log : ((window.opera) ? opera.postError : console.log),
-
   write: function (store, obj) {
-    // Build a list of values to save
-    if (!obj) {
-      var values = {},
-          fields = this.fields;
-      for (var id in fields)
-        values[id] = fields[id].value;
-    }
-
     try {
-      this.setValue(store || this.id, this.stringify(obj || values));
+      this.setValue(store || this.id, this.stringify(obj || this.readVals));
     } catch(e) {
       this.log("GM_config failed to save settings!");
     }
+    this.readVals = {};
   },
 
   read: function (store) {
@@ -353,6 +351,7 @@ GM_configStruct.prototype = {
   onClose: null,
   id: 'GM_config',
   fields: {},
+  readVals: {},
   title: 'User Script Settings',
   css: {
     basic:     "#GM_config * { font-family: arial,tahoma,myriad pro,sans-serif; }"
@@ -414,6 +413,7 @@ GM_configStruct.prototype = {
   GM_configStruct.prototype.getValue = getValue;
   GM_configStruct.prototype.stringify = stringify;
   GM_configStruct.prototype.parser = parser;
+  GM_configStruct.prototype.log = isGM ? GM_log : (window.opera ? opera.postError : console.log);
 })();
 
 function GM_configDefaultValue(type) {
@@ -574,7 +574,8 @@ GM_configField.prototype = {
   toValue: function() {
     var node = this.node,
         field = this.settings,
-        type = field.type;
+        type = field.type,
+        rval;
 
     switch (type) {
       case 'checkbox':
@@ -595,7 +596,7 @@ GM_configField.prototype = {
         var num = Number(node.value);
         if (isNaN(num) || Math.ceil(num) != Math.floor(num)) {
           alert('Field labeled "' + field.label + '" expects an integer value.');
-          return false;
+          return null;
         }
         this.value = num;
         break;
@@ -603,7 +604,7 @@ GM_configField.prototype = {
         var num = Number(node.value);
         if (isNaN(num)) {
           alert('Field labeled "' + field.label + '" expects a number value.');
-          return false;
+          return null;
         }
         this.value = num;
         break;
@@ -612,7 +613,7 @@ GM_configField.prototype = {
         break;
     }
 
-    return true; // value read successfully
+    return this.value; // value read successfully
   }
 };
 
