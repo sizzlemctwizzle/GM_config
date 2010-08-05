@@ -425,7 +425,8 @@ function GM_configDefaultValue(type) {
     case 'checkbox':
       value = false;
       break;
-    case 'int': case 'float':
+    case 'int': case 'integer':
+    case 'float': case 'number':
       value = 0;
       break;
     default:
@@ -592,7 +593,7 @@ GM_configField.prototype = {
         break;
       case 'button':
         break;
-      case 'int':
+      case 'int': case 'integer':
         var num = Number(node.value);
         if (isNaN(num) || Math.ceil(num) != Math.floor(num)) {
           alert('Field labeled "' + field.label + '" expects an integer value.');
@@ -600,7 +601,7 @@ GM_configField.prototype = {
         }
         this.value = num;
         break;
-      case 'float':
+      case 'float': case 'number':
         var num = Number(node.value);
         if (isNaN(num)) {
           alert('Field labeled "' + field.label + '" expects a number value.');
