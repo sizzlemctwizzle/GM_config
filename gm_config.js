@@ -11,12 +11,11 @@ function GM_configStruct() {
 
 // This is the initializer function
 function GM_configInit(config, args) {
-  var settings = null,
-      configId = config.id;
+  var settings = null;
   
   // If the id has changed we must modify the default style
-  if (configId != 'GM_config')
-    config.css.basic = config.css.basic.replace(/#GM_config/gm, '#' + configId);
+  if (config.id != 'GM_config')
+    config.css.basic = config.css.basic.replace(/#GM_config/gm, '#' + config.id);
 
   // loop through GM_config.init() arguments
   for (var i = 0, l = args.length, arg; i < l; ++i) {
@@ -199,7 +198,7 @@ GM_configStruct.prototype = {
       this.frame.addEventListener('load', function(e) {
           var frame = config.frame;
           var body = frame.contentDocument.getElementsByTagName('body')[0];
-          body.id = configId; // Allows for prefixing styles with "#GM_config"
+          body.id = config.id; // Allows for prefixing styles with "#GM_config"
           buildConfigWin(body, frame.contentDocument.getElementsByTagName('head')[0]);
       }, false);
     }
