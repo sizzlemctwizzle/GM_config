@@ -1,5 +1,5 @@
 // @name              GM_config
-// @version           1.4.3
+// @version           1.4.4
 // @contributors      JoeSimmons & SizzleMcTwizzle & IzzySoft & MartiMartz
 
 // The GM_config constructor
@@ -418,6 +418,10 @@ GM_configStruct.prototype = {
 
 function GM_configDefaultValue(type) {
   var value;
+
+  if (type.indexOf('unsigned ') == 0)
+    type = type.substring(9);
+
   switch (type) {
     case 'radio': case 'select':
       value = settings.options[0];
@@ -576,7 +580,13 @@ GM_configField.prototype = {
     var node = this.node,
         field = this.settings,
         type = field.type,
+        unsigned = false,
         rval;
+
+    if (type.indexOf('unsigned ') == 0) {
+      type = type.substring(9);
+      unsigned = true;
+    }
 
     switch (type) {
       case 'checkbox':
@@ -595,16 +605,19 @@ GM_configField.prototype = {
         break;
       case 'int': case 'integer':
         var num = Number(node.value);
-        if (isNaN(num) || Math.ceil(num) != Math.floor(num)) {
-          alert('Field labeled "' + field.label + '" expects an integer value.');
+        if (isNaN(num) || Math.ceil(num) != Math.floor(num) || 
+            (unsigned && num < 0)) {
+          alert('Field labeled "' + field.label + '" expects a ' + 
+                (unsigned ? 'positive ' : '') + 'integer value.');
           return null;
         }
         this.value = num;
         break;
       case 'float': case 'number':
         var num = Number(node.value);
-        if (isNaN(num)) {
-          alert('Field labeled "' + field.label + '" expects a number value.');
+        if (isNaN(num) || (unsigned && num < 0)) {
+          alert('Field labeled "' + field.label + '" expects a ' + 
+                (unsigned ? 'positive ' : '') + 'number value.');
           return null;
         }
         this.value = num;
