@@ -474,16 +474,17 @@ GM_configField.prototype = {
 
     var retNode = create('div', { className: 'config_var', 
           id: configId + '_' + this.id + '_var',
-          title: field.title || '' });
+          title: field.title || '' }),
+        firstProp;
 
-    if (field.type != "hidden" &&
-        field.type != "button" &&
-        typeof field.label == "string")
-      retNode.appendChild(create('span', {
-        textContent: field.label,
-        id: configId + '_' + this.id +'_field_label',
-        className: 'field_label'
-      }));
+    // Retrieve the first prop
+    for (var i in field) { firstProp = i; break; }
+
+    var label = create('span', {
+      textContent: field.label,
+      id: configId + '_' + this.id +'_field_label',
+      className: 'field_label'
+    });
 
     switch (field.type) {
       case 'textarea':
@@ -571,6 +572,17 @@ GM_configField.prototype = {
           value: value,
           size: (field.size ? field.size : 25)
         })));    
+    }
+
+    // If the label is passed first, insert it before the field
+    // else insert it after
+    if (field.type != "hidden" &&
+        field.type != "button" &&
+        typeof field.label == "string") {
+      if (firstProp == "label")
+        retNode.insertBefore(label, retNode.firstChild);
+      else
+        retNode.appendChild(label);
     }
 
     return retNode;
