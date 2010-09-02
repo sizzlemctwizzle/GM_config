@@ -206,16 +206,9 @@ GM_configStruct.prototype = {
 
   save: function () {
     var fields = this.fields;
-    for (id in fields) {
-      var field = fields[id],
-          val = field.toValue();
-
-      if (val === null) { // invalid value encountered
-        this.readVals = {};
+    for (id in fields)
+      if (fields[id].toValue() === null) // invalid value encountered
         return;
-      } else if (field.settings.type != "button")
-        this.readVals[id] = val;
-    }
 
     this.write();
 
@@ -235,7 +228,7 @@ GM_configStruct.prototype = {
 
     // Null out all the fields so we don't leak memory
     var fields = this.fields;
-    for (id in fields)
+    for (var id in fields)
       fields[id].node = null;
 
     if (this.onClose) 
@@ -251,12 +244,21 @@ GM_configStruct.prototype = {
   },
 
   write: function (store, obj) {
+    if (!obj) {
+      var readVals = {},
+          fields = this.fields;
+
+      for (var id in fields) {
+        var field = fields[id];
+        if (field.settings.type != "button")
+          readVals[id] = field.value;
+      }
+    }
     try {
-      this.setValue(store || this.id, this.stringify(obj || this.readVals));
+      this.setValue(store || this.id, this.stringify(obj || readVals));
     } catch(e) {
       this.log("GM_config failed to save settings!");
     }
-    this.readVals = {};
   },
 
   read: function (store) {
@@ -351,7 +353,6 @@ GM_configStruct.prototype = {
   onClose: null,
   id: 'GM_config',
   fields: {},
-  readVals: {},
   title: 'User Script Settings',
   css: {
     basic:     "#GM_config * { font-family: arial,tahoma,myriad pro,sans-serif; }"
