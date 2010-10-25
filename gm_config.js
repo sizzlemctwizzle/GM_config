@@ -515,10 +515,10 @@ GM_configField.prototype = {
             checked: options[i] == value ? true : false
           }));
 
-          if (field.labelAfter)
-            wrap.appendChild(radLabel);
-          else
+          if (firstProp == "options")
             wrap.insertBefore(radLabel, rad);
+          else
+            wrap.appendChild(radLabel);
         }
 
         retNode.appendChild(wrap);
