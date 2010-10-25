@@ -607,18 +607,6 @@ GM_configField.prototype = {
       unsigned = true;
     }
 
-    function checkNumberRange(num, warn) {
-      if (typeof field.min == "number" && num < field.min) {
-        alert(warn + ' greater than or equal to ' + field.min + '.');
-        return null;
-      }
-      if (typeof field.max == "number" && num > field.max) {
-        alert(warn + ' less than or equal to ' + field.max + '.');
-        return null;
-      }
-      return true;
-    }
-
     switch (type) {
       case 'checkbox':
         this.value = node.checked;
@@ -643,7 +631,7 @@ GM_configField.prototype = {
           alert(warn + '.');
           return null;
         }
-        if (!checkNumberRange(num, warn))
+        if (!this._checkNumberRange(num, warn))
           return null;
         this.value = num;
         break;
@@ -655,7 +643,7 @@ GM_configField.prototype = {
           alert(warn + '.');
           return null;
         }
-        if (!checkNumberRange(num, warn))
+        if (!this._checkNumberRange(num, warn))
           return null;
         this.value = num;
         break;
@@ -665,6 +653,20 @@ GM_configField.prototype = {
     }
 
     return this.value; // value read successfully
+  },
+
+  _checkNumberRange: function(num, warn) {
+    var field = this.settings;
+    if (typeof field.min == "number" && num < field.min) {
+      alert(warn + ' greater than or equal to ' + field.min + '.');
+      return null;
+    }
+
+    if (typeof field.max == "number" && num > field.max) {
+      alert(warn + ' less than or equal to ' + field.max + '.');
+      return null;
+    }
+    return true;
   }
 };
 
