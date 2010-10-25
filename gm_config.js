@@ -89,7 +89,7 @@ GM_configStruct.prototype = {
       bodyWrapper.appendChild(create('div', {
         id: configId + '_header',
         className: 'config_header block center',
-        textContent: config.title
+        innerHTML: config.title
       }));
 
       // Append elements
@@ -483,7 +483,7 @@ GM_configField.prototype = {
     for (var i in field) { firstProp = i; break; }
 
     var label = create('span', {
-      textContent: field.label,
+      innerHTML: field.label,
       id: configId + '_' + this.id +'_field_label',
       className: 'field_label'
     });
@@ -505,7 +505,7 @@ GM_configField.prototype = {
 
         for (var i = 0, len = options.length; i < len; ++i) {
           var radLabel = wrap.appendChild(create('span', {
-            textContent: options[i]
+            innerHTML: options[i]
           }));
 
           var rad = wrap.appendChild(create('input', {
@@ -531,7 +531,7 @@ GM_configField.prototype = {
 
         for (var i in options)
           wrap.appendChild(create('option', {
-            textContent: options[i],
+            innerHTML: options[i],
             value: i,
             selected: options[i] == value ? true : false
           }));
