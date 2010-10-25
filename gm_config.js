@@ -68,15 +68,15 @@ GM_configStruct.prototype = {
     var match = document.getElementById(this.id);
     if (match && (match.tagName == "IFRAME" || match.childNodes.length > 0)) return;
 
-    // Sometime "this" gets overwritten so create an alias
+    // Sometimes "this" gets overwritten so create an alias
     var config = this;
 
     // Function to build the mighty config window :)
     function buildConfigWin (body, head) {
-      var frameBody = body,
-          create = config.create,
+      var create = config.create,
           fields = config.fields,
-          configId = config.id;
+          configId = config.id,
+          bodyWrapper = create('div', {id: configId + '_wrapper'});
 
       // Append the style which is our default style plus the user style
       head.appendChild(
@@ -86,14 +86,14 @@ GM_configStruct.prototype = {
       }));
 
       // Add header and title
-      frameBody.appendChild(create('div', {
+      bodyWrapper.appendChild(create('div', {
         id: configId + '_header',
         className: 'config_header block center',
         textContent: config.title
       }));
 
       // Append elements
-      var section = frameBody,
+      var section = bodyWrapper,
           secNum = 0; // Section count
 
       // loop through fields
@@ -101,7 +101,7 @@ GM_configStruct.prototype = {
         var field = fields[id].settings;
 
         if (field.section) { // the start of a new section
-          section = frameBody.appendChild(create('div', {
+          section = bodyWrapper.appendChild(create('div', {
               className: 'section_header_holder',
               id: configId + '_section_' + secNum
             }));
@@ -127,7 +127,7 @@ GM_configStruct.prototype = {
       }
 
       // Add save and close buttons
-      frameBody.appendChild(create('div',
+      bodyWrapper.appendChild(create('div',
         {id: configId + '_buttons_holder'},
 
         create('button', {
@@ -160,6 +160,7 @@ GM_configStruct.prototype = {
           })
       )));
 
+      body.appendChild(bodyWrapper); // Paint everything to window at once
       config.center(); // Show and center iframe
       window.addEventListener('resize', config.center, false); // Center frame on resize
 
@@ -245,17 +246,17 @@ GM_configStruct.prototype = {
 
   write: function (store, obj) {
     if (!obj) {
-      var readVals = {},
+      var values = {},
           fields = this.fields;
 
       for (var id in fields) {
         var field = fields[id];
         if (field.settings.type != "button")
-          readVals[id] = field.value;
+          values[id] = field.value;
       }
     }
     try {
-      this.setValue(store || this.id, this.stringify(obj || readVals));
+      this.setValue(store || this.id, this.stringify(obj || values));
     } catch(e) {
       this.log("GM_config failed to save settings!");
     }
@@ -503,16 +504,21 @@ GM_configField.prototype = {
         this.node = wrap;
 
         for (var i = 0, len = options.length; i < len; ++i) {
-          wrap.appendChild(create('span', {
+          var radLabel = wrap.appendChild(create('span', {
             textContent: options[i]
           }));
 
-          wrap.appendChild(create('input', {
+          var rad = wrap.appendChild(create('input', {
             value: options[i],
             type: 'radio',
             name: id,
             checked: options[i] == value ? true : false
           }));
+
+          if (field.labelAfter)
+            wrap.appendChild(radLabel);
+          else
+            wrap.insertBefore(radLabel, rad);
         }
 
         retNode.appendChild(wrap);
