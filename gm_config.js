@@ -607,6 +607,18 @@ GM_configField.prototype = {
       unsigned = true;
     }
 
+    function checkNumberRange(num, warn) {
+      if (typeof field.min == "number" && num < field.min) {
+        alert(warn + ' greater than or equal to ' + field.min + '.');
+        return null;
+      }
+      if (typeof field.max == "number" && num > field.max) {
+        alert(warn + ' less than or equal to ' + field.max + '.');
+        return null;
+      }
+      return true;
+    }
+
     switch (type) {
       case 'checkbox':
         this.value = node.checked;
@@ -624,21 +636,27 @@ GM_configField.prototype = {
         break;
       case 'int': case 'integer':
         var num = Number(node.value);
+        var warn = 'Field labeled "' + field.label + '" expects a' + 
+          (unsigned ? ' positive ' : 'n ') + 'integer value';
         if (isNaN(num) || Math.ceil(num) != Math.floor(num) || 
             (unsigned && num < 0)) {
-          alert('Field labeled "' + field.label + '" expects a ' + 
-                (unsigned ? 'positive ' : '') + 'integer value.');
+          alert(warn + '.');
           return null;
         }
+        if (!checkNumberRange(num, warn))
+          return null;
         this.value = num;
         break;
       case 'float': case 'number':
         var num = Number(node.value);
+        var warn = 'Field labeled "' + field.label + '" expects a ' + 
+          (unsigned ? 'positive ' : '') + 'number value';
         if (isNaN(num) || (unsigned && num < 0)) {
-          alert('Field labeled "' + field.label + '" expects a ' + 
-                (unsigned ? 'positive ' : '') + 'number value.');
+          alert(warn + '.');
           return null;
         }
+        if (!checkNumberRange(num, warn))
+          return null;
         this.value = num;
         break;
       default:
