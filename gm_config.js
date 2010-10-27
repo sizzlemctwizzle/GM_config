@@ -12,7 +12,7 @@ function GM_configStruct() {
 // This is the initializer function
 function GM_configInit(config, args) {
   var settings = null;
-  
+
   // If the id has changed we must modify the default style
   if (config.id != 'GM_config')
     config.css.basic = config.css.basic.replace(/#GM_config/gm, '#' + config.id);
@@ -41,9 +41,9 @@ function GM_configInit(config, args) {
         config.onOpen = arg;
         break;
       case 'string': // could be custom CSS or the title string
-        if (arg.indexOf('{') != -1 && arg.indexOf('}') != -1) 
+        if (arg.indexOf('{') != -1 && arg.indexOf('}') != -1)
           config.css.stylish = arg;
-        else 
+        else
           config.title = arg;
         break;
     }
@@ -113,7 +113,7 @@ GM_configStruct.prototype = {
               innerHTML: field.section[0]
             }));
 
-          if (typeof field.section[1] == "string") 
+          if (typeof field.section[1] == "string")
             section.appendChild(create('p', {
               className: 'section_desc center',
               id: configId + '_section_desc_' + secNum,
@@ -146,7 +146,7 @@ GM_configStruct.prototype = {
           onclick: function () { config.close() }
         }),
 
-        create('div', 
+        create('div',
           {className: 'reset_holder block'},
 
           // Reset link
@@ -164,9 +164,9 @@ GM_configStruct.prototype = {
       config.center(); // Show and center iframe
       window.addEventListener('resize', config.center, false); // Center frame on resize
 
-      if (config.onOpen) 
+      if (config.onOpen)
         config.onOpen(config.frame.contentDocument || config.frame.ownerDocument,
-                      config.frame.contentWindow || window, 
+                      config.frame.contentWindow || window,
                       config.frame); // Call the open() callback function
 
       // Close frame on window close
@@ -213,7 +213,7 @@ GM_configStruct.prototype = {
 
     this.write();
 
-    if (this.onSave) 
+    if (this.onSave)
       this.onSave(); // Call the save() callback function
   },
 
@@ -232,7 +232,7 @@ GM_configStruct.prototype = {
     for (var id in fields)
       fields[id].node = null;
 
-    if (this.onClose) 
+    if (this.onClose)
       this.onClose(); //  Call the close() callback function
   },
 
@@ -290,15 +290,15 @@ GM_configStruct.prototype = {
         case 'select':
           if (field['default']) {
             for (var i = 0, len = node.options.length; i < len; ++i)
-              if (node.options[i].value == field['default']) 
+              if (node.options[i].value == field['default'])
                 node.selectedIndex = i;
-          } else 
+          } else
             node.selectedIndex = 0;
           break;
         case 'radio':
-          var radios = node.getElementsByTagName('input'); 
-          for (var i = 0, len = radios.length; i < len; ++i) 
-            if (radios[i].value == field['default']) 
+          var radios = node.getElementsByTagName('input');
+          for (var i = 0, len = radios.length; i < len; ++i)
+            if (radios[i].value == field['default'])
               radios[i].checked = true;
           break;
         case 'button' :
@@ -370,7 +370,7 @@ GM_configStruct.prototype = {
       + '\n' + "#GM_config .center { text-align: center; }"
       + '\n' + "#GM_config .section_header_holder { margin-top: 8px; }"
       + '\n' + "#GM_config .config_var { margin: 0 0 4px; }"
-      + '\n' + "#GM_config .section_header { font-size: 13pt; background: #414141; color: #FFF;" 
+      + '\n' + "#GM_config .section_header { font-size: 13pt; background: #414141; color: #FFF;"
       + '\n' +  "border: 1px solid #000; margin: 0; }"
       + '\n' + "#GM_config .section_desc { font-size: 9pt; background: #EFEFEF; color: #575757;"
       + '\n' + "border: 1px solid #CCC; margin: 0 0 6px; }",
@@ -380,7 +380,7 @@ GM_configStruct.prototype = {
 
 // Define a bunch of API stuff
 (function() {
-  var isGM = typeof GM_getValue != 'undefined' && 
+  var isGM = typeof GM_getValue != 'undefined' &&
              typeof GM_getValue('a', 'b') != 'undefined',
       setValue, getValue, stringify, parser;
 
@@ -390,7 +390,7 @@ GM_configStruct.prototype = {
       return localStorage.setItem(name, value);
     };
     getValue = function(name, def){
-      var s = localStorage.getItem(name); 
+      var s = localStorage.getItem(name);
       return s == null ? def : s
     };
 
@@ -400,13 +400,13 @@ GM_configStruct.prototype = {
   } else {
     setValue = GM_setValue;
     getValue = GM_getValue;
-    stringify = typeof JSON == "undefined" ? 
-      function(obj) { 
+    stringify = typeof JSON == "undefined" ?
+      function(obj) {
         return obj.toSource();
     } : JSON.stringify;
-    parser = typeof JSON == "undefined" ? 
+    parser = typeof JSON == "undefined" ?
       function(jsonData) {
-        return (new Function('return ' + jsonData + ';'))(); 
+        return (new Function('return ' + jsonData + ';'))();
     } : JSON.parse;
   }
 
@@ -446,16 +446,16 @@ function GM_configField(settings, stored, id) {
   // Store the field's settings
   this.settings = settings;
   this.id = id;
-  
-  // if a setting was passed to init but wasn't stored then 
-  //      if a default value wasn't passed through init() then 
+
+  // if a setting was passed to init but wasn't stored then
+  //      if a default value wasn't passed through init() then
   //      use default value for type
   //      else use the default value passed through init()
   // else use the stored value
-  var value = typeof stored == "undefined" ? 
-                typeof settings['default'] == "undefined" ? 
+  var value = typeof stored == "undefined" ?
+                typeof settings['default'] == "undefined" ?
                   GM_configDefaultValue(settings.type)
-                : settings['default'] 
+                : settings['default']
               : stored;
 
   // Store the field's value
@@ -474,7 +474,7 @@ GM_configField.prototype = {
         id = this.id,
         create = this.create;
 
-    var retNode = create('div', { className: 'config_var', 
+    var retNode = create('div', { className: 'config_var',
           id: configId + '_' + this.id + '_var',
           title: field.title || '' }),
         firstProp;
@@ -578,7 +578,7 @@ GM_configField.prototype = {
           type: 'text',
           value: value,
           size: (field.size ? field.size : 25)
-        })));    
+        })));
     }
 
     // If the label is passed first, insert it before the field
@@ -616,7 +616,7 @@ GM_configField.prototype = {
         break;
       case 'radio':
         var radios = node.getElementsByTagName('input');
-        for (var i = 0, len = radios.length; i < len; ++i) 
+        for (var i = 0, len = radios.length; i < len; ++i)
           if (radios[i].checked)
             this.value = radios[i].value;
         break;
@@ -624,9 +624,9 @@ GM_configField.prototype = {
         break;
       case 'int': case 'integer':
         var num = Number(node.value);
-        var warn = 'Field labeled "' + field.label + '" expects a' + 
+        var warn = 'Field labeled "' + field.label + '" expects a' +
           (unsigned ? ' positive ' : 'n ') + 'integer value';
-        if (isNaN(num) || Math.ceil(num) != Math.floor(num) || 
+        if (isNaN(num) || Math.ceil(num) != Math.floor(num) ||
             (unsigned && num < 0)) {
           alert(warn + '.');
           return null;
@@ -637,7 +637,7 @@ GM_configField.prototype = {
         break;
       case 'float': case 'number':
         var num = Number(node.value);
-        var warn = 'Field labeled "' + field.label + '" expects a ' + 
+        var warn = 'Field labeled "' + field.label + '" expects a ' +
           (unsigned ? 'positive ' : '') + 'number value';
         if (isNaN(num) || (unsigned && num < 0)) {
           alert(warn + '.');
