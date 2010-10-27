@@ -308,6 +308,9 @@ GM_configStruct.prototype = {
           break;
       }
     }
+
+    if (this.onReset)
+      this.onReset(); // Call the reset() callback function
   },
 
   create: function () {
