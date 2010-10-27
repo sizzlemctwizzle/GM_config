@@ -1,5 +1,5 @@
 // @name              GM_config
-// @version           1.4.4
+// @version           1.4.5
 // @contributors      JoeSimmons & SizzleMcTwizzle & IzzySoft & MartiMartz
 
 // The GM_config constructor
@@ -164,10 +164,10 @@ GM_configStruct.prototype = {
       config.center(); // Show and center iframe
       window.addEventListener('resize', config.center, false); // Center frame on resize
 
-      if (config.onOpen)
-        config.onOpen(config.frame.contentDocument || config.frame.ownerDocument,
-                      config.frame.contentWindow || window,
-                      config.frame); // Call the open() callback function
+      // Call the open() callback function
+      config.onOpen(config.frame.contentDocument || config.frame.ownerDocument,
+                    config.frame.contentWindow || window,
+                    config.frame);
 
       // Close frame on window close
       window.addEventListener('beforeunload', function () {
@@ -212,9 +212,7 @@ GM_configStruct.prototype = {
         return;
 
     this.write();
-
-    if (this.onSave)
-      this.onSave(); // Call the save() callback function
+    this.onSave(); // Call the save() callback function
   },
 
   close: function() {
@@ -232,8 +230,7 @@ GM_configStruct.prototype = {
     for (var id in fields)
       fields[id].node = null;
 
-    if (this.onClose)
-      this.onClose(); //  Call the close() callback function
+    this.onClose(); //  Call the close() callback function
   },
 
   set: function (name, val) {
@@ -309,8 +306,7 @@ GM_configStruct.prototype = {
       }
     }
 
-    if (this.onReset)
-      this.onReset(); // Call the reset() callback function
+    this.onReset(); // Call the reset() callback function
   },
 
   create: function () {
@@ -352,9 +348,10 @@ GM_configStruct.prototype = {
   },
 
   // Define some default properties
-  onOpen: null,
-  onSave: null,
-  onClose: null,
+  onOpen: function() {},
+  onSave: function() {},
+  onClose: function() {},
+  onReset: function() {},
   id: 'GM_config',
   fields: {},
   title: 'User Script Settings',
