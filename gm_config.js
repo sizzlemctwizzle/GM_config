@@ -39,6 +39,9 @@ function GM_configInit(config, args) {
   if (config.id != 'GM_config')
     config.css.basic = config.css.basic.replace(/#GM_config/gm, '#' + config.id);
 
+  // Save the previous initialize callback
+  var oldInitCb = config.onInit;
+
   // loop through GM_config.init() arguments
   for (var i = 0, l = args.length, arg; i < l; ++i) {
     arg = args[i];
@@ -77,6 +80,9 @@ function GM_configInit(config, args) {
     for (var id in settings) // for each setting create a field object
       config.fields[id] = new GM_configField(settings[id], stored[id], id);
   }
+
+  // Call the previous init() callback function
+  oldInitCb();
 }
 
 GM_configStruct.prototype = {
@@ -370,6 +376,7 @@ GM_configStruct.prototype = {
   },
 
   // Define some default properties
+  onInit: function() {},
   onOpen: function() {},
   onSave: function() {},
   onClose: function() {},
