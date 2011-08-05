@@ -81,6 +81,10 @@ function GM_configInit(config, args) {
       config.fields[id] = new GM_configField(settings[id], stored[id], id);
   }
 
+  // Prevent infinite loops
+  if (config.onInit === oldInitCb)
+    config.onInit = function() {};
+
   // Call the previous init() callback function
   oldInitCb();
 }
@@ -204,6 +208,7 @@ GM_configStruct.prototype = {
 
       // Now that everything is loaded, make it visible
       config.frame.style.display = "block";
+      config.isOpen = true;
     }
 
     // Either use the element passed to init() or create an iframe
@@ -259,6 +264,7 @@ GM_configStruct.prototype = {
       fields[id].node = null;
 
     this.onClose(); //  Call the close() callback function
+    this.isOpen = false;
   },
 
   set: function (name, val) {
@@ -381,6 +387,7 @@ GM_configStruct.prototype = {
   onSave: function() {},
   onClose: function() {},
   onReset: function() {},
+  isOpen: false,
   id: 'GM_config',
   fields: {},
   title: 'User Script Settings',
