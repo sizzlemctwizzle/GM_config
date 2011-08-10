@@ -36,16 +36,14 @@ function GM_configInit(config, args) {
   // Initialize instance variables
   if (typeof config.fields == "undefined") {
     config.fields = {};
-    onInit = function() {};
-    onOpen = function() {};
-    onSave = function() {};
-    onClose = function() {};
-    onReset = function() {};
-    isOpen = false;
-    id = 'GM_config';
-    fields = {};
-    title = 'User Script Settings';
-    css = {
+    config.onInit = function() {};
+    config.onOpen = function() {};
+    config.onSave = function() {};
+    config.onClose = function() {};
+    config.onReset = function() {};
+    config.isOpen = false;
+    config.title = 'User Script Settings';
+    config.css = {
       basic: "#GM_config * { font-family: arial,tahoma,myriad pro,sans-serif; }"
              + '\n' + "#GM_config { background: #FFF; }"
              + '\n' + "#GM_config input[type='radio'] { margin-right: 8px; }"
@@ -68,8 +66,11 @@ function GM_configInit(config, args) {
     };
   }
 
-  var settings = null;
+  // Set a default id
+  if (typeof config.id == "undefined")
+    config.id = 'GM_config';
 
+  var settings = null;
   // If the id has changed we must modify the default style
   if (config.id != 'GM_config')
     config.css.basic = config.css.basic.replace(/#GM_config/gm, '#' + config.id);
