@@ -33,6 +33,41 @@ function GM_configStruct() {
 
 // This is the initializer function
 function GM_configInit(config, args) {
+  // Initialize instance variables
+  if (typeof config.fields == "undefined") {
+    config.fields = {};
+    onInit = function() {};
+    onOpen = function() {};
+    onSave = function() {};
+    onClose = function() {};
+    onReset = function() {};
+    isOpen = false;
+    id = 'GM_config';
+    fields = {};
+    title = 'User Script Settings';
+    css = {
+      basic: "#GM_config * { font-family: arial,tahoma,myriad pro,sans-serif; }"
+             + '\n' + "#GM_config { background: #FFF; }"
+             + '\n' + "#GM_config input[type='radio'] { margin-right: 8px; }"
+             + '\n' + "#GM_config .indent40 { margin-left: 40%; }"
+             + '\n' + "#GM_config .field_label { font-weight: bold; font-size: 12px; margin-right: 6px; }"
+             + '\n' + "#GM_config .block { display: block; }"
+             + '\n' + "#GM_config .saveclose_buttons { margin: 16px 10px 10px; padding: 2px 12px; }"
+             + '\n' + "#GM_config .reset, #GM_config .reset a,"
+             + '\n' + "#GM_config_buttons_holder { text-align: right; color: #000; }"
+             + '\n' + "#GM_config .config_header { font-size: 20pt; margin: 0; }"
+             + '\n' + "#GM_config .config_desc, #GM_config .section_desc, #GM_config .reset { font-size: 9pt; }"
+             + '\n' + "#GM_config .center { text-align: center; }"
+             + '\n' + "#GM_config .section_header_holder { margin-top: 8px; }"
+             + '\n' + "#GM_config .config_var { margin: 0 0 4px; }"
+             + '\n' + "#GM_config .section_header { font-size: 13pt; background: #414141; color: #FFF;"
+             + '\n' +  "border: 1px solid #000; margin: 0; }"
+             + '\n' + "#GM_config .section_desc { font-size: 9pt; background: #EFEFEF; color: #575757;"
+             + '\n' + "border: 1px solid #CCC; margin: 0 0 6px; }",
+      stylish: ""
+    };
+  }
+
   var settings = null;
 
   // If the id has changed we must modify the default style
@@ -379,38 +414,6 @@ GM_configStruct.prototype = {
 
   remove: function (el) {
     if (el && el.parentNode) el.parentNode.removeChild(el);
-  },
-
-  // Define some default properties
-  onInit: function() {},
-  onOpen: function() {},
-  onSave: function() {},
-  onClose: function() {},
-  onReset: function() {},
-  isOpen: false,
-  id: 'GM_config',
-  fields: {},
-  title: 'User Script Settings',
-  css: {
-    basic:     "#GM_config * { font-family: arial,tahoma,myriad pro,sans-serif; }"
-      + '\n' + "#GM_config { background: #FFF; }"
-      + '\n' + "#GM_config input[type='radio'] { margin-right: 8px; }"
-      + '\n' + "#GM_config .indent40 { margin-left: 40%; }"
-      + '\n' + "#GM_config .field_label { font-weight: bold; font-size: 12px; margin-right: 6px; }"
-      + '\n' + "#GM_config .block { display: block; }"
-      + '\n' + "#GM_config .saveclose_buttons { margin: 16px 10px 10px; padding: 2px 12px; }"
-      + '\n' + "#GM_config .reset, #GM_config .reset a,"
-      + '\n' + "#GM_config_buttons_holder { text-align: right; color: #000; }"
-      + '\n' + "#GM_config .config_header { font-size: 20pt; margin: 0; }"
-      + '\n' + "#GM_config .config_desc, #GM_config .section_desc, #GM_config .reset { font-size: 9pt; }"
-      + '\n' + "#GM_config .center { text-align: center; }"
-      + '\n' + "#GM_config .section_header_holder { margin-top: 8px; }"
-      + '\n' + "#GM_config .config_var { margin: 0 0 4px; }"
-      + '\n' + "#GM_config .section_header { font-size: 13pt; background: #414141; color: #FFF;"
-      + '\n' +  "border: 1px solid #000; margin: 0; }"
-      + '\n' + "#GM_config .section_desc { font-size: 9pt; background: #EFEFEF; color: #575757;"
-      + '\n' + "border: 1px solid #CCC; margin: 0 0 6px; }",
-    stylish: ""
   }
 };
 
