@@ -390,7 +390,7 @@ GM_configStruct.prototype = {
         for (var b in B) {
           if (b.indexOf("on") == 0)
             A.addEventListener(b.substring(2), B[b], false);
-          else if (",style,accesskey,id,name,src,href,which".indexOf("," +
+          else if (",style,accesskey,id,name,src,href,which,for".indexOf("," +
                    b.toLowerCase()) != -1)
             A.setAttribute(b, B[b]);
           else
@@ -522,9 +522,10 @@ GM_configField.prototype = {
     // Retrieve the first prop
     for (var i in field) { firstProp = i; break; }
 
-    var label = create('span', {
+    var label = create('label', {
       innerHTML: field.label,
       id: configId + '_' + this.id +'_field_label',
+      for: configId + '_field_' + this.id,
       className: 'field_label'
     });
 
