@@ -61,7 +61,8 @@ function GM_configInit(config, args) {
              + '\n' + "#GM_config .section_header { font-size: 13pt; background: #414141; color: #FFF;"
              + '\n' +  "border: 1px solid #000; margin: 0; }"
              + '\n' + "#GM_config .section_desc { font-size: 9pt; background: #EFEFEF; color: #575757;"
-             + '\n' + "border: 1px solid #CCC; margin: 0 0 6px; }",
+             + '\n' + "border: 1px solid #CCC; margin: 0 0 6px; }"
+             + '\n',
       stylish: ""
     };
   }
@@ -248,10 +249,10 @@ GM_configStruct.prototype = {
     }
 
     // Either use the element passed to init() or create an iframe
-    var defaultStyle = 'position:fixed; top:0; left:0; opacity:0; display:none; z-index:999;' +
-                       'width:75%; height:75%; max-height:95%; max-width:95%;' +
-                       'border:1px solid #000000; overflow:auto; bottom: auto;' +
-                       'right: auto; margin: 0; padding: 0;';
+    var defaultStyle = 'position: fixed; top: 0; left: 0; opacity: 0; display: none; z-index: 999;'
+                       + 'width: 75%; height: 75%; max-height: 95%; max-width: 95%;'
+                       + 'border: 1px solid #000; overflow: auto; bottom: auto;'
+                       + 'right: auto; margin: 0; padding: 0;';
     if (this.frame) {
       this.frame.id = this.id;
       this.frame.setAttribute('style', defaultStyle);
