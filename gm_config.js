@@ -48,20 +48,21 @@ function GM_configInit(config, args) {
              + '\n' + "#GM_config { background: #FFF; }"
              + '\n' + "#GM_config input[type='radio'] { margin-right: 8px; }"
              + '\n' + "#GM_config .indent40 { margin-left: 40%; }"
-             + '\n' + "#GM_config .field_label { font-weight: bold; font-size: 12px; margin-right: 6px; }"
+             + '\n' + "#GM_config .field_label { font-size: 12px; font-weight: bold; margin-right: 6px; }"
              + '\n' + "#GM_config .block { display: block; }"
              + '\n' + "#GM_config .saveclose_buttons { margin: 16px 10px 10px; padding: 2px 12px; }"
              + '\n' + "#GM_config .reset, #GM_config .reset a,"
-             + '\n' + "#GM_config_buttons_holder { text-align: right; color: #000; }"
+             + '\n' + "#GM_config_buttons_holder { color: #000; text-align: right; }"
              + '\n' + "#GM_config .config_header { font-size: 20pt; margin: 0; }"
              + '\n' + "#GM_config .config_desc, #GM_config .section_desc, #GM_config .reset { font-size: 9pt; }"
              + '\n' + "#GM_config .center { text-align: center; }"
              + '\n' + "#GM_config .section_header_holder { margin-top: 8px; }"
              + '\n' + "#GM_config .config_var { margin: 0 0 4px; }"
-             + '\n' + "#GM_config .section_header { font-size: 13pt; background: #414141; color: #FFF;"
-             + '\n' +  "border: 1px solid #000; margin: 0; }"
-             + '\n' + "#GM_config .section_desc { font-size: 9pt; background: #EFEFEF; color: #575757;"
-             + '\n' + "border: 1px solid #CCC; margin: 0 0 6px; }",
+             + '\n' + "#GM_config .section_header { background: #414141; border: 1px solid #000; color: #FFF;"
+             + '\n' + "font-size: 13pt; margin: 0; }"
+             + '\n' + "#GM_config .section_desc { background: #EFEFEF; border: 1px solid #CCC; color: #575757;"
+             + '\n' + "font-size: 9pt; margin: 0 0 6px; }"
+             + '\n',
       stylish: ""
     };
   }
@@ -248,10 +249,12 @@ GM_configStruct.prototype = {
     }
 
     // Either use the element passed to init() or create an iframe
-    var defaultStyle = 'position:fixed; top:0; left:0; opacity:0; display:none; z-index:999;' +
-                       'width:75%; height:75%; max-height:95%; max-width:95%;' +
-                       'border:1px solid #000000; overflow:auto; bottom: auto;' +
-                       'right: auto; margin: 0; padding: 0;';
+    var defaultStyle = 'bottom: auto; border: 1px solid #000; display: none; height: 75%;'
+                       + ' left: 0; margin: 0; max-height: 95%; max-width: 95%; opacity: 0;'
+                       + ' overflow: auto; padding: 0; position: fixed; right: auto; top: 0;'
+                       + ' width: 75%; z-index: 999;';
+
+
     if (this.frame) {
       this.frame.id = this.id;
       this.frame.setAttribute('style', defaultStyle);
