@@ -581,7 +581,7 @@ GM_configField.prototype = {
           wrap.appendChild(create('option', {
             innerHTML: options[i],
             value: i,
-            selected: options[i] == value ? true : false
+            selected: i == value
           }));
 
         retNode.appendChild(wrap);
