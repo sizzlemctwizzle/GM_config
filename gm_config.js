@@ -279,7 +279,7 @@ GM_configStruct.prototype = {
 
   save: function () {
     var fields = this.fields;
-    for (id in fields)
+    for (var id in fields)
       if (fields[id].toValue() === null) // invalid value encountered
         return;
 
@@ -347,7 +347,7 @@ GM_configStruct.prototype = {
         doc = this.frame.contentDocument || this.frame.ownerDocument,
         type;
 
-    for (id in fields) {
+    for (var id in fields) {
       var node = fields[id].node,
           field = fields[id].settings,
           noDefault = typeof field['default'] == "undefined",
