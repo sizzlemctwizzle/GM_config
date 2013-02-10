@@ -527,7 +527,7 @@ GM_configField.prototype = {
 
     var label = create('label', {
       innerHTML: field.label,
-      id: configId + '_' + this.id +'_field_label',
+      id: configId + '_' + this.id + '_field_label',
       for: configId + '_field_' + this.id,
       className: 'field_label'
     });
@@ -548,11 +548,13 @@ GM_configField.prototype = {
         this.node = wrap;
 
         for (var i = 0, len = options.length; i < len; ++i) {
-          var radLabel = wrap.appendChild(create('span', {
+          var labelI = create('label', {});
+
+          var radLabel = labelI.appendChild(create('span', {
             innerHTML: options[i]
           }));
 
-          var rad = wrap.appendChild(create('input', {
+          var rad = labelI.appendChild(create('input', {
             value: options[i],
             type: 'radio',
             name: id,
@@ -560,9 +562,11 @@ GM_configField.prototype = {
           }));
 
           if (firstProp == "options")
-            wrap.insertBefore(radLabel, rad);
+            labelI.insertBefore(radLabel, rad);
           else
-            wrap.appendChild(radLabel);
+            labelI.appendChild(radLabel);
+
+          wrap.appendChild(labelI);
         }
 
         retNode.appendChild(wrap);
@@ -630,7 +634,7 @@ GM_configField.prototype = {
     if (field.type != "hidden" &&
         field.type != "button" &&
         typeof field.label == "string") {
-      if (firstProp == "label")
+      if (firstProp == "label" || field.type == "radio")
         retNode.insertBefore(label, retNode.firstChild);
       else
         retNode.appendChild(label);
