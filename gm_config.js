@@ -1,5 +1,5 @@
 /*
-Copyright 2009-2010, GM_config Contributors
+Copyright 2009-2013, GM_config Contributors
 All rights reserved.
 
 GM_config Contributors:
@@ -604,11 +604,11 @@ GM_configField.prototype = {
         });
         this.node = btn;
 
-        if (field.script)
+        if (field.script || field.click) {
           btn.addEventListener('click', function () {
-            var scr = field.script;
-            typeof scr == 'function' ? setTimeout(scr, 0) : eval(scr);
+            field[field.script ? 'script' : 'click']();
           }, false);
+        }
 
         retNode.appendChild(btn);
         break;
