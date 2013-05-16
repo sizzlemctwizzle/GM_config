@@ -360,7 +360,7 @@ GM_configStruct.prototype = {
         case 'select':
           if (field['default']) {
             for (var i = 0, len = node.options.length; i < len; ++i)
-              if (node.options[i].value == field['default'])
+              if (node.options[i].textContent == field['default'])
                 node.selectedIndex = i;
           } else
             node.selectedIndex = 0;
