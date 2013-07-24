@@ -103,7 +103,7 @@ function GM_configInit(config, args) {
         config.onOpen = arg;
         break;
       case 'string': // could be custom CSS or the title string
-        if (arg.indexOf('{') != -1 && arg.indexOf('}') != -1)
+        if (/\w+\s*\{\s*\w+\s*:\s*\w+[\s|\S]*\}/.test(arg))
           config.css.stylish = arg;
         else
           config.title = arg;
