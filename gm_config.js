@@ -36,11 +36,11 @@ function GM_configInit(config, args) {
   // Initialize instance variables
   if (typeof config.fields == "undefined") {
     config.fields = {};
-    config.onInit = function() {};
-    config.onOpen = function() {};
-    config.onSave = function() {};
-    config.onClose = function() {};
-    config.onReset = function() {};
+    config.onInit = config.onInit || function() {};
+    config.onOpen = config.onOpen || function() {};
+    config.onSave = config.onSave || function() {};
+    config.onClose = config.onClose || function() {};
+    config.onReset = config.onReset || function() {};
     config.isOpen = false;
     config.title = 'User Script Settings';
     config.css = {
@@ -117,10 +117,6 @@ function GM_configInit(config, args) {
     for (var id in settings) // for each setting create a field object
       config.fields[id] = new GM_configField(settings[id], stored[id], id);
   }
-
-  // Prevent infinite loops
-  if (config.onInit === oldInitCb)
-    config.onInit = function() {};
 
   // Call the previous init() callback function
   oldInitCb();
@@ -406,8 +402,9 @@ GM_configStruct.prototype = {
   },
 
   center: function () {
-    var node = this.frame,
-        style = node.style,
+    var node = this.frame;
+    if (!node) return;
+    var style = node.style,
         beforeOpacity = style.opacity;
     if (style.display == 'none') style.opacity = '0';
     style.display = '';
