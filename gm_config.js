@@ -174,6 +174,8 @@ GM_configStruct.prototype = {
               id: configId + '_section_' + secNum
             }));
 
+          if (typeof field.section == "string") field.section = [field.section];
+
           if (typeof field.section[0] == "string")
             section.appendChild(create('div', {
               className: 'section_header center',
