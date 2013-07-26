@@ -36,7 +36,7 @@ function GM_configInit(config, args) {
   // Initialize instance variables
   if (typeof config.fields == "undefined") {
     config.fields = {};
-    config.onInit = config.onInit || function() {};
+    config.onInit = config.onInit || null;
     config.onOpen = config.onOpen || function() {};
     config.onSave = config.onSave || function() {};
     config.onClose = config.onClose || function() {};
@@ -118,8 +118,11 @@ function GM_configInit(config, args) {
       config.fields[id] = new GM_configField(settings[id], stored[id], id);
   }
 
-  // Call the previous init() callback function
-  oldInitCb();
+  if (!config.onInit) 
+    config.onInit = function() {};
+
+  // Call the previous init() callback function if set
+  (oldInitCb || config.onInit)();
 }
 
 GM_configStruct.prototype = {
