@@ -463,7 +463,7 @@ GM_configStruct.prototype = {
   GM_configStruct.prototype.log = isGM ? GM_log : (window.opera ? opera.postError : console.log);
 })();
 
-function GM_configDefaultValue(type) {
+function GM_configDefaultValue(type, options) {
   var value;
 
   if (type.indexOf('unsigned ') == 0)
@@ -471,7 +471,7 @@ function GM_configDefaultValue(type) {
 
   switch (type) {
     case 'radio': case 'select':
-      value = settings.options[0];
+      value = options[0];
       break;
     case 'checkbox':
       value = false;
@@ -499,7 +499,7 @@ function GM_configField(settings, stored, id) {
   // else use the stored value
   var value = typeof stored == "undefined" ?
                 typeof settings['default'] == "undefined" ?
-                  GM_configDefaultValue(settings.type)
+                  GM_configDefaultValue(settings.type, settings.options)
                 : settings['default']
               : stored;
 
