@@ -1,0 +1,113 @@
+<html>
+<head>
+<script src="https://raw.github.com/sizzlemctwizzle/GM_config/master/gm_config.js" type="text/javascript"></script>
+</head>
+<body>
+<div id="GM_config_example"></div>
+<script type="text/javascript">
+var settings = {
+    'name': {
+        'section': ['Personal Info About Yourself', 'We need this info to do stuff'],
+        'label': 'Name',
+        'type': 'text',
+        'default': 'Joe Simmons'
+    },
+    'age': {
+        'label': 'Age',
+        'type': 'int',
+        'default': 19
+    },
+    'gender': {
+        'label': 'Gender',
+        'type': 'radio',
+        'options': ['Male', 'Female'],
+        'default': 'Male'
+    },
+    'income': {
+        'label': 'Income',
+        'type': 'float',
+        'default': 50000.0
+    },
+    'status': {
+        'label': 'Married',
+        'type': 'checkbox',
+        'default': false
+    },
+    'work': {
+        'label': 'Job',
+        'type': 'select',
+        'options': ['Carpenter', 'Truck Driver', 'Porn Star'],
+        'default': 'Truck Driver'
+          },
+    'magic': {
+        'label': 'Magic Button',
+        'type': 'button',
+        'script': function() { 
+            alert('Magic works!');
+        }
+    },
+    'upperLeft': {
+        'section': ['Check some boxes'],
+        'type': 'checkbox',
+        'default': false
+    },
+    'upperLeftMiddle': {
+        'type': 'checkbox',
+        'default': false
+    },
+    'upperRightMiddle': {
+        'type': 'checkbox',
+        'default': false
+    },
+    'upperRight': {
+        'type': 'checkbox',
+        'default': false
+    },
+    'middleLeft': {
+        'section': [],
+        'type': 'checkbox',
+        'default': false
+    },
+    'middleLeftMiddle': {
+        'type': 'checkbox',
+        'default': false
+    },
+    'middleRightMiddle': {
+        'type': 'checkbox',
+        'default': false
+    },
+    'middleRight': {
+        'type': 'checkbox',
+        'default': false
+    },
+    'bottomLeft': {
+        'section': [],
+        'type': 'checkbox',
+        'default': false
+    },
+    'bottomLeftMiddle': {
+        'type': 'checkbox',
+        'default': false
+    },
+    'bottomRightMiddle': {
+        'type': 'checkbox',
+        'default': false
+    },
+    'bottomRight': {
+        'type': 'checkbox',
+        'default': false
+    }
+};
+
+GM_config.init('Configurable Options Script',
+    settings,
+    '#GM_config_section_1 .config_var, #GM_config_section_2 .config_var, #GM_config_section_3 .config_var { margin: 5% !important;display: inline !important; }',
+    function(doc) {
+        doc.getElementById('GM_config_section_header_1').className = 'field_label';
+    },
+    document.getElementById('GM_config_example')
+);
+GM_config.open();
+</script>
+</body>
+</html>
