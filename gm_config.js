@@ -658,6 +658,8 @@ GM_configField.prototype = {
         unsigned = false,
         rval;
 
+    if (!this.node) return null;
+
     if (type.indexOf('unsigned ') == 0) {
       type = type.substring(9);
       unsigned = true;
