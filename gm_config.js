@@ -284,13 +284,8 @@ GM_configStruct.prototype = {
       if (fields[id].toValue() === null) // invalid value encountered
         return;
 
-<<<<<<< HEAD
-    this.write();
-    this.onSave(); // Call the save() callback function
-=======
     var forgotten = this.write();
     this.onSave(forgotten); // Call the save() callback function
->>>>>>> master
   },
 
   close: function() {
@@ -323,24 +318,16 @@ GM_configStruct.prototype = {
   write: function (store, obj) {
     if (!obj) {
       var values = {},
-<<<<<<< HEAD
-=======
           forgotten = {},
->>>>>>> master
           fields = this.fields;
 
       for (var id in fields) {
         var field = fields[id];
-<<<<<<< HEAD
-        if (field.settings.type != "button")
-          values[id] = field.value;
-=======
         if (field.save) {
           if (field.settings.type != "button")
             values[id] = field.value;
         } else
           forgotten[id] = field.value;
->>>>>>> master
       }
     }
     try {
@@ -348,11 +335,8 @@ GM_configStruct.prototype = {
     } catch(e) {
       this.log("GM_config failed to save settings!");
     }
-<<<<<<< HEAD
-=======
 
     return forgotten;
->>>>>>> master
   },
 
   read: function (store) {
@@ -513,10 +497,7 @@ function GM_configField(settings, stored, id) {
   // Store the field's settings
   this.settings = settings;
   this.id = id;
-<<<<<<< HEAD
-=======
   this.save = typeof settings.save == "undefined" ? true : settings.save;
->>>>>>> master
 
   // if a setting was passed to init but wasn't stored then
   //      if a default value wasn't passed through init() then
@@ -553,14 +534,6 @@ GM_configField.prototype = {
     // Retrieve the first prop
     for (var i in field) { firstProp = i; break; }
 
-<<<<<<< HEAD
-    var label = create('label', {
-      innerHTML: field.label,
-      id: configId + '_' + this.id + '_field_label',
-      for: configId + '_field_' + this.id,
-      className: 'field_label'
-    });
-=======
     var label = typeof field.label == "string" && field.type != "button" ? 
       create('label', {
         innerHTML: field.label,
@@ -568,7 +541,6 @@ GM_configField.prototype = {
         for: configId + '_field_' + this.id,
         className: 'field_label'
       }) : null;
->>>>>>> master
 
     switch (field.type) {
       case 'textarea':
@@ -669,13 +641,7 @@ GM_configField.prototype = {
 
     // If the label is passed first, insert it before the field
     // else insert it after
-<<<<<<< HEAD
-    if (field.type != "hidden" &&
-        field.type != "button" &&
-        typeof field.label == "string") {
-=======
     if (label) {
->>>>>>> master
       if (firstProp == "label" || field.type == "radio")
         retNode.insertBefore(label, retNode.firstChild);
       else
