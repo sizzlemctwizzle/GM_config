@@ -284,8 +284,8 @@ GM_configStruct.prototype = {
       if (fields[id].toValue() === null) // invalid value encountered
         return;
 
-    this.write();
-    this.onSave(); // Call the save() callback function
+    var forgotten = this.write();
+    this.onSave(forgotten); // Call the save() callback function
   },
 
   close: function() {
@@ -318,12 +318,16 @@ GM_configStruct.prototype = {
   write: function (store, obj) {
     if (!obj) {
       var values = {},
+          forgotten = {},
           fields = this.fields;
 
       for (var id in fields) {
         var field = fields[id];
-        if (field.settings.type != "button")
-          values[id] = field.value;
+        if (field.save) {
+          if (field.settings.type != "button")
+            values[id] = field.value;
+        } else
+          forgotten[id] = field.value;
       }
     }
     try {
@@ -331,6 +335,8 @@ GM_configStruct.prototype = {
     } catch(e) {
       this.log("GM_config failed to save settings!");
     }
+
+    return forgotten;
   },
 
   read: function (store) {
@@ -491,6 +497,7 @@ function GM_configField(settings, stored, id) {
   // Store the field's settings
   this.settings = settings;
   this.id = id;
+  this.save = typeof settings.save == "undefined" ? true : settings.save;
 
   // if a setting was passed to init but wasn't stored then
   //      if a default value wasn't passed through init() then
@@ -527,7 +534,7 @@ GM_configField.prototype = {
     // Retrieve the first prop
     for (var i in field) { firstProp = i; break; }
 
-    var label = typeof field.label == "string" ? 
+    var label = typeof field.label == "string" && field.type != "button" ? 
       create('label', {
         innerHTML: field.label,
         id: configId + '_' + this.id + '_field_label',
