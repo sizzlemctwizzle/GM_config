@@ -497,6 +497,7 @@ function GM_configField(settings, stored, id) {
   // Store the field's settings
   this.settings = settings;
   this.id = id;
+  this.node = null;
   this.save = typeof settings.save == "undefined" ? true : settings.save;
 
   // if a setting was passed to init but wasn't stored then
@@ -516,8 +517,6 @@ function GM_configField(settings, stored, id) {
 
 GM_configField.prototype = {
   create: GM_configStruct.prototype.create,
-
-  node: null,
 
   toNode: function(configId) {
     var field = this.settings,
