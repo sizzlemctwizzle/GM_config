@@ -350,41 +350,10 @@ GM_configStruct.prototype = {
   },
 
   reset: function () {
-    var fields = this.fields,
-        doc = this.frame.contentDocument || this.frame.ownerDocument,
-        type;
+    var fields = this.fields;
 
-    for (var id in fields) {
-      var node = fields[id].node,
-          field = fields[id].settings,
-          noDefault = typeof field['default'] == "undefined",
-          type = field.type;
-
-      switch (type) {
-        case 'checkbox':
-          node.checked = noDefault ? GM_configDefaultValue(type) : field['default'];
-          break;
-        case 'select':
-          if (field['default']) {
-            for (var i = 0, len = node.options.length; i < len; ++i)
-              if (node.options[i].textContent == field['default'])
-                node.selectedIndex = i;
-          } else
-            node.selectedIndex = 0;
-          break;
-        case 'radio':
-          var radios = node.getElementsByTagName('input');
-          for (var i = 0, len = radios.length; i < len; ++i)
-            if (radios[i].value == field['default'])
-              radios[i].checked = true;
-          break;
-        case 'button' :
-          break;
-        default:
-          node.value = noDefault ? GM_configDefaultValue(type) : field['default'];
-          break;
-      }
-    }
+    // Reset all the fields
+    for (var id in fields) fields[id].reset();
 
     this.onReset(); // Call the reset() callback function
   },
@@ -657,7 +626,7 @@ GM_configField.prototype = {
         unsigned = false,
         rval;
 
-    if (!this.node) return null;
+    if (!node) return null;
 
     if (type.indexOf('unsigned ') == 0) {
       type = type.substring(9);
@@ -710,6 +679,40 @@ GM_configField.prototype = {
     }
 
     return this.value; // value read successfully
+  },
+
+  reset: function() {
+    var node = this.node,
+        field = this.settings,
+        noDefault = typeof field['default'] == "undefined",
+        type = field.type;
+
+    if (!node) return;
+
+    switch (type) {
+      case 'checkbox':
+        node.checked = noDefault ? GM_configDefaultValue(type) : field['default'];
+        break;
+      case 'select':
+        if (field['default']) {
+          for (var i = 0, len = node.options.length; i < len; ++i)
+            if (node.options[i].textContent == field['default'])
+              node.selectedIndex = i;
+        } else
+          node.selectedIndex = 0;
+        break;
+      case 'radio':
+        var radios = node.getElementsByTagName('input');
+        for (var i = 0, len = radios.length; i < len; ++i)
+          if (radios[i].value == field['default'])
+            radios[i].checked = true;
+        break;
+      case 'button' :
+        break;
+      default:
+        node.value = noDefault ? GM_configDefaultValue(type) : field['default'];
+        break;
+      }
   },
 
   _checkNumberRange: function(num, warn) {
