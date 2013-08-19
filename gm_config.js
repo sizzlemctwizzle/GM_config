@@ -527,12 +527,13 @@ GM_configField.prototype = {
     // Retrieve the first prop
     for (var i in field) { firstProp = i; break; }
 
-    var label = field.label ? create('label', {
-      innerHTML: field.label,
-      id: configId + '_' + this.id + '_field_label',
-      for: configId + '_field_' + this.id,
-      className: 'field_label'
-    }) : null;
+    var label = typeof field.label == "string" ? 
+      create('label', {
+        innerHTML: field.label,
+        id: configId + '_' + this.id + '_field_label',
+        for: configId + '_field_' + this.id,
+        className: 'field_label'
+      }) : null;
 
     switch (field.type) {
       case 'textarea':
@@ -633,10 +634,7 @@ GM_configField.prototype = {
 
     // If the label is passed first, insert it before the field
     // else insert it after
-    if (label &&
-        field.type != "hidden" &&
-        field.type != "button" &&
-        typeof field.label == "string") {
+    if (label) {
       if (firstProp == "label" || field.type == "radio")
         retNode.insertBefore(label, retNode.firstChild);
       else
