@@ -134,10 +134,11 @@ function GM_configInit(config, args) {
   // Create the fields
   if (settings.fields) {
     var stored = config.read(), // read the stored settings
-        fields = settings.fields;
+        fields = settings.fields,
+        customTypes = settings.types || {};
 
     for (var id in fields) // for each field definition create a field object
-      config.fields[id] = new GM_configField(fields[id], stored[id], id);
+      config.fields[id] = new GM_configField(fields[id], stored[id], id, customTypes);
   }
 
   // If the id has changed we must modify the default style
@@ -485,26 +486,39 @@ function GM_configDefaultValue(type, options) {
   return value;
 }
 
-function GM_configField(settings, stored, id) {
+function GM_configField(settings, stored, id, customTypes) {
   // Store the field's settings
   this.settings = settings;
   this.id = id;
   this.node = null;
   this.save = typeof settings.save == "undefined" ? true : settings.save;
 
+  var type = settings.type;
+
   // if a setting was passed to init but wasn't stored then
-  //      if a default value wasn't passed through init() then
-  //      use default value for type
-  //      else use the default value passed through init()
+  //   if a default value wasn't passed through init() then
+  //     if the type is custom use its default
+  //       else use default value for type
+  //   else use the default value passed through init()
   // else use the stored value
   var value = typeof stored == "undefined" ?
                 typeof settings['default'] == "undefined" ?
-                  GM_configDefaultValue(settings.type, settings.options)
+                  customTypes[type] ? 
+                    customTypes[type]['default']
+                    : GM_configDefaultValue(type, settings.options)
                 : settings['default']
               : stored;
 
   // Store the field's value
   this.value = value;
+
+  // Setup methods for a custom type
+  var customType = null;
+  if ((customType = customTypes[type])) {
+    this.toNode = customType.toNode;
+    this.toValue = customType.toValue;
+    this.reset = customType.reset;
+  }
 }
 
 GM_configField.prototype = {
