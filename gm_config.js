@@ -67,62 +67,85 @@ function GM_configInit(config, args) {
     };
   }
 
-  // Set a default id
-  if (typeof config.id == "undefined")
-    config.id = 'GM_config';
+  // Save the previous initialize callback
+  var oldInitCb = config.onInit;
 
-  var settings = null;
+  if (args.length == 1 &&
+    typeof args[0].id == "string" &&
+    typeof args[0].appendChild != "function") var settings = args[0];
+  else {
+    // Provide backwards-compatibility with argument style intialization
+    var settings = {};
+
+    // loop through GM_config.init() arguments
+    for (var i = 0, l = args.length, arg; i < l; ++i) {
+      arg = args[i];
+
+      // An element to use as the config window
+      if (typeof arg.appendChild == "function") {
+        settings.frame = arg;
+        continue;
+      }
+
+      switch (typeof arg) {
+        case 'object':
+          for (var j in arg) { // could be a callback functions or settings object
+            if (typeof arg[j] != "function") { // we are in the settings object
+              settings.fields = arg; // store settings object
+              break; // leave the loop
+            } // otherwise it must be a callback function
+            if (!settings.events) settings.events = {};
+            settings.events[j] = arg[j];
+          }
+          break;
+        case 'function': // passing a bare function is set to open callback
+          settings.events = {onOpen: arg};
+          break;
+        case 'string': // could be custom CSS or the title string
+          if (/\w+\s*\{\s*\w+\s*:\s*\w+[\s|\S]*\}/.test(arg))
+            settings.css = arg;
+          else
+            settings.title = arg;
+          break;
+      }
+    }
+  }
+
+  /* Initialize everything using the new settings object */
+  // Set the id
+  if (settings.id) config.id = settings.id;
+  else if (typeof config.id == "undefined") config.id = 'GM_config';
+
+  // Set the title
+  if (settings.title) config.title = settings.title;
+
+  // Set the custom css
+  if (settings.css) config.css.stylish = settings.css;
+
+  // Set the frame
+  if (settings.frame) config.frame = settings.frame;
+
+  // Set the event callbacks
+  if (settings.events) {
+    var events = settings.events;
+    for (e in events) config["on" + e.charAt(0).toUpperCase() + e.slice(1)] = events[e];
+  }
+
+  // Create the fields
+  if (settings.fields) {
+    var stored = config.read(), // read the stored settings
+        fields = settings.fields;
+
+    for (var id in fields) // for each field definition create a field object
+      config.fields[id] = new GM_configField(fields[id], stored[id], id);
+  }
+
   // If the id has changed we must modify the default style
   if (config.id != 'GM_config')
     config.css.basic = config.css.basic.replace(/#GM_config/gm, '#' + config.id);
 
-  // Save the previous initialize callback
-  var oldInitCb = config.onInit;
-
-  // loop through GM_config.init() arguments
-  for (var i = 0, l = args.length, arg; i < l; ++i) {
-    arg = args[i];
-
-    // An element to use as the config window
-    if (typeof arg.appendChild == "function") {
-      config.frame = arg;
-      continue;
-    }
-
-    switch (typeof arg) {
-      case 'object':
-        for (var j in arg) { // could be a callback functions or settings object
-          if (typeof arg[j] != "function") { // we are in the settings object
-            settings = arg; // store settings object
-            break; // leave the loop
-          } // otherwise it must be a callback function
-          config["on" + j.charAt(0).toUpperCase() + j.slice(1)] = arg[j];
-        }
-        break;
-      case 'function': // passing a bare function is set to open callback
-        config.onOpen = arg;
-        break;
-      case 'string': // could be custom CSS or the title string
-        if (/\w+\s*\{\s*\w+\s*:\s*\w+[\s|\S]*\}/.test(arg))
-          config.css.stylish = arg;
-        else
-          config.title = arg;
-        break;
-    }
-  }
-
-  if (settings) {
-    var stored = config.read(); // read the stored settings
-
-    for (var id in settings) // for each setting create a field object
-      config.fields[id] = new GM_configField(settings[id], stored[id], id);
-  }
-
-  if (!config.onInit) 
-    config.onInit = function() {};
-
   // Call the previous init() callback function if set
-  (oldInitCb || config.onInit)();
+  (oldInitCb || config.onInit || (function() {}))();
 }
 
 GM_configStruct.prototype = {
