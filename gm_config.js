@@ -501,22 +501,18 @@ function GM_configField(settings, stored, id, customType) {
   this.node = null;
   this.save = typeof settings.save == "undefined" ? true : settings.save;
 
-  // if a setting was passed to init but wasn't stored then
-  //   if a default value wasn't passed through init() then
-  //     if the type is custom use its default
-  //       else use default value for type
-  //   else use the default value passed through init()
-  // else use the stored value
-  var value = typeof stored == "undefined" ?
-                typeof settings['default'] == "undefined" ?
-                  customType ? 
-                    customType['default']
-                    : GM_configDefaultValue(settings.type, settings.options)
-                : settings['default']
-              : stored;
+  // if a default value wasn't passed through init() then
+  //   if the type is custom use its default value
+  //   else use default value for type
+  // else use the default value passed through init()
+  this['default'] = typeof settings['default'] == "undefined" ?
+    customType ? 
+      customType['default']
+      : GM_configDefaultValue(settings.type, settings.options)
+    : settings['default'];
 
   // Store the field's value
-  this.value = value;
+  this.value = typeof stored == "undefined" ? this['default'] : stored;
 
   // Setup methods for a custom type
   if (customType) {
@@ -597,12 +593,14 @@ GM_configField.prototype = {
         });
         this.node = wrap;
 
-        for (var i in options)
+        for (var i = 0, len = options.length; i < len; ++i) {
+          var option = options[i];
           wrap.appendChild(create('option', {
-            innerHTML: options[i],
-            value: i,
-            selected: i == value
+            innerHTML: option,
+            value: option,
+            selected: option == value
           }));
+        }
 
         retNode.appendChild(wrap);
         break;
@@ -726,33 +724,29 @@ GM_configField.prototype = {
   reset: function() {
     var node = this.node,
         field = this.settings,
-        noDefault = typeof field['default'] == "undefined",
         type = field.type;
 
     if (!node) return;
 
     switch (type) {
       case 'checkbox':
-        node.checked = noDefault ? GM_configDefaultValue(type) : field['default'];
+        node.checked = this['default'];
         break;
       case 'select':
-        if (field['default']) {
-          for (var i = 0, len = node.options.length; i < len; ++i)
-            if (node.options[i].textContent == field['default'])
-              node.selectedIndex = i;
-        } else
-          node.selectedIndex = 0;
+        for (var i = 0, len = node.options.length; i < len; ++i)
+          if (node.options[i].textContent == this['default'])
+            node.selectedIndex = i;
         break;
       case 'radio':
         var radios = node.getElementsByTagName('input');
         for (var i = 0, len = radios.length; i < len; ++i)
-          if (radios[i].value == field['default'])
+          if (radios[i].value == this['default'])
             radios[i].checked = true;
         break;
       case 'button' :
         break;
       default:
-        node.value = noDefault ? GM_configDefaultValue(type) : field['default'];
+        node.value = this['default'];
         break;
       }
   },
