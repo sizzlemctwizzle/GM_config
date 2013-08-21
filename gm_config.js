@@ -128,7 +128,8 @@ function GM_configInit(config, args) {
   // Set the event callbacks
   if (settings.events) {
     var events = settings.events;
-    for (e in events) config["on" + e.charAt(0).toUpperCase() + e.slice(1)] = events[e];
+    for (e in events) 
+      config["on" + e.charAt(0).toUpperCase() + e.slice(1)] = events[e];
   }
 
   // Create the fields
@@ -138,7 +139,8 @@ function GM_configInit(config, args) {
         customTypes = settings.types || {};
 
     for (var id in fields) // for each field definition create a field object
-      config.fields[id] = new GM_configField(fields[id], stored[id], id, customTypes);
+      config.fields[id] = new GM_configField(fields[id], stored[id], id,
+        customTypes[fields[id].type]);
   }
 
   // If the id has changed we must modify the default style
@@ -486,14 +488,12 @@ function GM_configDefaultValue(type, options) {
   return value;
 }
 
-function GM_configField(settings, stored, id, customTypes) {
+function GM_configField(settings, stored, id, customType) {
   // Store the field's settings
   this.settings = settings;
   this.id = id;
   this.node = null;
   this.save = typeof settings.save == "undefined" ? true : settings.save;
-
-  var type = settings.type;
 
   // if a setting was passed to init but wasn't stored then
   //   if a default value wasn't passed through init() then
@@ -503,9 +503,9 @@ function GM_configField(settings, stored, id, customTypes) {
   // else use the stored value
   var value = typeof stored == "undefined" ?
                 typeof settings['default'] == "undefined" ?
-                  customTypes[type] ? 
-                    customTypes[type]['default']
-                    : GM_configDefaultValue(type, settings.options)
+                  customType ? 
+                    customType['default']
+                    : GM_configDefaultValue(settings.type, settings.options)
                 : settings['default']
               : stored;
 
@@ -513,8 +513,7 @@ function GM_configField(settings, stored, id, customTypes) {
   this.value = value;
 
   // Setup methods for a custom type
-  var customType = null;
-  if ((customType = customTypes[type])) {
+  if (customType) {
     this.toNode = customType.toNode;
     this.toValue = customType.toValue;
     this.reset = customType.reset;
