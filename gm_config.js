@@ -36,6 +36,7 @@ function GM_configInit(config, args) {
   // Initialize instance variables
   if (typeof config.fields == "undefined") {
     config.fields = {};
+    config.fieldDefs = {};
     config.onInit = config.onInit || null;
     config.onOpen = config.onOpen || function() {};
     config.onSave = config.onSave || function() {};
@@ -138,9 +139,15 @@ function GM_configInit(config, args) {
         fields = settings.fields,
         customTypes = settings.types || {};
 
-    for (var id in fields) // for each field definition create a field object
-      config.fields[id] = new GM_configField(fields[id], stored[id], id,
-        customTypes[fields[id].type]);
+    for (var id in fields) {
+      var field = fields[id];
+
+      // for each field definition create a field object
+      if (field)
+        config.fields[id] = new GM_configField(field, stored[id], id,
+          customTypes[field.type]);
+      else if (config.fields[id]) delete config.fields[id];
+    }
   }
 
   // If the id has changed we must modify the default style
