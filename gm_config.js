@@ -36,7 +36,6 @@ function GM_configInit(config, args) {
   // Initialize instance variables
   if (typeof config.fields == "undefined") {
     config.fields = {};
-    config.fieldDefs = {};
     config.onInit = config.onInit || null;
     config.onOpen = config.onOpen || function() {};
     config.onSave = config.onSave || function() {};
