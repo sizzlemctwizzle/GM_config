@@ -499,6 +499,7 @@ function GM_configField(settings, stored, id, customType) {
   this.settings = settings;
   this.id = id;
   this.node = null;
+  this.wrapper = null;
   this.save = typeof settings.save == "undefined" ? true : settings.save;
 
   // if a default value wasn't passed through init() then
@@ -519,6 +520,10 @@ function GM_configField(settings, stored, id, customType) {
     this.toNode = customType.toNode;
     this.toValue = customType.toValue;
     this.reset = customType.reset;
+    
+    // Optional methods
+    if (customType.remove) this.remove = customType.remove;
+    if (customType.reload) this.reload = customType.reload;
   }
 }
 
@@ -536,6 +541,7 @@ GM_configField.prototype = {
           id: configId + '_' + this.id + '_var',
           title: field.title || '' }),
         firstProp;
+    this.wrapper = retNode;
 
     // Retrieve the first prop
     for (var i in field) { firstProp = i; break; }
@@ -749,6 +755,19 @@ GM_configField.prototype = {
         node.value = this['default'];
         break;
       }
+  },
+
+  remove: function(el) {
+    GM_configStruct.prototype.remove(el || this.wrapper || this.node);
+  },
+
+  reload: function() {
+    var wrapper = this.wrapper || this.node;
+    if (wrapper) {
+      var fieldParent = wrapper.parentNode;
+      fieldParent.insertBefore(this.toNode(), wrapper);
+      this.remove(wrapper);
+    }
   },
 
   _checkNumberRange: function(num, warn) {
