@@ -198,28 +198,30 @@ GM_configStruct.prototype = {
 
       // loop through fields
       for (var id in fields) {
-        var field = fields[id].settings;
+        var field = fields[id],
+            settings = field.settings;
 
-        if (field.section) { // the start of a new section
+        if (settings.section) { // the start of a new section
           section = bodyWrapper.appendChild(create('div', {
               className: 'section_header_holder',
               id: configId + '_section_' + secNum
             }));
 
-          if (typeof field.section == "string") field.section = [field.section];
+          if (typeof settings.section == "string")
+            settings.section = [settings.section];
 
-          if (typeof field.section[0] == "string")
+          if (typeof settings.section[0] == "string")
             section.appendChild(create('div', {
               className: 'section_header center',
               id: configId + '_section_header_' + secNum,
-              innerHTML: field.section[0]
+              innerHTML: settings.section[0]
             }));
 
-          if (typeof field.section[1] == "string")
+          if (typeof settings.section[1] == "string")
             section.appendChild(create('p', {
               className: 'section_desc center',
               id: configId + '_section_desc_' + secNum,
-              innerHTML: field.section[1]
+              innerHTML: settings.section[1]
             }));
           ++secNum;
         }
