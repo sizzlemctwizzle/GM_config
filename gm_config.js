@@ -225,7 +225,7 @@ GM_configStruct.prototype = {
         }
 
         // Create field elements and append to current section
-        section.appendChild(fields[id].toNode(configId));
+        section.appendChild((field.wrapper = field.toNode(configId)));
       }
 
       // Add save and close buttons
@@ -332,8 +332,11 @@ GM_configStruct.prototype = {
 
     // Null out all the fields so we don't leak memory
     var fields = this.fields;
-    for (var id in fields)
-      fields[id].node = null;
+    for (var id in fields) {
+      var field = fields[id];
+      field.wrapper = null;
+      field.node = null;
+    }
 
     this.onClose(); //  Call the close() callback function
     this.isOpen = false;
@@ -520,10 +523,6 @@ function GM_configField(settings, stored, id, customType) {
     this.toNode = customType.toNode;
     this.toValue = customType.toValue;
     this.reset = customType.reset;
-    
-    // Optional methods
-    if (customType.remove) this.remove = customType.remove;
-    if (customType.reload) this.reload = customType.reload;
   }
 }
 
@@ -541,7 +540,6 @@ GM_configField.prototype = {
           id: configId + '_' + this.id + '_var',
           title: field.title || '' }),
         firstProp;
-    this.wrapper = retNode;
 
     // Retrieve the first prop
     for (var i in field) { firstProp = i; break; }
@@ -758,14 +756,16 @@ GM_configField.prototype = {
   },
 
   remove: function(el) {
-    GM_configStruct.prototype.remove(el || this.wrapper || this.node);
+    GM_configStruct.prototype.remove(el || this.wrapper);
+    this.wrapper = null;
+    this.node = null;
   },
 
   reload: function() {
-    var wrapper = this.wrapper || this.node;
+    var wrapper = this.wrapper;
     if (wrapper) {
       var fieldParent = wrapper.parentNode;
-      fieldParent.insertBefore(this.toNode(), wrapper);
+      fieldParent.insertBefore((this.wrapper = this.toNode()), wrapper);
       this.remove(wrapper);
     }
   },
