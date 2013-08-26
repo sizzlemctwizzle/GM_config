@@ -507,6 +507,9 @@ function GM_configField(settings, stored, id, customType) {
   this.wrapper = null;
   this.save = typeof settings.save == "undefined" ? true : settings.save;
 
+  // Buttons are static and don't have a stored value
+  if (settings.type == "button") this.save = false;
+
   // if a default value wasn't passed through init() then
   //   if the type is custom use its default value
   //   else use default value for type
@@ -633,7 +636,6 @@ GM_configField.prototype = {
             field[field.script ? 'script' : 'click']();
           }, false);
         }
-        this.save = false;
 
         retNode.appendChild(btn);
         break;
