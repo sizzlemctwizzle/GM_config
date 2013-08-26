@@ -358,12 +358,11 @@ GM_configStruct.prototype = {
         var value = field.toValue();
 
         if (field.save) {
-          if (field.settings.type != "button")
-            if (value != null) {
-              values[id] = value;
-              field.value = value;
-            } else 
-              values[id] = field.value;
+          if (value != null) {
+            values[id] = value;
+            field.value = value;
+          } else 
+            values[id] = field.value;
         } else
           forgotten[id] = value;
       }
@@ -634,6 +633,7 @@ GM_configField.prototype = {
             field[field.script ? 'script' : 'click']();
           }, false);
         }
+        this.save = false;
 
         retNode.appendChild(btn);
         break;
