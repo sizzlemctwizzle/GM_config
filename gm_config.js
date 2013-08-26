@@ -673,7 +673,7 @@ GM_configField.prototype = {
         unsigned = false,
         rval = null;
 
-    if (!node) return null;
+    if (!node) return rval;
 
     if (type.indexOf('unsigned ') == 0) {
       type = type.substring(9);
