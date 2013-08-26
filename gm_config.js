@@ -313,11 +313,6 @@ GM_configStruct.prototype = {
   },
 
   save: function () {
-    var fields = this.fields;
-    for (var id in fields)
-      if (fields[id].toValue() === null) // invalid value encountered
-        return;
-
     var forgotten = this.write();
     this.onSave(forgotten); // Call the save() callback function
   },
@@ -360,11 +355,17 @@ GM_configStruct.prototype = {
 
       for (var id in fields) {
         var field = fields[id];
+        var value = field.toValue();
+
         if (field.save) {
           if (field.settings.type != "button")
-            values[id] = field.value;
+            if (value != null) {
+              values[id] = value;
+              field.value = value;
+            } else 
+              values[id] = field.value;
         } else
-          forgotten[id] = field.value;
+          forgotten[id] = value;
       }
     }
     try {
@@ -670,7 +671,7 @@ GM_configField.prototype = {
         field = this.settings,
         type = field.type,
         unsigned = false,
-        rval;
+        rval = null;
 
     if (!node) return null;
 
@@ -681,16 +682,16 @@ GM_configField.prototype = {
 
     switch (type) {
       case 'checkbox':
-        this.value = node.checked;
+        rval = node.checked;
         break;
       case 'select':
-        this.value = node[node.selectedIndex].value;
+        rval = node[node.selectedIndex].value;
         break;
       case 'radio':
         var radios = node.getElementsByTagName('input');
         for (var i = 0, len = radios.length; i < len; ++i)
           if (radios[i].checked)
-            this.value = radios[i].value;
+            rval = radios[i].value;
         break;
       case 'button':
         break;
@@ -705,7 +706,7 @@ GM_configField.prototype = {
         }
         if (!this._checkNumberRange(num, warn))
           return null;
-        this.value = num;
+        rval = num;
         break;
       case 'float': case 'number':
         var num = Number(node.value);
@@ -717,14 +718,14 @@ GM_configField.prototype = {
         }
         if (!this._checkNumberRange(num, warn))
           return null;
-        this.value = num;
+        rval = num;
         break;
       default:
-        this.value = node.value;
+        rval = node.value;
         break;
     }
 
-    return this.value; // value read successfully
+    return rval; // value read successfully
   },
 
   reset: function() {
