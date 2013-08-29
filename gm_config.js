@@ -538,6 +538,7 @@ GM_configField.prototype = {
     var field = this.settings,
         value = this.value,
         options = field.options,
+        type = field.type,
         id = this.id,
         create = this.create;
 
@@ -549,7 +550,7 @@ GM_configField.prototype = {
     // Retrieve the first prop
     for (var i in field) { firstProp = i; break; }
 
-    var label = typeof field.label == "string" && field.type != "button" ? 
+    var label = typeof field.label == "string" && type != "button" ? 
       create('label', {
         innerHTML: field.label,
         id: configId + '_' + this.id + '_field_label',
@@ -557,7 +558,7 @@ GM_configField.prototype = {
         className: 'field_label'
       }) : null;
 
-    switch (field.type) {
+    switch (type) {
       case 'textarea':
         retNode.appendChild((this.node = create('textarea', {
           id: configId + '_field_' + this.id,
@@ -613,53 +614,37 @@ GM_configField.prototype = {
 
         retNode.appendChild(wrap);
         break;
-      case 'checkbox':
-        retNode.appendChild((this.node = create('input', {
+      default: // fields using input elements
+        var props = {
           id: configId + '_field_' + id,
-          type: 'checkbox',
-          value: value,
-          checked: value
-        })));
-        break;
-      case 'button':
-        var btn = create('input', {
-          id: configId + '_field_' + id,
-          type: 'button',
-          value: field.label,
-          size: (field.size ? field.size : 25),
-          title: field.title || ''
-        });
-        this.node = btn;
+          type: type,
+          value: type == 'button' ? field.label : value
+        };
 
-        if (field.script || field.click) {
-          btn.addEventListener('click', function () {
-            field[field.script ? 'script' : 'click']();
-          }, false);
+        switch (type) {
+          case 'checkbox':
+            props.checked = value;
+            break;
+          case 'button':
+            props.size = field.size ? field.size : 25;
+            if (field.script) field.click = field.script;
+            if (field.click) props.onclick = field.click;
+            break;
+          case 'hidden': 
+            break;
+          default:
+            // type = text, int, or float
+            props.type = 'text';
+            props.size = field.size ? field.size : 25;
         }
 
-        retNode.appendChild(btn);
-        break;
-      case 'hidden':
-        retNode.appendChild((this.node = create('input', {
-          id: configId + '_field_' + id,
-          type: 'hidden',
-          value: value
-        })));
-        break;
-      default:
-        // type = text, int, or float
-        retNode.appendChild((this.node = create('input', {
-          id: configId + '_field_' + id,
-          type: 'text',
-          value: value,
-          size: (field.size ? field.size : 25)
-        })));
+        retNode.appendChild((this.node = create('input', props)));
     }
 
     // If the label is passed first, insert it before the field
     // else insert it after
     if (label) {
-      if (firstProp == "label" || field.type == "radio")
+      if (firstProp == "label" || type == "radio")
         retNode.insertBefore(label, retNode.firstChild);
       else
         retNode.appendChild(label);
@@ -698,26 +683,18 @@ GM_configField.prototype = {
       case 'button':
         break;
       case 'int': case 'integer':
+      case 'float': case 'number':
         var num = Number(node.value);
         var warn = 'Field labeled "' + field.label + '" expects a' +
           (unsigned ? ' positive ' : 'n ') + 'integer value';
-        if (isNaN(num) || Math.ceil(num) != Math.floor(num) ||
+
+        if (isNaN(num) || (type.substr(0, 3) == 'int' && 
+            Math.ceil(num) != Math.floor(num)) ||
             (unsigned && num < 0)) {
           alert(warn + '.');
           return null;
         }
-        if (!this._checkNumberRange(num, warn))
-          return null;
-        rval = num;
-        break;
-      case 'float': case 'number':
-        var num = Number(node.value);
-        var warn = 'Field labeled "' + field.label + '" expects a ' +
-          (unsigned ? 'positive ' : '') + 'number value';
-        if (isNaN(num) || (unsigned && num < 0)) {
-          alert(warn + '.');
-          return null;
-        }
+
         if (!this._checkNumberRange(num, warn))
           return null;
         rval = num;
