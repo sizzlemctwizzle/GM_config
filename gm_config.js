@@ -543,7 +543,7 @@ GM_configField.prototype = {
         create = this.create;
 
     var retNode = create('div', { className: 'config_var',
-          id: configId + '_' + this.id + '_var',
+          id: configId + '_' + id + '_var',
           title: field.title || '' }),
         firstProp;
 
@@ -553,15 +553,15 @@ GM_configField.prototype = {
     var label = typeof field.label == "string" && type != "button" ? 
       create('label', {
         innerHTML: field.label,
-        id: configId + '_' + this.id + '_field_label',
-        for: configId + '_field_' + this.id,
+        id: configId + '_' + id + '_field_label',
+        for: configId + '_field_' + id,
         className: 'field_label'
       }) : null;
 
     switch (type) {
       case 'textarea':
         retNode.appendChild((this.node = create('textarea', {
-          id: configId + '_field_' + this.id,
+          id: configId + '_field_' + id,
           innerHTML: value,
           cols: (field.cols ? field.cols : 20),
           rows: (field.rows ? field.rows : 2)
