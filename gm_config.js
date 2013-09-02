@@ -49,6 +49,7 @@ function GM_configInit(config, args) {
              + '\n' + "#GM_config input[type='radio'] { margin-right: 8px; }"
              + '\n' + "#GM_config .indent40 { margin-left: 40%; }"
              + '\n' + "#GM_config .field_label { font-size: 12px; font-weight: bold; margin-right: 6px; }"
+             + '\n' + "#GM_config .radio_label { font-size: 12px; }"
              + '\n' + "#GM_config .block { display: block; }"
              + '\n' + "#GM_config .saveclose_buttons { margin: 16px 10px 10px; padding: 2px 12px; }"
              + '\n' + "#GM_config .reset, #GM_config .reset a,"
@@ -562,6 +563,7 @@ GM_configField.prototype = {
       case 'textarea':
         retNode.appendChild((this.node = create('textarea', {
           id: configId + '_field_' + id,
+          className: 'block',
           innerHTML: value,
           cols: (field.cols ? field.cols : 20),
           rows: (field.rows ? field.rows : 2)
@@ -574,25 +576,22 @@ GM_configField.prototype = {
         this.node = wrap;
 
         for (var i = 0, len = options.length; i < len; ++i) {
-          var labelI = create('label', {});
-
-          var radLabel = labelI.appendChild(create('span', {
-            innerHTML: options[i]
+          var radLabel = wrap.appendChild(create('label', {
+            innerHTML: options[i],
+            className: 'radio_label'
           }));
 
-          var rad = labelI.appendChild(create('input', {
+          var rad = create('input', {
             value: options[i],
             type: 'radio',
             name: id,
-            checked: options[i] == value ? true : false
-          }));
+            checked: options[i] == value
+          });
 
           if (firstProp == "options")
-            labelI.insertBefore(radLabel, rad);
+            wrap.insertBefore(radLabel, rad);
           else
-            labelI.appendChild(radLabel);
-
-          wrap.appendChild(labelI);
+            wrap.appendChild(rad);
         }
 
         retNode.appendChild(wrap);
