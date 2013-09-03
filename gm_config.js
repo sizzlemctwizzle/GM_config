@@ -27,8 +27,10 @@ GM_config is distributed under the terms of the GNU Lesser General Public Licens
 // The GM_config constructor
 function GM_configStruct() {
   // call init() if settings were passed to constructor
-  if (arguments.length)
+  if (arguments.length) {
     GM_configInit(this, arguments);
+    this.onInit();
+  }
 }
 
 // This is the initializer function
@@ -36,7 +38,7 @@ function GM_configInit(config, args) {
   // Initialize instance variables
   if (typeof config.fields == "undefined") {
     config.fields = {};
-    config.onInit = config.onInit || null;
+    config.onInit = config.onInit || function() {};
     config.onOpen = config.onOpen || function() {};
     config.onSave = config.onSave || function() {};
     config.onClose = config.onClose || function() {};
@@ -64,12 +66,10 @@ function GM_configInit(config, args) {
              + '\n' + "#GM_config .section_desc { background: #EFEFEF; border: 1px solid #CCC; color: #575757;"
                     + " font-size: 9pt; margin: 0 0 6px; }"
              + '\n',
+      basicPrefix: "GM_config",
       stylish: ""
     };
   }
-
-  // Save the previous initialize callback
-  var oldInitCb = config.onInit;
 
   if (args.length == 1 &&
     typeof args[0].id == "string" &&
@@ -151,16 +151,19 @@ function GM_configInit(config, args) {
   }
 
   // If the id has changed we must modify the default style
-  if (config.id != 'GM_config')
-    config.css.basic = config.css.basic.replace(/#GM_config/gm, '#' + config.id);
-
-  // Call the previous init() callback function if set
-  (oldInitCb || config.onInit || (function() {}))();
+  if (config.id != config.css.basicPrefix) {
+    config.css.basic = config.css.basic.replace(
+      new RegExp('#' + config.css.basicPrefix, 'gm'), '#' + config.id);
+    config.css.basicPrefix = config.id;
+  }
 }
 
 GM_configStruct.prototype = {
   // Support old method of initalizing
-  init: function() { GM_configInit(this, arguments); },
+  init: function() { 
+    GM_configInit(this, arguments);
+    this.onInit(); 
+  },
 
   // call GM_config.open() from your script to open the menu
   open: function () {
