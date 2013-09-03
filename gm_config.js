@@ -46,26 +46,27 @@ function GM_configInit(config, args) {
     config.isOpen = false;
     config.title = 'User Script Settings';
     config.css = {
-      basic: "#GM_config * { font-family: arial,tahoma,myriad pro,sans-serif; }"
-             + '\n' + "#GM_config { background: #FFF; }"
-             + '\n' + "#GM_config input[type='radio'] { margin-right: 8px; }"
-             + '\n' + "#GM_config .indent40 { margin-left: 40%; }"
-             + '\n' + "#GM_config .field_label { font-size: 12px; font-weight: bold; margin-right: 6px; }"
-             + '\n' + "#GM_config .radio_label { font-size: 12px; }"
-             + '\n' + "#GM_config .block { display: block; }"
-             + '\n' + "#GM_config .saveclose_buttons { margin: 16px 10px 10px; padding: 2px 12px; }"
-             + '\n' + "#GM_config .reset, #GM_config .reset a,"
-                    + " #GM_config_buttons_holder { color: #000; text-align: right; }"
-             + '\n' + "#GM_config .config_header { font-size: 20pt; margin: 0; }"
-             + '\n' + "#GM_config .config_desc, #GM_config .section_desc, #GM_config .reset { font-size: 9pt; }"
-             + '\n' + "#GM_config .center { text-align: center; }"
-             + '\n' + "#GM_config .section_header_holder { margin-top: 8px; }"
-             + '\n' + "#GM_config .config_var { margin: 0 0 4px; }"
-             + '\n' + "#GM_config .section_header { background: #414141; border: 1px solid #000; color: #FFF;"
-                    + " font-size: 13pt; margin: 0; }"
-             + '\n' + "#GM_config .section_desc { background: #EFEFEF; border: 1px solid #CCC; color: #575757;"
-                    + " font-size: 9pt; margin: 0 0 6px; }"
-             + '\n',
+      basic: [
+        "#GM_config * { font-family: arial,tahoma,myriad pro,sans-serif; }",
+        "#GM_config { background: #FFF; }",
+        "#GM_config input[type='radio'] { margin-right: 8px; }",
+        "#GM_config .indent40 { margin-left: 40%; }",
+        "#GM_config .field_label { font-size: 12px; font-weight: bold; margin-right: 6px; }",
+        "#GM_config .radio_label { font-size: 12px; }",
+        "#GM_config .block { display: block; }",
+        "#GM_config .saveclose_buttons { margin: 16px 10px 10px; padding: 2px 12px; }",
+        "#GM_config .reset, #GM_config .reset a," +
+          " #GM_config_buttons_holder { color: #000; text-align: right; }",
+        "#GM_config .config_header { font-size: 20pt; margin: 0; }",
+        "#GM_config .config_desc, #GM_config .section_desc, #GM_config .reset { font-size: 9pt; }",
+        "#GM_config .center { text-align: center; }",
+        "#GM_config .section_header_holder { margin-top: 8px; }",
+        "#GM_config .config_var { margin: 0 0 4px; }",
+        "#GM_config .section_header { background: #414141; border: 1px solid #000; color: #FFF;",
+        " font-size: 13pt; margin: 0; }",
+        "#GM_config .section_desc { background: #EFEFEF; border: 1px solid #CCC; color: #575757;" +
+          " font-size: 9pt; margin: 0 0 6px; }"
+        ].join('\n') + '\n',
       basicPrefix: "GM_config",
       stylish: ""
     };
