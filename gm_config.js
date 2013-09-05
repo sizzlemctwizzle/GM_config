@@ -565,11 +565,12 @@ GM_configField.prototype = {
     switch (type) {
       case 'textarea':
         retNode.appendChild((this.node = create('textarea', {
+          innerHTML: value,
           id: configId + '_field_' + id,
           className: 'block',
           cols: (field.cols ? field.cols : 20),
           rows: (field.rows ? field.rows : 2)
-        }, value)));
+        })));
         break;
       case 'radio':
         var wrap = create('div', {
