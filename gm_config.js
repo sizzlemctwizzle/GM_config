@@ -193,9 +193,8 @@ GM_configStruct.prototype = {
       // Add header and title
       bodyWrapper.appendChild(create('div', {
         id: configId + '_header',
-        className: 'config_header block center',
-        innerHTML: config.title
-      }));
+        className: 'config_header block center'
+      }, config.title));
 
       // Append elements
       var section = bodyWrapper,
@@ -218,16 +217,14 @@ GM_configStruct.prototype = {
           if (typeof settings.section[0] == "string")
             section.appendChild(create('div', {
               className: 'section_header center',
-              id: configId + '_section_header_' + secNum,
-              innerHTML: settings.section[0]
-            }));
+              id: configId + '_section_header_' + secNum
+            }, settings.section[0]));
 
           if (typeof settings.section[1] == "string")
             section.appendChild(create('p', {
               className: 'section_desc center',
-              id: configId + '_section_desc_' + secNum,
-              innerHTML: settings.section[1]
-            }));
+              id: configId + '_section_desc_' + secNum
+            }, settings.section[1]));
           ++secNum;
         }
 
@@ -417,8 +414,11 @@ GM_configStruct.prototype = {
           else
             A[b] = B[b];
         }
-        for (var i = 2, len = arguments.length; i < len; ++i)
-          A.appendChild(arguments[i]);
+        if (typeof arguments[2] == "string")
+          A.innerHTML = arguments[2];
+        else
+          for (var i = 2, len = arguments.length; i < len; ++i)
+            A.appendChild(arguments[i]);
     }
     return A;
   },
@@ -555,23 +555,21 @@ GM_configField.prototype = {
     // Retrieve the first prop
     for (var i in field) { firstProp = i; break; }
 
-    var label = typeof field.label == "string" && type != "button" ? 
+    var label = field.label && type != "button" ? 
       create('label', {
-        innerHTML: field.label,
         id: configId + '_' + id + '_field_label',
         for: configId + '_field_' + id,
         className: 'field_label'
-      }) : null;
+      }, field.label) : null;
 
     switch (type) {
       case 'textarea':
         retNode.appendChild((this.node = create('textarea', {
           id: configId + '_field_' + id,
           className: 'block',
-          innerHTML: value,
           cols: (field.cols ? field.cols : 20),
           rows: (field.rows ? field.rows : 2)
-        })));
+        }, value)));
         break;
       case 'radio':
         var wrap = create('div', {
@@ -581,9 +579,8 @@ GM_configField.prototype = {
 
         for (var i = 0, len = options.length; i < len; ++i) {
           var radLabel = wrap.appendChild(create('label', {
-            innerHTML: options[i],
             className: 'radio_label'
-          }));
+          }, options[i]));
 
           var rad = create('input', {
             value: options[i],
@@ -609,10 +606,9 @@ GM_configField.prototype = {
         for (var i = 0, len = options.length; i < len; ++i) {
           var option = options[i];
           wrap.appendChild(create('option', {
-            innerHTML: option,
             value: option,
             selected: option == value
-          }));
+          }, option));
         }
 
         retNode.appendChild(wrap);
