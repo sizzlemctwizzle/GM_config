@@ -211,16 +211,16 @@ GM_configStruct.prototype = {
               id: configId + '_section_' + secNum
             }));
 
-          if (typeof settings.section == "string")
+          if (Object.prototype.toString.call(settings.section) !== '[object Array]')
             settings.section = [settings.section];
 
-          if (typeof settings.section[0] == "string")
+          if (settings.section[0])
             section.appendChild(create('div', {
               className: 'section_header center',
               id: configId + '_section_header_' + secNum
             }, settings.section[0]));
 
-          if (typeof settings.section[1] == "string")
+          if (settings.section[1])
             section.appendChild(create('p', {
               className: 'section_desc center',
               id: configId + '_section_desc_' + secNum
