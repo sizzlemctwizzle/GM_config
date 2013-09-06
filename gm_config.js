@@ -547,6 +547,21 @@ GM_configField.prototype = {
         id = this.id,
         create = this.create;
 
+    function addLabel(pos, labelEl, parentNode, beforeEl) {
+      if (!beforeEl) beforeEl = parentNode.firstChild;
+      switch (pos) {
+        case 'right': case 'below':
+          if (pos == 'below') 
+            parentNode.appendChild(create('br', {}));
+          parentNode.appendChild(labelEl);
+          break;
+        default:
+          if (pos == 'above')
+            parentNode.insertBefore(create('br', {}), beforeEl);
+          parentNode.insertBefore(labelEl, beforeEl);
+      }
+    }
+
     var retNode = create('div', { className: 'config_var',
           id: configId + '_' + id + '_var',
           title: field.title || '' }),
@@ -579,21 +594,22 @@ GM_configField.prototype = {
         this.node = wrap;
 
         for (var i = 0, len = options.length; i < len; ++i) {
-          var radLabel = wrap.appendChild(create('label', {
+          var radLabel = create('label', {
             className: 'radio_label'
-          }, options[i]));
+          }, options[i]);
 
-          var rad = create('input', {
+          var rad = wrap.appendChild(create('input', {
             value: options[i],
             type: 'radio',
             name: id,
             checked: options[i] == value
-          });
+          }));
 
-          if (firstProp == "options")
-            wrap.insertBefore(radLabel, rad);
-          else
-            wrap.appendChild(rad);
+          var radLabelPos = field.labelPos && 
+            (field.labelPos == 'left' || field.labelPos == 'right') ? 
+            field.labelPos : firstProp == 'options' ? 'left' : 'right';
+
+          addLabel(radLabelPos, radLabel, wrap, rad);
         }
 
         retNode.appendChild(wrap);
@@ -641,13 +657,14 @@ GM_configField.prototype = {
         retNode.appendChild((this.node = create('input', props)));
     }
 
-    // If the label is passed first, insert it before the field
-    // else insert it after
     if (label) {
-      if (firstProp == "label" || type == "radio")
-        retNode.insertBefore(label, retNode.firstChild);
-      else
-        retNode.appendChild(label);
+      // If the label is passed first, insert it before the field
+      // else insert it after
+      if (!field.labelPos)
+        field.labelPos = firstProp == "label" || type == "radio" ? 
+          "left" : "right";
+
+      addLabel(field.labelPos, label, retNode);
     }
 
     return retNode;
