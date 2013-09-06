@@ -545,6 +545,7 @@ GM_configField.prototype = {
         options = field.options,
         type = field.type,
         id = this.id,
+        labelPos = field.labelPos,
         create = this.create;
 
     function addLabel(pos, labelEl, parentNode, beforeEl) {
@@ -605,9 +606,9 @@ GM_configField.prototype = {
             checked: options[i] == value
           }));
 
-          var radLabelPos = field.labelPos && 
-            (field.labelPos == 'left' || field.labelPos == 'right') ? 
-            field.labelPos : firstProp == 'options' ? 'left' : 'right';
+          var radLabelPos = labelPos && 
+            (labelPos == 'left' || labelPos == 'right') ? 
+            labelPos : firstProp == 'options' ? 'left' : 'right';
 
           addLabel(radLabelPos, radLabel, wrap, rad);
         }
@@ -660,11 +661,11 @@ GM_configField.prototype = {
     if (label) {
       // If the label is passed first, insert it before the field
       // else insert it after
-      if (!field.labelPos)
-        field.labelPos = firstProp == "label" || type == "radio" ? 
+      if (!labelPos)
+        labelPos = firstProp == "label" || type == "radio" ? 
           "left" : "right";
 
-      addLabel(field.labelPos, label, retNode);
+      addLabel(labelPos, label, retNode);
     }
 
     return retNode;
