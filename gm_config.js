@@ -169,7 +169,7 @@ GM_configStruct.prototype = {
   // call GM_config.open() from your script to open the menu
   open: function () {
     // Die if the menu is already open on this page
-    // You can have multiple instances but they can't be open at the same time
+    // You can have multiple instances but you can't open the same instance twice
     var match = document.getElementById(this.id);
     if (match && (match.tagName == "IFRAME" || match.childNodes.length > 0)) return;
 
@@ -285,15 +285,15 @@ GM_configStruct.prototype = {
       config.isOpen = true;
     }
 
-    // Either use the element passed to init() or create an iframe
+    // Change this in the onOpen callback using this.frame.setAttribute('style', '')
     var defaultStyle = 'bottom: auto; border: 1px solid #000; display: none; height: 75%;'
-                       + ' left: 0; margin: 0; max-height: 95%; max-width: 95%; opacity: 0;'
-                       + ' overflow: auto; padding: 0; position: fixed; right: auto; top: 0;'
-                       + ' width: 75%; z-index: 999;';
+      + ' left: 0; margin: 0; max-height: 95%; max-width: 95%; opacity: 0;'
+      + ' overflow: auto; padding: 0; position: fixed; right: auto; top: 0;'
+      + ' width: 75%; z-index: 999;';
 
-
+    // Either use the element passed to init() or create an iframe
     if (this.frame) {
-      this.frame.id = this.id;
+      this.frame.id = this.id; // Allows for prefixing styles with the config id
       this.frame.setAttribute('style', defaultStyle);
       buildConfigWin(this.frame, this.frame.ownerDocument.getElementsByTagName('head')[0]);
     } else {
@@ -303,12 +303,13 @@ GM_configStruct.prototype = {
         style: defaultStyle
       })));
 
-      this.frame.src = 'about:blank'; // In WebKit src can't be set until it is added to the page
+      // In WebKit src can't be set until it is added to the page
+      this.frame.src = 'about:blank';
       // we wait for the iframe to load before we can modify it
       this.frame.addEventListener('load', function(e) {
           var frame = config.frame;
           var body = frame.contentDocument.getElementsByTagName('body')[0];
-          body.id = config.id; // Allows for prefixing styles with "#GM_config"
+          body.id = config.id; // Allows for prefixing styles with the config id
           buildConfigWin(body, frame.contentDocument.getElementsByTagName('head')[0]);
       }, false);
     }
