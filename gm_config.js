@@ -478,7 +478,10 @@ GM_configStruct.prototype = {
   GM_configStruct.prototype.getValue = getValue;
   GM_configStruct.prototype.stringify = stringify;
   GM_configStruct.prototype.parser = parser;
-  GM_configStruct.prototype.log = console ? console.log : ( GM_log || (window.opera ? opera.postError : function(){}) );
+  GM_configStruct.prototype.log = window.console ? console.log :
+                                    ( typeof GM_log !== 'undefined' ? GM_log :
+                                        (window.opera ? opera.postError : function(){})
+                                    );
 })();
 
 function GM_configDefaultValue(type, options) {
