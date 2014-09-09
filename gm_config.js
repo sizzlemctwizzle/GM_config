@@ -1,6 +1,5 @@
 /*
-Copyright 2009-2013, GM_config Contributors
-All rights reserved.
+Copyright 2009+, GM_config Contributors (https://github.com/sizzlemctwizzle/GM_config)
 
 GM_config Contributors:
     Mike Medley <medleymind@gmail.com>
@@ -130,7 +129,7 @@ function GM_configInit(config, args) {
   // Set the event callbacks
   if (settings.events) {
     var events = settings.events;
-    for (e in events) 
+    for (e in events)
       config["on" + e.charAt(0).toUpperCase() + e.slice(1)] = events[e];
   }
 
@@ -161,9 +160,9 @@ function GM_configInit(config, args) {
 
 GM_configStruct.prototype = {
   // Support old method of initalizing
-  init: function() { 
+  init: function() {
     GM_configInit(this, arguments);
-    this.onInit(); 
+    this.onInit();
   },
 
   // call GM_config.open() from your script to open the menu
@@ -364,7 +363,7 @@ GM_configStruct.prototype = {
           if (value != null) {
             values[id] = value;
             field.value = value;
-          } else 
+          } else
             values[id] = field.value;
         } else
           forgotten[id] = value;
@@ -525,7 +524,7 @@ function GM_configField(settings, stored, id, customType) {
   //   else use default value for type
   // else use the default value passed through init()
   this['default'] = typeof settings['default'] == "undefined" ?
-    customType ? 
+    customType ?
       customType['default']
       : GM_configDefaultValue(settings.type, settings.options)
     : settings['default'];
@@ -557,7 +556,7 @@ GM_configField.prototype = {
       if (!beforeEl) beforeEl = parentNode.firstChild;
       switch (pos) {
         case 'right': case 'below':
-          if (pos == 'below') 
+          if (pos == 'below')
             parentNode.appendChild(create('br', {}));
           parentNode.appendChild(labelEl);
           break;
@@ -576,7 +575,7 @@ GM_configField.prototype = {
     // Retrieve the first prop
     for (var i in field) { firstProp = i; break; }
 
-    var label = field.label && type != "button" ? 
+    var label = field.label && type != "button" ?
       create('label', {
         id: configId + '_' + id + '_field_label',
         for: configId + '_field_' + id,
@@ -611,8 +610,8 @@ GM_configField.prototype = {
             checked: options[i] == value
           }));
 
-          var radLabelPos = labelPos && 
-            (labelPos == 'left' || labelPos == 'right') ? 
+          var radLabelPos = labelPos &&
+            (labelPos == 'left' || labelPos == 'right') ?
             labelPos : firstProp == 'options' ? 'left' : 'right';
 
           addLabel(radLabelPos, radLabel, wrap, rad);
@@ -652,7 +651,7 @@ GM_configField.prototype = {
             if (field.script) field.click = field.script;
             if (field.click) props.onclick = field.click;
             break;
-          case 'hidden': 
+          case 'hidden':
             break;
           default:
             // type = text, int, or float
@@ -667,7 +666,7 @@ GM_configField.prototype = {
       // If the label is passed first, insert it before the field
       // else insert it after
       if (!labelPos)
-        labelPos = firstProp == "label" || type == "radio" ? 
+        labelPos = firstProp == "label" || type == "radio" ?
           "left" : "right";
 
       addLabel(labelPos, label, retNode);
@@ -711,7 +710,7 @@ GM_configField.prototype = {
         var warn = 'Field labeled "' + field.label + '" expects a' +
           (unsigned ? ' positive ' : 'n ') + 'integer value';
 
-        if (isNaN(num) || (type.substr(0, 3) == 'int' && 
+        if (isNaN(num) || (type.substr(0, 3) == 'int' &&
             Math.ceil(num) != Math.floor(num)) ||
             (unsigned && num < 0)) {
           alert(warn + '.');
