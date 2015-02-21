@@ -2,5 +2,5 @@ For GM_config usage information, read the [wiki](https://github.com/sizzlemctwiz
 
 See what GM_config can do with:
 
-* a server side live example please visit the [demo page](http://sizzlemctwizzle.github.io/GM_config/). *(__NOTE__: Currently offline due to userscripts.org being offline)*
+* a server side live example please visit the [demo page](http://sizzlemctwizzle.github.io/GM_config/).
 * a client side live example please visit the [GM_config Unit Test](https://openuserjs.org/scripts/sizzle/The_GM_config_Unit_Test), install the user script, and refresh that same page. Check out the [Userscript Beginners HOWTO](https://openuserjs.org/about/Userscript-Beginners-HOWTO) if you are new to user scripts.
