@@ -478,9 +478,9 @@ GM_configStruct.prototype = {
   GM_configStruct.prototype.stringify = stringify;
   GM_configStruct.prototype.parser = parser;
   GM_configStruct.prototype.log =  window.console ?
-    console.log : (isGM && typeof GM_log != 'undefined' ?
+    console.log.bind(console) : (isGM && typeof GM_log != 'undefined' ?
       GM_log : (window.opera ?
-        opera.postError : function(){ /* no logging */ }
+        opera.postError.bind(opera) : function(){ /* no logging */ }
   ));
 })();
 
