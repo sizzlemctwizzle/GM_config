@@ -129,7 +129,7 @@ function GM_configInit(config, args) {
   // Set the event callbacks
   if (settings.events) {
     var events = settings.events;
-    for (e in events)
+    for (var e in events)
       config["on" + e.charAt(0).toUpperCase() + e.slice(1)] = events[e];
   }
 
