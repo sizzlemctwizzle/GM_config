@@ -26,7 +26,7 @@ GM_config is distributed under the terms of the GNU Lesser General Public Licens
 // ==UserScript==
 // @exclude       *
 // @author        Mike Medley <medleymind@gmail.com> (https://github.com/sizzlemctwizzle/GM_config)
-// @icon          https://raw.githubusercontent.com/sizzlemctwizzle/GM_config/master/gm_config_icon.png
+// @icon          https://raw.githubusercontent.com/sizzlemctwizzle/GM_config/master/gm_config_icon_large.png
 
 // ==UserLibrary==
 // @name          GM_config
