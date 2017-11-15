@@ -23,6 +23,22 @@ GM_config is distributed under the terms of the GNU Lesser General Public Licens
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+// ==UserScript==
+// @exclude       *
+// @author        Mike Medley <medleymind@gmail.com> (https://github.com/sizzlemctwizzle/GM_config)
+// @icon          https://raw.githubusercontent.com/sizzlemctwizzle/GM_config/master/gm_config_icon.png
+
+// ==UserLibrary==
+// @name          GM_config
+// @description   A lightweight, reusable, cross-browser graphical settings framework for inclusion in user scripts.
+// @copyright     2009+, Mike Medley (https://github.com/sizzlemctwizzle)
+// @license       LGPL-3.0; http://www.gnu.org/licenses/lgpl-3.0.txt
+
+// ==/UserScript==
+
+// ==/UserLibrary==
+
+
 // The GM_config constructor
 function GM_configStruct() {
   // call init() if settings were passed to constructor
