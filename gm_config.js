@@ -39,6 +39,7 @@ GM_config is distributed under the terms of the GNU Lesser General Public Licens
 // ==/UserLibrary==
 
 
+
 // The GM_config constructor
 function GM_configStruct() {
   // call init() if settings were passed to constructor
