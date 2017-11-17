@@ -32,7 +32,7 @@ GM_config is distributed under the terms of the GNU Lesser General Public Licens
 // @name          GM_config
 // @description   A lightweight, reusable, cross-browser graphical settings framework for inclusion in user scripts.
 // @copyright     2009+, Mike Medley (https://github.com/sizzlemctwizzle)
-// @license       LGPL-3.0; http://www.gnu.org/licenses/lgpl-3.0.txt
+// @license       LGPL-3.0
 
 // ==/UserScript==
 
