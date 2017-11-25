@@ -360,10 +360,21 @@ GM_configStruct.prototype = {
 
   set: function (name, val) {
     this.fields[name].value = val;
+
+    if (this.fields[name].node) {
+      this.fields[name].reload();
+    }
   },
 
-  get: function (name) {
-    return this.fields[name].value;
+  get: function (name, getLive) {
+    var field = this.fields[name],
+        fieldVal = null;
+
+    if (getLive && field.node) {
+      fieldVal = field.toValue();
+    }
+
+    return fieldVal != null ? fieldVal : field.value;
   },
 
   write: function (store, obj) {
