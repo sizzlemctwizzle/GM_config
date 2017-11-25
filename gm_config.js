@@ -153,7 +153,8 @@ function GM_configInit(config, args) {
   if (settings.fields) {
     var stored = config.read(), // read the stored settings
         fields = settings.fields,
-        customTypes = settings.types || {};
+        customTypes = settings.types || {},
+        configId = config.id;
 
     for (var id in fields) {
       var field = fields[id];
@@ -161,7 +162,7 @@ function GM_configInit(config, args) {
       // for each field definition create a field object
       if (field)
         config.fields[id] = new GM_configField(field, stored[id], id,
-          customTypes[field.type]);
+          customTypes[field.type], configId);
       else if (config.fields[id]) delete config.fields[id];
     }
   }
@@ -244,7 +245,7 @@ GM_configStruct.prototype = {
         }
 
         // Create field elements and append to current section
-        section.appendChild((field.wrapper = field.toNode(configId)));
+        section.appendChild((field.wrapper = field.toNode()));
       }
 
       // Add save and close buttons
@@ -524,10 +525,11 @@ function GM_configDefaultValue(type, options) {
   return value;
 }
 
-function GM_configField(settings, stored, id, customType) {
+function GM_configField(settings, stored, id, customType, configId) {
   // Store the field's settings
   this.settings = settings;
   this.id = id;
+  this.configId = configId;
   this.node = null;
   this.wrapper = null;
   this.save = typeof settings.save == "undefined" ? true : settings.save;
@@ -559,12 +561,13 @@ function GM_configField(settings, stored, id, customType) {
 GM_configField.prototype = {
   create: GM_configStruct.prototype.create,
 
-  toNode: function(configId) {
+  toNode: function() {
     var field = this.settings,
         value = this.value,
         options = field.options,
         type = field.type,
         id = this.id,
+        configId = this.configId,
         labelPos = field.labelPos,
         create = this.create;
 
