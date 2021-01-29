@@ -322,8 +322,15 @@ GM_configStruct.prototype = {
       // In WebKit src can't be set until it is added to the page
       this.frame.src = 'about:blank';
       // we wait for the iframe to load before we can modify it
+      var that = this;
       this.frame.addEventListener('load', function(e) {
           var frame = config.frame;
+          if (frame.src && !frame.contentDocument) {
+            // Some agents need this as an empty string for newer context implementations
+            frame.src = "";
+          } else if (!frame.contentDocument) {
+            that.log("GM_config failed to initialize default settings dialog node!");
+          }
           var body = frame.contentDocument.getElementsByTagName('body')[0];
           body.id = config.id; // Allows for prefixing styles with the config id
           buildConfigWin(body, frame.contentDocument.getElementsByTagName('head')[0]);
