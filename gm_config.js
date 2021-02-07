@@ -34,6 +34,10 @@ GM_config is distributed under the terms of the GNU Lesser General Public Licens
 // @copyright     2009+, Mike Medley (https://github.com/sizzlemctwizzle)
 // @license       LGPL-3.0-or-later; https://raw.githubusercontent.com/sizzlemctwizzle/GM_config/master/LICENSE
 
+// @homepageURL   https://openuserjs.org/libs/sizzle/GM_config
+// @homepageURL   https://github.com/sizzlemctwizzle/GM_config
+// @supportURL    https://github.com/sizzlemctwizzle/GM_config/issues
+
 // ==/UserScript==
 
 // ==/UserLibrary==
