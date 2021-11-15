@@ -1,7 +1,7 @@
 /*
 Copyright 2009+, GM_config Contributors (https://github.com/sizzlemctwizzle/GM_config)
 
-GM_config Contributors:
+GM_config Collaborators:
     Mike Medley <medleymind@gmail.com>
     Joe Simmons
     Izzy Soft
