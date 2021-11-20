@@ -1,4 +1,3 @@
-// Type definitions for GM_config
 // Minimum TypeScript Version: 2.8
 
 type FieldValue = string | number | boolean;
@@ -73,12 +72,14 @@ interface CustomType {
 /* GM_configStruct and related */
 
 interface GM_configStructConstructor {
+    // tslint:disable-next-line:no-unnecessary-generics
     new <CustomTypes extends string>(options: InitOptions<CustomTypes>): GM_configStruct;
 }
 
 /** Initialize a GM_configStruct */
 declare function GM_configInit<CustomTypes extends string>(
     config: GM_configStruct,
+    // tslint:disable-next-line:no-unnecessary-generics
     options: InitOptions<CustomTypes>,
 ): void;
 
@@ -86,6 +87,7 @@ declare function GM_configDefaultValue(type: FieldTypes): FieldValue;
 
 interface GM_configStruct {
     /** Initialize GM_config */
+    // tslint:disable-next-line:no-unnecessary-generics
     init<CustomTypes extends string>(options: InitOptions<CustomTypes>): void;
 
     /** Display the config panel */
