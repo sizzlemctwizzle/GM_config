@@ -71,21 +71,19 @@ interface CustomType {
 
 /* GM_configStruct and related */
 
-interface GM_configStructConstructor {
-    // tslint:disable-next-line:no-unnecessary-generics
-    new <CustomTypes extends string>(options: InitOptions<CustomTypes>): GM_configStruct;
-}
-
 /** Initialize a GM_configStruct */
 declare function GM_configInit<CustomTypes extends string>(
-    config: GM_configStruct,
+    config: GM_configStruct<CustomTypes>,
     // tslint:disable-next-line:no-unnecessary-generics
     options: InitOptions<CustomTypes>,
 ): void;
 
 declare function GM_configDefaultValue(type: FieldTypes): FieldValue;
 
-interface GM_configStruct {
+/** Create multiple GM_config instances */
+declare class GM_configStruct<CustomTypes extends string = never> {
+    constructor(options: InitOptions<CustomTypes>)
+
     /** Initialize GM_config */
     // tslint:disable-next-line:no-unnecessary-generics
     init<CustomTypes extends string>(options: InitOptions<CustomTypes>): void;
@@ -174,21 +172,18 @@ interface GM_configStruct {
 
 /** Default GM_config object */
 declare let GM_config: GM_configStruct;
-/** Create multiple GM_config instances */
-declare let GM_configStruct: GM_configStructConstructor;
 
 /* GM_configField and related */
-interface GM_configFieldConstructor {
-    new (
+
+declare class GM_configField {
+    constructor(
         settings: Field,
         stored: FieldValue | undefined,
         id: string,
         customType: CustomType | undefined,
         configId: string,
-    ): GM_configField;
-}
+    )
 
-interface GM_configField {
     [key: string]: any;
     settings: Field;
     id: string;
@@ -215,5 +210,3 @@ interface GM_configField {
 
     _checkNumberRange(num: number, warn: string): true | null;
 }
-
-declare let GM_configField: GM_configFieldConstructor;
