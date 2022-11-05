@@ -782,6 +782,7 @@ GM_configField.prototype = {
         for (i = 0, len = radios.length; i < len; ++i) {
           if (radios[i].checked) {
             rval = radios[i].value;
+            break;
           }
         }
         break;
@@ -840,6 +841,8 @@ GM_configField.prototype = {
         for (i = 0, len = radios.length; i < len; ++i) {
           if (radios[i].value == this['default']) {
             radios[i].checked = true;
+          } else {
+            radios[i].checked = false;
           }
         }
         break;
