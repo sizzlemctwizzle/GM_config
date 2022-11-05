@@ -92,12 +92,13 @@ function GM_configInit(config, args) {
     };
   }
 
+  var settings = null;
   if (args.length == 1 &&
     typeof args[0].id == "string" &&
-    typeof args[0].appendChild != "function") var settings = args[0];
+    typeof args[0].appendChild != "function") settings = args[0];
   else {
     // Provide backwards-compatibility with argument style intialization
-    var settings = {};
+    settings = {};
 
     // loop through GM_config.init() arguments
     for (var i = 0, l = args.length, arg; i < l; ++i) {
@@ -124,10 +125,11 @@ function GM_configInit(config, args) {
           settings.events = {onOpen: arg};
           break;
         case 'string': // could be custom CSS or the title string
-          if (/\w+\s*\{\s*\w+\s*:\s*\w+[\s|\S]*\}/.test(arg))
+          if (/\w+\s*\{\s*\w+\s*:\s*\w+[\s|\S]*\}/.test(arg)) {
             settings.css = arg;
-          else
+          } else {
             settings.title = arg;
+          }
           break;
       }
     }
@@ -150,8 +152,9 @@ function GM_configInit(config, args) {
   // Set the event callbacks
   if (settings.events) {
     var events = settings.events;
-    for (var e in events)
+    for (var e in events) {
       config["on" + e.charAt(0).toUpperCase() + e.slice(1)] = events[e];
+    }
   }
 
   // Create the fields
@@ -165,10 +168,10 @@ function GM_configInit(config, args) {
       var field = fields[id];
 
       // for each field definition create a field object
-      if (field)
+      if (field) {
         config.fields[id] = new GM_configField(field, stored[id], id,
           customTypes[field.type], configId);
-      else if (config.fields[id]) delete config.fields[id];
+      } else if (config.fields[id]) delete config.fields[id];
     }
   }
 
@@ -232,20 +235,23 @@ GM_configStruct.prototype = {
               id: configId + '_section_' + secNum
             }));
 
-          if (Object.prototype.toString.call(settings.section) !== '[object Array]')
+          if (Object.prototype.toString.call(settings.section) !== '[object Array]') {
             settings.section = [settings.section];
+          }
 
-          if (settings.section[0])
+          if (settings.section[0]) {
             section.appendChild(create('div', {
               className: 'section_header center',
               id: configId + '_section_header_' + secNum
             }, settings.section[0]));
+          }
 
-          if (settings.section[1])
+          if (settings.section[1]) {
             section.appendChild(create('p', {
               className: 'section_desc center',
               id: configId + '_section_desc_' + secNum
             }, settings.section[1]));
+          }
           ++secNum;
         }
 
@@ -403,10 +409,12 @@ GM_configStruct.prototype = {
           if (value != null) {
             values[id] = value;
             field.value = value;
-          } else
+          } else {
             values[id] = field.value;
-        } else
+          }
+        } else {
           forgotten[id] = value;
+        }
       }
     }
     try {
@@ -419,11 +427,12 @@ GM_configStruct.prototype = {
   },
 
   read: function (store) {
+    var rval = null;
     try {
-      var rval = this.parser(this.getValue(store || this.id, '{}'));
+      rval = this.parser(this.getValue(store || this.id, '{}'));
     } catch(e) {
       this.log("GM_config failed to read saved settings!");
-      var rval = {};
+      rval = {};
     }
     return rval;
   },
@@ -438,27 +447,31 @@ GM_configStruct.prototype = {
   },
 
   create: function () {
+    var A = null;
     switch(arguments.length) {
       case 1:
-        var A = document.createTextNode(arguments[0]);
+        A = document.createTextNode(arguments[0]);
         break;
       default:
-        var A = document.createElement(arguments[0]),
-            B = arguments[1];
+        A = document.createElement(arguments[0]);
+        var B = arguments[1];
         for (var b in B) {
-          if (b.indexOf("on") == 0)
+          if (b.indexOf("on") == 0) {
             A.addEventListener(b.substring(2), B[b], false);
-          else if (",style,accesskey,id,name,src,href,which,for".indexOf("," +
-                   b.toLowerCase()) != -1)
+          } else if (",style,accesskey,id,name,src,href,which,for".indexOf("," +
+                   b.toLowerCase()) != -1) {
             A.setAttribute(b, B[b]);
-          else
+          } else {
             A[b] = B[b];
+          }
         }
-        if (typeof arguments[2] == "string")
+        if (typeof arguments[2] == "string") {
           A.innerHTML = arguments[2];
-        else
-          for (var i = 2, len = arguments.length; i < len; ++i)
+        } else {
+          for (var i = 2, len = arguments.length; i < len; ++i) {
             A.appendChild(arguments[i]);
+          }
+        }
     }
     return A;
   },
@@ -517,7 +530,7 @@ GM_configStruct.prototype = {
   GM_configStruct.prototype.getValue = getValue;
   GM_configStruct.prototype.stringify = stringify;
   GM_configStruct.prototype.parser = parser;
-  GM_configStruct.prototype.log =  window.console ?
+  GM_configStruct.prototype.log = window.console ?
     console.log : (isGM && typeof GM_log != 'undefined' ?
       GM_log : (window.opera ?
         opera.postError : function(){ /* no logging */ }
@@ -527,8 +540,9 @@ GM_configStruct.prototype = {
 function GM_configDefaultValue(type, options) {
   var value;
 
-  if (type.indexOf('unsigned ') == 0)
+  if (type.indexOf('unsigned ') == 0) {
     type = type.substring(9);
+  }
 
   switch (type) {
     case 'radio': case 'select':
@@ -594,17 +608,22 @@ GM_configField.prototype = {
         labelPos = field.labelPos,
         create = this.create;
 
+    var i = null;
+    var len = null;
+
     function addLabel(pos, labelEl, parentNode, beforeEl) {
       if (!beforeEl) beforeEl = parentNode.firstChild;
       switch (pos) {
         case 'right': case 'below':
-          if (pos == 'below')
+          if (pos == 'below') {
             parentNode.appendChild(create('br', {}));
+          }
           parentNode.appendChild(labelEl);
           break;
         default:
-          if (pos == 'above')
+          if (pos == 'above') {
             parentNode.insertBefore(create('br', {}), beforeEl);
+          }
           parentNode.insertBefore(labelEl, beforeEl);
       }
     }
@@ -615,7 +634,7 @@ GM_configField.prototype = {
         firstProp;
 
     // Retrieve the first prop
-    for (var i in field) { firstProp = i; break; }
+    for (i in field) { firstProp = i; break; }
 
     var label = field.label && type != "button" ?
       create('label', {
@@ -624,6 +643,7 @@ GM_configField.prototype = {
         className: 'field_label'
       }, field.label) : null;
 
+    var wrap = null;
     switch (type) {
       case 'textarea':
         retNode.appendChild((this.node = create('textarea', {
@@ -635,12 +655,12 @@ GM_configField.prototype = {
         })));
         break;
       case 'radio':
-        var wrap = create('div', {
+        wrap = create('div', {
           id: configId + '_field_' + id
         });
         this.node = wrap;
 
-        for (var i = 0, len = options.length; i < len; ++i) {
+        for (i = 0, len = options.length; i < len; ++i) {
           var radLabel = create('label', {
             className: 'radio_label'
           }, options[i]);
@@ -662,12 +682,12 @@ GM_configField.prototype = {
         retNode.appendChild(wrap);
         break;
       case 'select':
-        var wrap = create('select', {
+        wrap = create('select', {
           id: configId + '_field_' + id
         });
         this.node = wrap;
 
-        for (var i = 0, len = options.length; i < len; ++i) {
+        for (i = 0, len = options.length; i < len; ++i) {
           var option = options[i];
           wrap.appendChild(create('option', {
             value: option,
@@ -707,9 +727,10 @@ GM_configField.prototype = {
     if (label) {
       // If the label is passed first, insert it before the field
       // else insert it after
-      if (!labelPos)
+      if (!labelPos) {
         labelPos = firstProp == "label" || type == "radio" ?
           "left" : "right";
+      }
 
       addLabel(labelPos, label, retNode);
     }
@@ -731,6 +752,9 @@ GM_configField.prototype = {
       unsigned = true;
     }
 
+    var i = null;
+    var len = null;
+
     switch (type) {
       case 'checkbox':
         rval = node.checked;
@@ -740,9 +764,11 @@ GM_configField.prototype = {
         break;
       case 'radio':
         var radios = node.getElementsByTagName('input');
-        for (var i = 0, len = radios.length; i < len; ++i)
-          if (radios[i].checked)
+        for (i = 0, len = radios.length; i < len; ++i) {
+          if (radios[i].checked) {
             rval = radios[i].value;
+          }
+        }
         break;
       case 'button':
         break;
@@ -759,8 +785,9 @@ GM_configField.prototype = {
           return null;
         }
 
-        if (!this._checkNumberRange(num, warn))
+        if (!this._checkNumberRange(num, warn)) {
           return null;
+        }
         rval = num;
         break;
       default:
@@ -778,20 +805,27 @@ GM_configField.prototype = {
 
     if (!node) return;
 
+    var i = null;
+    var len = null;
+
     switch (type) {
       case 'checkbox':
         node.checked = this['default'];
         break;
       case 'select':
-        for (var i = 0, len = node.options.length; i < len; ++i)
-          if (node.options[i].textContent == this['default'])
+        for (i = 0, len = node.options.length; i < len; ++i) {
+          if (node.options[i].textContent == this['default']) {
             node.selectedIndex = i;
+          }
+        }
         break;
       case 'radio':
         var radios = node.getElementsByTagName('input');
-        for (var i = 0, len = radios.length; i < len; ++i)
-          if (radios[i].value == this['default'])
+        for (i = 0, len = radios.length; i < len; ++i) {
+          if (radios[i].value == this['default']) {
             radios[i].checked = true;
+          }
+        }
         break;
       case 'button' :
         break;
