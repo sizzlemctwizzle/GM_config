@@ -814,8 +814,9 @@ GM_configField.prototype = {
         break;
       case 'select':
         for (i = 0, len = node.options.length; i < len; ++i) {
-          if (node.options[i].textContent == this['default']) {
+          if (node.options[i].value == this['default']) {
             node.selectedIndex = i;
+            break;
           }
         }
         break;
