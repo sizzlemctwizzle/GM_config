@@ -689,10 +689,25 @@ GM_configField.prototype = {
 
         for (i = 0, len = options.length; i < len; ++i) {
           var option = options[i];
+          var optvalue;
+          var optname;
+          if (Array.isArray(option)) {
+            if (option.length < 1) {
+              this.log("GM_config: invalid option array for field id " + id);
+            }
+            optvalue = option[0];
+            if (option.length > 1) {
+              optname = option[1];
+            } else {
+              optname = optvalue;
+            }
+          } else {
+            optvalue = optname = option;
+          }
           wrap.appendChild(create('option', {
-            value: option,
-            selected: option == value
-          }, option));
+            value: optvalue,
+            selected: optvalue == value
+          }, optname));
         }
 
         retNode.appendChild(wrap);
