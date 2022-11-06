@@ -687,27 +687,41 @@ GM_configField.prototype = {
         });
         this.node = wrap;
 
-        for (i = 0, len = options.length; i < len; ++i) {
-          var option = options[i];
-          var optvalue;
-          var optname;
-          if (Array.isArray(option)) {
-            if (option.length < 1) {
-              this.log("GM_config: invalid option array for field id " + id);
+        var optvalue = null;
+        var optname = null;
+        if (Array.isArray(options)) {
+          for (i = 0, len = options.length; i < len; ++i) {
+            var option = options[i];
+            if (Array.isArray(option)) {
+              if (option.length < 1) {
+                this.log("GM_config: invalid option array for field id " + id);
+              }
+              optvalue = option[0];
+              if (option.length > 1) {
+                optname = option[1];
+              } else {
+                optname = optvalue;
+              }
+            } else {
+              optvalue = optname = option;
             }
-            optvalue = option[0];
-            if (option.length > 1) {
-              optname = option[1];
+            wrap.appendChild(create('option', {
+              value: optvalue,
+              selected: optvalue == value
+            }, optname));
+          }
+        } else {
+          for (optvalue in options) {
+            if (options[optvalue]) {
+              optname = options[optvalue];
             } else {
               optname = optvalue;
             }
-          } else {
-            optvalue = optname = option;
+            wrap.appendChild(create('option', {
+              value: optvalue,
+              selected: optvalue == value
+            }, optname));
           }
-          wrap.appendChild(create('option', {
-            value: optvalue,
-            selected: optvalue == value
-          }, optname));
         }
 
         retNode.appendChild(wrap);
