@@ -521,309 +521,309 @@ let GM_config = (function () {
 }());
 let GM_configStruct = GM_config;
 
-    function GM_configField(settings, stored, id, customType, configId) {
-      // Store the field's settings
-      this.settings = settings;
-      this.id = id;
-      this.configId = configId;
-      this.node = null;
-      this.wrapper = null;
-      this.save = typeof settings.save == "undefined" ? true : settings.save;
+function GM_configField(settings, stored, id, customType, configId) {
+  // Store the field's settings
+  this.settings = settings;
+  this.id = id;
+  this.configId = configId;
+  this.node = null;
+  this.wrapper = null;
+  this.save = typeof settings.save == "undefined" ? true : settings.save;
 
-      // Buttons are static and don't have a stored value
-      if (settings.type == "button") this.save = false;
+  // Buttons are static and don't have a stored value
+  if (settings.type == "button") this.save = false;
 
-      // if a default value wasn't passed through init() then
-      //   if the type is custom use its default value
-      //   else use default value for type
-      // else use the default value passed through init()
-      this['default'] = typeof settings['default'] == "undefined" ?
-        customType ?
-          customType['default']
-          : this.defaultValue(settings.type, settings.options)
-        : settings['default'];
+  // if a default value wasn't passed through init() then
+  //   if the type is custom use its default value
+  //   else use default value for type
+  // else use the default value passed through init()
+  this['default'] = typeof settings['default'] == "undefined" ?
+    customType ?
+      customType['default']
+      : this.defaultValue(settings.type, settings.options)
+    : settings['default'];
 
-      // Store the field's value
-      this.value = typeof stored == "undefined" ? this['default'] : stored;
+  // Store the field's value
+  this.value = typeof stored == "undefined" ? this['default'] : stored;
 
-      // Setup methods for a custom type
-      if (customType) {
-        this.toNode = customType.toNode;
-        this.toValue = customType.toValue;
-        this.reset = customType.reset;
+  // Setup methods for a custom type
+  if (customType) {
+    this.toNode = customType.toNode;
+    this.toValue = customType.toValue;
+    this.reset = customType.reset;
+  }
+}
+
+GM_configField.prototype = {
+  create: GM_config.create,
+  
+  defaultValue: function(type, options) {
+    var value;
+
+    if (type.indexOf('unsigned ') == 0)
+      type = type.substring(9);
+
+    switch (type) {
+      case 'radio': case 'select':
+        value = options[0];
+        break;
+      case 'checkbox':
+        value = false;
+        break;
+      case 'int': case 'integer':
+      case 'float': case 'number':
+        value = 0;
+        break;
+      default:
+        value = '';
+    }
+
+    return value;
+  },
+
+  toNode: function() {
+    var field = this.settings,
+        value = this.value,
+        options = field.options,
+        type = field.type,
+        id = this.id,
+        configId = this.configId,
+        labelPos = field.labelPos,
+        create = this.create;
+
+    function addLabel(pos, labelEl, parentNode, beforeEl) {
+      if (!beforeEl) beforeEl = parentNode.firstChild;
+      switch (pos) {
+        case 'right': case 'below':
+          if (pos == 'below')
+            parentNode.appendChild(create('br', {}));
+          parentNode.appendChild(labelEl);
+          break;
+        default:
+          if (pos == 'above')
+            parentNode.insertBefore(create('br', {}), beforeEl);
+          parentNode.insertBefore(labelEl, beforeEl);
       }
     }
 
-    GM_configField.prototype = {
-      create: GM_config.create,
+    var retNode = create('div', { className: 'config_var',
+          id: configId + '_' + id + '_var',
+          title: field.title || '' }),
+        firstProp;
 
-      defaultValue: function(type, options) {
-          var value;
+    // Retrieve the first prop
+    for (var i in field) { firstProp = i; break; }
 
-          if (type.indexOf('unsigned ') == 0)
-            type = type.substring(9);
+    var label = field.label && type != "button" ?
+      create('label', {
+        id: configId + '_' + id + '_field_label',
+        for: configId + '_field_' + id,
+        className: 'field_label'
+      }, field.label) : null;
 
-          switch (type) {
-            case 'radio': case 'select':
-              value = options[0];
-              break;
-            case 'checkbox':
-              value = false;
-              break;
-            case 'int': case 'integer':
-            case 'float': case 'number':
-              value = 0;
-              break;
-            default:
-              value = '';
-          }
+    switch (type) {
+      case 'textarea':
+        retNode.appendChild((this.node = create('textarea', {
+          innerHTML: value,
+          id: configId + '_field_' + id,
+          className: 'block',
+          cols: (field.cols ? field.cols : 20),
+          rows: (field.rows ? field.rows : 2)
+        })));
+        break;
+      case 'radio':
+        var wrap = create('div', {
+          id: configId + '_field_' + id
+        });
+        this.node = wrap;
 
-          return value;
-    },
+        for (var i = 0, len = options.length; i < len; ++i) {
+          var radLabel = create('label', {
+            className: 'radio_label'
+          }, options[i]);
 
-      toNode: function() {
-        var field = this.settings,
-            value = this.value,
-            options = field.options,
-            type = field.type,
-            id = this.id,
-            configId = this.configId,
-            labelPos = field.labelPos,
-            create = this.create;
+          var rad = wrap.appendChild(create('input', {
+            value: options[i],
+            type: 'radio',
+            name: id,
+            checked: options[i] == value
+          }));
 
-        function addLabel(pos, labelEl, parentNode, beforeEl) {
-          if (!beforeEl) beforeEl = parentNode.firstChild;
-          switch (pos) {
-            case 'right': case 'below':
-              if (pos == 'below')
-                parentNode.appendChild(create('br', {}));
-              parentNode.appendChild(labelEl);
-              break;
-            default:
-              if (pos == 'above')
-                parentNode.insertBefore(create('br', {}), beforeEl);
-              parentNode.insertBefore(labelEl, beforeEl);
-          }
+          var radLabelPos = labelPos &&
+            (labelPos == 'left' || labelPos == 'right') ?
+            labelPos : firstProp == 'options' ? 'left' : 'right';
+
+          addLabel(radLabelPos, radLabel, wrap, rad);
         }
 
-        var retNode = create('div', { className: 'config_var',
-              id: configId + '_' + id + '_var',
-              title: field.title || '' }),
-            firstProp;
+        retNode.appendChild(wrap);
+        break;
+      case 'select':
+        var wrap = create('select', {
+          id: configId + '_field_' + id
+        });
+        this.node = wrap;
 
-        // Retrieve the first prop
-        for (var i in field) { firstProp = i; break; }
-
-        var label = field.label && type != "button" ?
-          create('label', {
-            id: configId + '_' + id + '_field_label',
-            for: configId + '_field_' + id,
-            className: 'field_label'
-          }, field.label) : null;
-
-        switch (type) {
-          case 'textarea':
-            retNode.appendChild((this.node = create('textarea', {
-              innerHTML: value,
-              id: configId + '_field_' + id,
-              className: 'block',
-              cols: (field.cols ? field.cols : 20),
-              rows: (field.rows ? field.rows : 2)
-            })));
-            break;
-          case 'radio':
-            var wrap = create('div', {
-              id: configId + '_field_' + id
-            });
-            this.node = wrap;
-
-            for (var i = 0, len = options.length; i < len; ++i) {
-              var radLabel = create('label', {
-                className: 'radio_label'
-              }, options[i]);
-
-              var rad = wrap.appendChild(create('input', {
-                value: options[i],
-                type: 'radio',
-                name: id,
-                checked: options[i] == value
-              }));
-
-              var radLabelPos = labelPos &&
-                (labelPos == 'left' || labelPos == 'right') ?
-                labelPos : firstProp == 'options' ? 'left' : 'right';
-
-              addLabel(radLabelPos, radLabel, wrap, rad);
-            }
-
-            retNode.appendChild(wrap);
-            break;
-          case 'select':
-            var wrap = create('select', {
-              id: configId + '_field_' + id
-            });
-            this.node = wrap;
-
-            for (var i = 0, len = options.length; i < len; ++i) {
-              var option = options[i];
-              wrap.appendChild(create('option', {
-                value: option,
-                selected: option == value
-              }, option));
-            }
-
-            retNode.appendChild(wrap);
-            break;
-          default: // fields using input elements
-            var props = {
-              id: configId + '_field_' + id,
-              type: type,
-              value: type == 'button' ? field.label : value
-            };
-
-            switch (type) {
-              case 'checkbox':
-                props.checked = value;
-                break;
-              case 'button':
-                props.size = field.size ? field.size : 25;
-                if (field.script) field.click = field.script;
-                if (field.click) props.onclick = field.click;
-                break;
-              case 'hidden':
-                break;
-              default:
-                // type = text, int, or float
-                props.type = 'text';
-                props.size = field.size ? field.size : 25;
-            }
-
-            retNode.appendChild((this.node = create('input', props)));
+        for (var i = 0, len = options.length; i < len; ++i) {
+          var option = options[i];
+          wrap.appendChild(create('option', {
+            value: option,
+            selected: option == value
+          }, option));
         }
 
-        if (label) {
-          // If the label is passed first, insert it before the field
-          // else insert it after
-          if (!labelPos)
-            labelPos = firstProp == "label" || type == "radio" ?
-              "left" : "right";
-
-          addLabel(labelPos, label, retNode);
-        }
-
-        return retNode;
-      },
-
-      toValue: function() {
-        var node = this.node,
-            field = this.settings,
-            type = field.type,
-            unsigned = false,
-            rval = null;
-
-        if (!node) return rval;
-
-        if (type.indexOf('unsigned ') == 0) {
-          type = type.substring(9);
-          unsigned = true;
-        }
+        retNode.appendChild(wrap);
+        break;
+      default: // fields using input elements
+        var props = {
+          id: configId + '_field_' + id,
+          type: type,
+          value: type == 'button' ? field.label : value
+        };
 
         switch (type) {
           case 'checkbox':
-            rval = node.checked;
-            break;
-          case 'select':
-            rval = node[node.selectedIndex].value;
-            break;
-          case 'radio':
-            var radios = node.getElementsByTagName('input');
-            for (var i = 0, len = radios.length; i < len; ++i)
-              if (radios[i].checked)
-                rval = radios[i].value;
+            props.checked = value;
             break;
           case 'button':
+            props.size = field.size ? field.size : 25;
+            if (field.script) field.click = field.script;
+            if (field.click) props.onclick = field.click;
             break;
-          case 'int': case 'integer':
-          case 'float': case 'number':
-            var num = Number(node.value);
-            var warn = 'Field labeled "' + field.label + '" expects a' +
-              (unsigned ? ' positive ' : 'n ') + 'integer value';
-
-            if (isNaN(num) || (type.substr(0, 3) == 'int' &&
-                Math.ceil(num) != Math.floor(num)) ||
-                (unsigned && num < 0)) {
-              alert(warn + '.');
-              return null;
-            }
-
-            if (!this._checkNumberRange(num, warn))
-              return null;
-            rval = num;
+          case 'hidden':
             break;
           default:
-            rval = node.value;
-            break;
+            // type = text, int, or float
+            props.type = 'text';
+            props.size = field.size ? field.size : 25;
         }
 
-        return rval; // value read successfully
-      },
+        retNode.appendChild((this.node = create('input', props)));
+    }
 
-      reset: function() {
-        var node = this.node,
-            field = this.settings,
-            type = field.type;
+    if (label) {
+      // If the label is passed first, insert it before the field
+      // else insert it after
+      if (!labelPos)
+        labelPos = firstProp == "label" || type == "radio" ?
+          "left" : "right";
 
-        if (!node) return;
+      addLabel(labelPos, label, retNode);
+    }
 
-        switch (type) {
-          case 'checkbox':
-            node.checked = this['default'];
-            break;
-          case 'select':
-            for (var i = 0, len = node.options.length; i < len; ++i)
-              if (node.options[i].textContent == this['default'])
-                node.selectedIndex = i;
-            break;
-          case 'radio':
-            var radios = node.getElementsByTagName('input');
-            for (var i = 0, len = radios.length; i < len; ++i)
-              if (radios[i].value == this['default'])
-                radios[i].checked = true;
-            break;
-          case 'button' :
-            break;
-          default:
-            node.value = this['default'];
-            break;
-          }
-      },
+    return retNode;
+  },
 
-      remove: function(el) {
-        GM_configStruct.remove(el || this.wrapper);
-        this.wrapper = null;
-        this.node = null;
-      },
+  toValue: function() {
+    var node = this.node,
+        field = this.settings,
+        type = field.type,
+        unsigned = false,
+        rval = null;
 
-      reload: function() {
-        var wrapper = this.wrapper;
-        if (wrapper) {
-          var fieldParent = wrapper.parentNode;
-          fieldParent.insertBefore((this.wrapper = this.toNode()), wrapper);
-          this.remove(wrapper);
-        }
-      },
+    if (!node) return rval;
 
-      _checkNumberRange: function(num, warn) {
-        var field = this.settings;
-        if (typeof field.min == "number" && num < field.min) {
-          alert(warn + ' greater than or equal to ' + field.min + '.');
+    if (type.indexOf('unsigned ') == 0) {
+      type = type.substring(9);
+      unsigned = true;
+    }
+
+    switch (type) {
+      case 'checkbox':
+        rval = node.checked;
+        break;
+      case 'select':
+        rval = node[node.selectedIndex].value;
+        break;
+      case 'radio':
+        var radios = node.getElementsByTagName('input');
+        for (var i = 0, len = radios.length; i < len; ++i)
+          if (radios[i].checked)
+            rval = radios[i].value;
+        break;
+      case 'button':
+        break;
+      case 'int': case 'integer':
+      case 'float': case 'number':
+        var num = Number(node.value);
+        var warn = 'Field labeled "' + field.label + '" expects a' +
+          (unsigned ? ' positive ' : 'n ') + 'integer value';
+
+        if (isNaN(num) || (type.substr(0, 3) == 'int' &&
+            Math.ceil(num) != Math.floor(num)) ||
+            (unsigned && num < 0)) {
+          alert(warn + '.');
           return null;
         }
 
-        if (typeof field.max == "number" && num > field.max) {
-          alert(warn + ' less than or equal to ' + field.max + '.');
+        if (!this._checkNumberRange(num, warn))
           return null;
-        }
-        return true;
+        rval = num;
+        break;
+      default:
+        rval = node.value;
+        break;
+    }
+
+    return rval; // value read successfully
+  },
+
+  reset: function() {
+    var node = this.node,
+        field = this.settings,
+        type = field.type;
+
+    if (!node) return;
+
+    switch (type) {
+      case 'checkbox':
+        node.checked = this['default'];
+        break;
+      case 'select':
+        for (var i = 0, len = node.options.length; i < len; ++i)
+          if (node.options[i].textContent == this['default'])
+            node.selectedIndex = i;
+        break;
+      case 'radio':
+        var radios = node.getElementsByTagName('input');
+        for (var i = 0, len = radios.length; i < len; ++i)
+          if (radios[i].value == this['default'])
+            radios[i].checked = true;
+        break;
+      case 'button' :
+        break;
+      default:
+        node.value = this['default'];
+        break;
       }
-    };
+  },
+
+  remove: function(el) {
+    GM_configStruct.remove(el || this.wrapper);
+    this.wrapper = null;
+    this.node = null;
+  },
+
+  reload: function() {
+    var wrapper = this.wrapper;
+    if (wrapper) {
+      var fieldParent = wrapper.parentNode;
+      fieldParent.insertBefore((this.wrapper = this.toNode()), wrapper);
+      this.remove(wrapper);
+    }
+  },
+
+  _checkNumberRange: function(num, warn) {
+    var field = this.settings;
+    if (typeof field.min == "number" && num < field.min) {
+      alert(warn + ' greater than or equal to ' + field.min + '.');
+      return null;
+    }
+
+    if (typeof field.max == "number" && num > field.max) {
+      alert(warn + ' less than or equal to ' + field.max + '.');
+      return null;
+    }
+    return true;
+  }
+};
