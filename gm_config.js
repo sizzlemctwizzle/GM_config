@@ -178,7 +178,7 @@ let GM_config = (function () {
     this.onInit();
   };
   construct.prototype = {
-    // Support old method of initalizing
+    // Support re-initalization
     init: function() {
       GM_configInit(this, arguments);
       this.onInit();
@@ -504,9 +504,9 @@ let GM_config = (function () {
   config.init = function () { 
     GM_config = config.apply(this, arguments);
       GM_config.init = function() {
-      GM_configInit(this, arguments);
-      GM_config.onInit();////////////////
-    };
+        GM_configInit(this, arguments);
+        GM_config.onInit();
+      };
     return GM_config;
   };
 
