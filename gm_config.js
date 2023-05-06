@@ -481,11 +481,11 @@ let GM_config = (function () {
   construct.prototype.constructor = construct;
   let isGM4 = typeof GM === 'object';
   if (isGM4) {
-    let GM_getValue = (name, def) => await GM.getValue(name, def);
-    let GM_setValue = (name, value) => await GM.setValue(name, value);
-    let GM_log = (text) => await GM.log(text);
+    let GM_getValue = async (name, def) => await GM.getValue(name, def);
+    let GM_setValue = async (name, value) => await GM.setValue(name, value);
+    let GM_log = async (text) => await GM.log(text);
   }
-  
+
   let isGM = typeof GM_getValue !== 'undefined' &&
     typeof GM_getValue('a', 'b') !== 'undefined';
   construct.prototype.isGM = isGM;
