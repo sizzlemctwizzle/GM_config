@@ -479,9 +479,17 @@ let GM_config = (function () {
   
   construct.prototype.name = 'GM_config';
   construct.prototype.constructor = construct;
+  let isGM4 = typeof GM === 'object';
+  if (isGM4) {
+    let GM_getValue = GM.getValue;
+    let GM_setValue = GM.setValue;
+    let GM_log = GM.log;
+  }
+  
   let isGM = typeof GM_getValue !== 'undefined' &&
     typeof GM_getValue('a', 'b') !== 'undefined';
   construct.prototype.isGM = isGM;
+  
   construct.prototype.setValue = isGM ? GM_setValue
     : (name, value) => localStorage.setItem(name, value);
   construct.prototype.getValue = isGM ? GM_getValue
