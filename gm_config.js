@@ -148,20 +148,21 @@ let GM_config = (function () {
 
     // Create the fields
     if (settings.fields) {
-      var stored = config.read(), // read the stored settings
-          fields = settings.fields,
+      config.read(null, (stored) => { // read the stored settings
+        var fields = settings.fields,
           customTypes = settings.types || {},
           configId = config.id;
 
-      for (var id in fields) {
-        var field = fields[id];
+        for (var id in fields) {
+          var field = fields[id];
 
-        // for each field definition create a field object
-        if (field)
-          config.fields[id] = new GM_configField(field, stored[id], id,
-            customTypes[field.type], configId);
-        else if (config.fields[id]) delete config.fields[id];
-      }
+          // for each field definition create a field object
+          if (field)
+            config.fields[id] = new GM_configField(field, stored[id], id,
+              customTypes[field.type], configId);
+          else if (config.fields[id]) delete config.fields[id];
+        }
+      });
     }
 
     // If the id has changed we must modify the default style
@@ -341,8 +342,7 @@ let GM_config = (function () {
     },
 
     save: function () {
-      var forgotten = this.write();
-      this.onSave(forgotten); // Call the save() callback function
+      this.write(null, null, this.onSave);
     },
 
     close: function() {
@@ -386,7 +386,7 @@ let GM_config = (function () {
       return fieldVal != null ? fieldVal : field.value;
     },
 
-    write: function (store, obj) {
+    write: function (store, obj, cb) {
       if (!obj) {
         var values = {},
             forgotten = {},
@@ -407,22 +407,19 @@ let GM_config = (function () {
         }
       }
       try {
-        this.setValue(store || this.id, this.stringify(obj || values));
+        this.setValue(store || this.id, this.stringify(obj || values), () => cb(forgotten));
       } catch(e) {
         this.log("GM_config failed to save settings!");
       }
-
-      return forgotten;
     },
 
-    read: function (store) {
+    read: function (store, cb) {
       try {
-        var rval = this.parser(this.getValue(store || this.id, '{}'));
+        this.getValue(store || this.id, '{}', (val) => cb(this.parser(val)));
       } catch(e) {
         this.log("GM_config failed to read saved settings!");
-        var rval = {};
+        cb({});
       }
-      return rval;
     },
 
     reset: function () {
@@ -480,26 +477,47 @@ let GM_config = (function () {
   construct.prototype.name = 'GM_config';
   construct.prototype.constructor = construct;
   let isGM4 = typeof GM === 'object';
-  if (isGM4) {
-    let GM_getValue = async (name, def) => await GM.getValue(name, def);
-    let GM_setValue = async (name, value) => await GM.setValue(name, value);
-    let GM_log = async (text) => await GM.log(text);
-  }
-
-  let isGM = typeof GM_getValue !== 'undefined' &&
-    typeof GM_getValue('a', 'b') !== 'undefined';
+  let isGM = isGM4 || (typeof GM_getValue !== 'undefined' &&
+    typeof GM_getValue('a', 'b') !== 'undefined');
   construct.prototype.isGM = isGM;
   
-  construct.prototype.setValue = isGM ? GM_setValue
-    : (name, value) => localStorage.setItem(name, value);
-  construct.prototype.getValue = isGM ? GM_getValue
-    : (name, def) => {
-      let s = localStorage.getItem(name);
-      return s !== null ? s : def;
+  if (!isGM4) {
+    let promisify = (old) => (...args) => {
+      return new Promise((resolve) => {
+        try {
+          resolve(old.apply(this, args));
+        } catch (e) {
+          reject(e);
+        }
+      });
     };
+    
+    let getValue = isGM ? GM_getValue
+      : (name, def) => {
+        let s = localStorage.getItem(name);
+        return s !== null ? s : def;
+      };
+    let setValue = isGM ? GM_setValue
+      : (name, value) => localStorage.setItem(name, value);
+    let log = isGM ? GM_log : console.log;
+    
+    var GM = Object.create(null);
+    GM.getValue = promisify(getValue);
+    GM.setValue = promisify(setValue);
+    GM.log = promisify(log);
+  }
+  
   construct.prototype.stringify = JSON.stringify;
   construct.prototype.parser = JSON.parse;
-  construct.prototype.log =  isGM ? GM_log : console.log;
+  construct.prototype.getValue = async (name, def, cb) => {
+    let value = await GM.getValue(name, def);
+    cb(value);
+  };
+  construct.prototype.setValue = async (name, value, cb) => {
+    await GM.setValue(name, value);
+    cb(name, value);
+  };
+  construct.prototype.log = async (text) => await GM.log(text);
   
   // Passthrough frontends for new and old usage
   let config = function () {
