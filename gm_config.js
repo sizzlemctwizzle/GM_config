@@ -476,7 +476,8 @@ let GM_config = (function () {
   
   construct.prototype.name = 'GM_config';
   construct.prototype.constructor = construct;
-  let isGM4 = typeof GM === 'object';
+  let isGM4 = typeof GM === 'object' && typeof GM.getValue !== 'undefined' &&
+    typeof GM.setValue !== 'undefined';
   let isGM = isGM4 || (typeof GM_getValue !== 'undefined' &&
     typeof GM_getValue('a', 'b') !== 'undefined');
   construct.prototype.isGM = isGM;
