@@ -414,12 +414,15 @@ let GM_config = (function () {
     },
 
     read: function (store, cb) {
-      try {
-        this.getValue(store || this.id, '{}', (val) => cb(this.parser(val)));
-      } catch(e) {
-        this.log("GM_config failed to read saved settings!");
-        cb({});
-      }
+      this.getValue(store || this.id, '{}', (val) => {
+        try {
+          let rval = this.parser(val);
+          cb(rval);
+        } catch(e) {
+          this.log("GM_config failed to read saved settings!");
+          cb({});
+        }
+      });
     },
 
     reset: function () {
