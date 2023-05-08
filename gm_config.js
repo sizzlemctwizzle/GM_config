@@ -145,8 +145,16 @@ let GM_config = (function () {
       for (var e in events)
         config["on" + e.charAt(0).toUpperCase() + e.slice(1)] = events[e];
     }
+    
+    // If the id has changed we must modify the default style
+    if (config.id != config.css.basicPrefix) {
+      config.css.basic = config.css.basic.replace(
+        new RegExp('#' + config.css.basicPrefix, 'gm'), '#' + config.id);
+      config.css.basicPrefix = config.id;
+    }
 
     // Create the fields
+    config.isInit = false;
     if (settings.fields) {
       config.read(null, (stored) => { // read the stored settings
         var fields = settings.fields,
@@ -162,31 +170,33 @@ let GM_config = (function () {
               customTypes[field.type], configId);
           else if (config.fields[id]) delete config.fields[id];
         }
+
+        config.isInit = true;
+        config.onInit();
       });
+    } else {
+      config.isInit = true;
+      config.onInit();
     }
 
-    // If the id has changed we must modify the default style
-    if (config.id != config.css.basicPrefix) {
-      config.css.basic = config.css.basic.replace(
-        new RegExp('#' + config.css.basicPrefix, 'gm'), '#' + config.id);
-      config.css.basicPrefix = config.id;
-    }
   }
 
   let construct = function () {
     // Parsing of input provided via frontends
     GM_configInit(this, arguments);
-    this.onInit();
   };
   construct.prototype = {
     // Support re-initalization
     init: function() {
       GM_configInit(this, arguments);
-      this.onInit();
     },
 
     // call GM_config.open() from your script to open the menu
     open: function () {
+      if (!this.isInit) {
+        setTimeout(() => this.open(), 0);
+        return;
+      }
       // Die if the menu is already open on this page
       // You can have multiple instances but you can't open the same instance twice
       var match = document.getElementById(this.id);
@@ -410,25 +420,24 @@ let GM_config = (function () {
       (async () => {
         try {
           let val = this.stringify(obj || values);
+          await this.setValue(store || this.id, val);
         } catch(e) {
           this.log("GM_config failed to save settings!");
         }
-        await this.setValue(store || this.id, val);
         cb(forgotten);
       })();
     },
 
     read: function (store, cb) {
       (async () => {
-        let rval = await this.getValue(store || this.id, '{}', (val) => {
-          try {
-            let rval = this.parser(val);
-            cb(rval);
-          } catch(e) {
-            this.log("GM_config failed to read saved settings!");
-            cb({});
-          }
-        });
+        let val = await this.getValue(store || this.id, '{}')
+        try {
+          let rval = this.parser(val);
+          cb(rval);
+        } catch(e) {
+          this.log("GM_config failed to read saved settings!");
+          cb({});
+        }
       })();
     },
 
@@ -522,7 +531,7 @@ let GM_config = (function () {
   construct.prototype.parser = JSON.parse;
   construct.prototype.getValue = GM.getValue;
   construct.prototype.setValue = GM.setValue;
-  construct.prototype.log = async (text) => await GM.log(text);
+  construct.prototype.log = GM.log;
   
   // Passthrough frontends for new and old usage
   let config = function () {
