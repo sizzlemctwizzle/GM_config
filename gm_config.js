@@ -406,23 +406,30 @@ let GM_config = (function () {
             forgotten[id] = value;
         }
       }
-      try {
-        this.setValue(store || this.id, this.stringify(obj || values), () => cb(forgotten));
-      } catch(e) {
-        this.log("GM_config failed to save settings!");
-      }
+      
+      (async () => {
+        try {
+          let val = this.stringify(obj || values);
+        } catch(e) {
+          this.log("GM_config failed to save settings!");
+        }
+        await this.setValue(store || this.id, val);
+        cb(forgotten);
+      })();
     },
 
     read: function (store, cb) {
-      this.getValue(store || this.id, '{}', (val) => {
-        try {
-          let rval = this.parser(val);
-          cb(rval);
-        } catch(e) {
-          this.log("GM_config failed to read saved settings!");
-          cb({});
-        }
-      });
+      (async () => {
+        let rval = await this.getValue(store || this.id, '{}', (val) => {
+          try {
+            let rval = this.parser(val);
+            cb(rval);
+          } catch(e) {
+            this.log("GM_config failed to read saved settings!");
+            cb({});
+          }
+        });
+      })();
     },
 
     reset: function () {
@@ -513,14 +520,8 @@ let GM_config = (function () {
   
   construct.prototype.stringify = JSON.stringify;
   construct.prototype.parser = JSON.parse;
-  construct.prototype.getValue = async (name, def, cb) => {
-    let value = await GM.getValue(name, def);
-    cb(value);
-  };
-  construct.prototype.setValue = async (name, value, cb) => {
-    await GM.setValue(name, value);
-    cb(name, value);
-  };
+  construct.prototype.getValue = GM.getValue;
+  construct.prototype.setValue = GM.setValue;
   construct.prototype.log = async (text) => await GM.log(text);
   
   // Passthrough frontends for new and old usage
