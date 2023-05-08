@@ -154,8 +154,9 @@ let GM_config = (function () {
     }
 
     // Create the fields
-    config.isInit = false;
+    config.isInit = typeof config.isInit !== 'undefined' ? config.isInit : false;
     if (settings.fields) {
+      config.isInit = false;
       config.read(null, (stored) => { // read the stored settings
         var fields = settings.fields,
           customTypes = settings.types || {},
@@ -174,11 +175,7 @@ let GM_config = (function () {
         config.isInit = true;
         config.onInit();
       });
-    } else {
-      config.isInit = true;
-      config.onInit();
     }
-
   }
 
   let construct = function () {
@@ -545,7 +542,6 @@ let GM_config = (function () {
     GM_config = config.apply(this, arguments);
       GM_config.init = function() {
         GM_configInit(this, arguments);
-        GM_config.onInit();
       };
     return GM_config;
   };
