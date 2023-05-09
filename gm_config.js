@@ -176,6 +176,7 @@ let GM_config = (function () {
       });
     } else {
       config.isInit = true;
+      config.onInit();
     }
   }
 
@@ -191,6 +192,7 @@ let GM_config = (function () {
 
     // call GM_config.open() from your script to open the menu
     open: function () {
+      // don't open before init is finished
       if (!this.isInit) {
         setTimeout(() => this.open(), 0);
         return;
@@ -541,10 +543,9 @@ let GM_config = (function () {
   // Support old method of initalizing
   config.init = function () { 
     GM_config = config.apply(this, arguments);
-      GM_config.init = function() {
-        GM_configInit(this, arguments);
-      };
-    return GM_config;
+    GM_config.init = function() {
+      GM_configInit(this, arguments);
+    };
   };
 
   config.create = construct.prototype.create;
