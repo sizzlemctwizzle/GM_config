@@ -352,7 +352,7 @@ let GM_config = (function () {
     },
 
     save: function () {
-      this.write(null, null, this.onSave);
+      this.write(null, null, (vals) => this.onSave(vals));
     },
 
     close: function() {
