@@ -172,11 +172,11 @@ let GM_config = (function () {
         }
 
         config.isInit = true;
-        config.onInit();
+        config.onInit.call(config);
       });
     } else {
       config.isInit = true;
-      config.onInit();
+      config.onInit.call(config);
     }
   }
 
