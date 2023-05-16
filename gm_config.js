@@ -839,7 +839,7 @@ GM_configField.prototype = {
   },
 
   remove: function(el) {
-    GM_configStruct.remove(el || this.wrapper);
+    GM_config.remove(el || this.wrapper);
     this.wrapper = null;
     this.node = null;
   },
@@ -848,8 +848,10 @@ GM_configField.prototype = {
     var wrapper = this.wrapper;
     if (wrapper) {
       var fieldParent = wrapper.parentNode;
-      fieldParent.insertBefore((this.wrapper = this.toNode()), wrapper);
-      this.remove(wrapper);
+      var newWrapper = this.toNode();
+      fieldParent.insertBefore(newWrapper, wrapper);
+      this.remove();
+      this.wrapper = newWrapper;
     }
   },
 
