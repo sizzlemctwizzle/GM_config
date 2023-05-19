@@ -44,7 +44,7 @@ GM_config is distributed under the terms of the GNU Lesser General Public Licens
 // ==/UserLibrary==
 
 
-let GM_config = (function () {    
+let GM_config = (function () {
   // This is the initializer function
   function GM_configInit(config, args) {
     // Initialize instance variables
@@ -145,7 +145,7 @@ let GM_config = (function () {
       for (var e in events)
         config["on" + e.charAt(0).toUpperCase() + e.slice(1)] = events[e];
     }
-    
+
     // If the id has changed we must modify the default style
     if (config.id != config.css.basicPrefix) {
       config.css.basic = config.css.basic.replace(
@@ -414,7 +414,7 @@ let GM_config = (function () {
             forgotten[id] = value;
         }
       }
-      
+
       (async () => {
         try {
           let val = this.stringify(obj || values);
@@ -490,7 +490,7 @@ let GM_config = (function () {
       if (el && el.parentNode) el.parentNode.removeChild(el);
     }
   };
-  
+
   construct.prototype.name = 'GM_config';
   construct.prototype.constructor = construct;
   let isGM4 = typeof GM === 'object' && typeof GM.getValue !== 'undefined' &&
@@ -498,7 +498,7 @@ let GM_config = (function () {
   let isGM = isGM4 || (typeof GM_getValue !== 'undefined' &&
     typeof GM_getValue('a', 'b') !== 'undefined');
   construct.prototype.isGM = isGM;
-  
+
   if (!isGM4) {
     let promisify = (old) => (...args) => {
       return new Promise((resolve) => {
@@ -509,7 +509,7 @@ let GM_config = (function () {
         }
       });
     };
-    
+
     let getValue = isGM ? GM_getValue
       : (name, def) => {
         let s = localStorage.getItem(name);
@@ -518,28 +518,28 @@ let GM_config = (function () {
     let setValue = isGM ? GM_setValue
       : (name, value) => localStorage.setItem(name, value);
     let log = typeof GM_log !== 'undefined' ? GM_log : console.log;
-    
+
     var GM = Object.create(null);
     GM.getValue = promisify(getValue);
     GM.setValue = promisify(setValue);
     GM.log = promisify(log);
   }
-  
+
   construct.prototype.stringify = JSON.stringify;
   construct.prototype.parser = JSON.parse;
   construct.prototype.getValue = GM.getValue;
   construct.prototype.setValue = GM.setValue;
   construct.prototype.log = GM.log;
-  
+
   // Passthrough frontends for new and old usage
   let config = function () {
     return new (config.bind.apply(construct,
       [null].concat(Array.from(arguments))));
   };
   config.prototype.constructor = config;
-    
+
   // Support old method of initalizing
-  config.init = function () { 
+  config.init = function () {
     GM_config = config.apply(this, arguments);
     GM_config.init = function() {
       GM_configInit(this, arguments);
@@ -594,7 +594,7 @@ function GM_configField(settings, stored, id, customType, configId) {
 
 GM_configField.prototype = {
   create: GM_config.create,
-  
+
   defaultValue: function(type, options) {
     var value;
 
