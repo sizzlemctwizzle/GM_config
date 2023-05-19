@@ -333,20 +333,18 @@ let GM_config = (function () {
         })));
 
         // In WebKit src can't be set until it is added to the page
-        this.frame.src = 'about:blank';
+        this.frame.src = '';
         // we wait for the iframe to load before we can modify it
         var that = this;
         this.frame.addEventListener('load', function(e) {
             var frame = config.frame;
-            if (frame.src && !frame.contentDocument) {
-              // Some agents need this as an empty string for newer context implementations
-              frame.src = "";
-            } else if (!frame.contentDocument) {
+            if (!frame.contentDocument) {
               that.log("GM_config failed to initialize default settings dialog node!");
+            } else {
+              var body = frame.contentDocument.getElementsByTagName('body')[0];
+              body.id = config.id; // Allows for prefixing styles with the config id
+              buildConfigWin(body, frame.contentDocument.getElementsByTagName('head')[0]);
             }
-            var body = frame.contentDocument.getElementsByTagName('body')[0];
-            body.id = config.id; // Allows for prefixing styles with the config id
-            buildConfigWin(body, frame.contentDocument.getElementsByTagName('head')[0]);
         }, false);
       }
     },
@@ -839,7 +837,7 @@ GM_configField.prototype = {
   },
 
   remove: function(el) {
-    GM_configStruct.remove(el || this.wrapper);
+    GM_config.remove(el || this.wrapper);
     this.wrapper = null;
     this.node = null;
   },
@@ -848,8 +846,10 @@ GM_configField.prototype = {
     var wrapper = this.wrapper;
     if (wrapper) {
       var fieldParent = wrapper.parentNode;
-      fieldParent.insertBefore((this.wrapper = this.toNode()), wrapper);
-      this.remove(wrapper);
+      var newWrapper = this.toNode();
+      fieldParent.insertBefore(newWrapper, wrapper);
+      this.remove();
+      this.wrapper = newWrapper;
     }
   },
 
