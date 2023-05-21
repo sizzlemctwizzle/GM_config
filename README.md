@@ -1,5 +1,7 @@
 For GM_config usage information, read the [wiki](https://github.com/sizzlemctwizzle/GM_config/wiki/).
 
+**Notice:** You may be impacted by a recent change to how values are [read from storage](https://github.com/sizzlemctwizzle/GM_config/wiki/Asynchronous-read-and-write-migration)
+
 See what GM_config can do with:
 
 * a server side live example please visit the [demo page](https://sizzlemctwizzle.github.io/GM_config/).
