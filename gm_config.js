@@ -517,16 +517,18 @@ let GM_config = (function (GM) {
       };
     let setValue = isGM ? GM_setValue
       : (name, value) => localStorage.setItem(name, value);
+    let log = typeof GM_log !== 'undefined' ? GM_log : console.log;
 
     GM.getValue = promisify(getValue);
     GM.setValue = promisify(setValue);
+    GM.log = promisify(log);
   }
 
   construct.prototype.stringify = JSON.stringify;
   construct.prototype.parser = JSON.parse;
   construct.prototype.getValue = GM.getValue;
   construct.prototype.setValue = GM.setValue;
-  construct.prototype.log = console.log;
+  construct.prototype.log = GM.log || console.log;
 
   // Passthrough frontends for new and old usage
   let config = function () {
