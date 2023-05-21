@@ -43,6 +43,15 @@ GM_config is distributed under the terms of the GNU Lesser General Public Licens
 
 // ==/UserLibrary==
 
+// Setup storage to support GM4+
+let isGM4 = typeof GM === 'object' && typeof GM.getValue !== 'undefined' &&
+  typeof GM.setValue !== 'undefined';
+let isGM = typeof GM_getValue !== 'undefined' &&
+  typeof GM_getValue('a', 'b') !== 'undefined';
+if (isGM4 && !isGM) {
+  var getValue = GM.getValue;
+  var setValue = GM.setValue;
+}
 
 let GM_config = (function () {
   // This is the initializer function
@@ -493,13 +502,8 @@ let GM_config = (function () {
 
   construct.prototype.name = 'GM_config';
   construct.prototype.constructor = construct;
-  let isGM4 = typeof GM === 'object' && typeof GM.getValue !== 'undefined' &&
-    typeof GM.setValue !== 'undefined';
-  let isGM = isGM4 || (typeof GM_getValue !== 'undefined' &&
-    typeof GM_getValue('a', 'b') !== 'undefined');
-  construct.prototype.isGM = isGM;
-
-  if (!isGM4) {
+  construct.prototype.isGM = isGM || isGM4;
+  if (!isGM4 || isGM) {
     let promisify = (old) => (...args) => {
       return new Promise((resolve) => {
         try {
@@ -510,26 +514,23 @@ let GM_config = (function () {
       });
     };
 
-    let getValue = isGM ? GM_getValue
+    var getValue = isGM ? GM_getValue
       : (name, def) => {
         let s = localStorage.getItem(name);
         return s !== null ? s : def;
       };
-    let setValue = isGM ? GM_setValue
+    var setValue = isGM ? GM_setValue
       : (name, value) => localStorage.setItem(name, value);
-    let log = typeof GM_log !== 'undefined' ? GM_log : console.log;
 
-    var GM = Object.create(null);
-    GM.getValue = promisify(getValue);
-    GM.setValue = promisify(setValue);
-    GM.log = promisify(log);
+    getValue = promisify(getValue);
+    setValue = promisify(setValue);
   }
 
   construct.prototype.stringify = JSON.stringify;
   construct.prototype.parser = JSON.parse;
-  construct.prototype.getValue = GM.getValue;
-  construct.prototype.setValue = GM.setValue;
-  construct.prototype.log = GM.log;
+  construct.prototype.getValue = getValue;
+  construct.prototype.setValue = setValue;
+  construct.prototype.log = console.log;
 
   // Passthrough frontends for new and old usage
   let config = function () {
