@@ -914,3 +914,4 @@ GM_configField.prototype = {
     return true;
   }
 };
+
