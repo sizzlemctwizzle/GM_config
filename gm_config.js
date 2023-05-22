@@ -498,8 +498,8 @@ let GM_config = (function (GM) {
           A = document.createTextNode(arguments[0]);
           break;
         default:
-          A = document.createElement(arguments[0]),
-            B = arguments[1];
+          A = document.createElement(arguments[0]);
+          B = arguments[1];
           for (let b in B) {
             if (b.indexOf("on") == 0)
               A.addEventListener(b.substring(2), B[b], false);
