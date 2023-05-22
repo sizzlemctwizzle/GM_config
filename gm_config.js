@@ -43,6 +43,7 @@ GM_config is distributed under the terms of the GNU Lesser General Public Licens
 
 // ==/UserLibrary==
 
+/* jshint esversion: 8 */
 
 let GM_config = (function (GM) {
   // This is the initializer function
@@ -142,8 +143,9 @@ let GM_config = (function (GM) {
     // Set the event callbacks
     if (settings.events) {
       var events = settings.events;
-      for (var e in events)
+      for (var e in events) {
         config["on" + e.charAt(0).toUpperCase() + e.slice(1)] = events[e];
+      }
     }
 
     // If the id has changed we must modify the default style
@@ -501,7 +503,7 @@ let GM_config = (function (GM) {
 
   if (!isGM4) {
     let promisify = (old) => (...args) => {
-      return new Promise((resolve) => {
+      return new Promise((resolve, reject) => {
         try {
           resolve(old.apply(this, args));
         } catch (e) {
@@ -774,9 +776,10 @@ GM_configField.prototype = {
         break;
       case 'radio':
         var radios = node.getElementsByTagName('input');
-        for (var i = 0, len = radios.length; i < len; ++i)
+        for (var i = 0, len = radios.length; i < len; ++i) {
           if (radios[i].checked)
             rval = radios[i].value;
+        }
         break;
       case 'button':
         break;
@@ -817,15 +820,17 @@ GM_configField.prototype = {
         node.checked = this['default'];
         break;
       case 'select':
-        for (var i = 0, len = node.options.length; i < len; ++i)
+        for (var i = 0, len = node.options.length; i < len; ++i) {
           if (node.options[i].textContent == this['default'])
             node.selectedIndex = i;
+        }
         break;
       case 'radio':
         var radios = node.getElementsByTagName('input');
-        for (var i = 0, len = radios.length; i < len; ++i)
+        for (var i = 0, len = radios.length; i < len; ++i) {
           if (radios[i].value == this['default'])
             radios[i].checked = true;
+        }
         break;
       case 'button' :
         break;
