@@ -300,7 +300,7 @@ let GM_config = (function (GM) {
             textContent: 'Save',
             title: 'Save settings',
             className: 'saveclose_buttons',
-            onclick: function () { config.save() }
+            onclick: function () { config.save(); }
           }),
 
           create('button', {
@@ -308,7 +308,7 @@ let GM_config = (function (GM) {
             textContent: 'Close',
             title: 'Close window',
             className: 'saveclose_buttons',
-            onclick: function () { config.close() }
+            onclick: function () { config.close(); }
           }),
 
           create('div',
@@ -321,7 +321,7 @@ let GM_config = (function (GM) {
               href: '#',
               title: 'Reset fields to default values',
               className: 'reset',
-              onclick: function(e) { e.preventDefault(); config.reset() }
+              onclick: function(e) { e.preventDefault(); config.reset(); }
             })
         )));
 
@@ -463,7 +463,7 @@ let GM_config = (function (GM) {
 
     read: function (store, cb) {
       (async () => {
-        let val = await this.getValue(store || this.id, '{}')
+        let val = await this.getValue(store || this.id, '{}');
         try {
           let rval = this.parser(val);
           cb(rval);
@@ -478,7 +478,7 @@ let GM_config = (function (GM) {
       var fields = this.fields;
 
       // Reset all the fields
-      for (let id in fields) { fields[id].reset() };
+      for (let id in fields) { fields[id].reset(); }
 
       this.onReset(); // Call the reset() callback function
     },
