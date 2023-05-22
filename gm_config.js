@@ -554,7 +554,6 @@ let GM_config = (function (GM) {
       : (name, value) => localStorage.setItem(name, value);
     let log = typeof GM_log !== 'undefined' ? GM_log : console.log;
 
-    var GM = Object.create(null);
     GM.getValue = promisify(getValue);
     GM.setValue = promisify(setValue);
     GM.log = promisify(log);
