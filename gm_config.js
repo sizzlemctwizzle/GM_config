@@ -93,7 +93,7 @@ let GM_config = (function (GM) {
       var settings = {};
 
       // loop through GM_config.init() arguments
-      for (var i = 0, l = args.length, arg; i < l; ++i) {
+      for (let i = 0, l = args.length, arg; i < l; ++i) {
         arg = args[i];
 
         // An element to use as the config window
@@ -104,7 +104,7 @@ let GM_config = (function (GM) {
 
         switch (typeof arg) {
           case 'object':
-            for (var j in arg) { // could be a callback functions or settings object
+            for (let j in arg) { // could be a callback functions or settings object
               if (typeof arg[j] != "function") { // we are in the settings object
                 settings.fields = arg; // store settings object
                 break; // leave the loop
@@ -143,7 +143,7 @@ let GM_config = (function (GM) {
     // Set the event callbacks
     if (settings.events) {
       var events = settings.events;
-      for (var e in events) {
+      for (let e in events) {
         config["on" + e.charAt(0).toUpperCase() + e.slice(1)] = events[e];
       }
     }
@@ -163,7 +163,7 @@ let GM_config = (function (GM) {
           customTypes = settings.types || {},
           configId = config.id;
 
-        for (var id in fields) {
+        for (let id in fields) {
           var field = fields[id];
 
           // for each field definition create a field object
@@ -232,7 +232,7 @@ let GM_config = (function (GM) {
             secNum = 0; // Section count
 
         // loop through fields
-        for (var id in fields) {
+        for (let id in fields) {
           var field = fields[id],
               settings = field.settings;
 
@@ -367,7 +367,7 @@ let GM_config = (function (GM) {
 
       // Null out all the fields so we don't leak memory
       var fields = this.fields;
-      for (var id in fields) {
+      for (let id in fields) {
         var field = fields[id];
         field.wrapper = null;
         field.node = null;
@@ -445,7 +445,7 @@ let GM_config = (function (GM) {
       var fields = this.fields;
 
       // Reset all the fields
-      for (var id in fields) fields[id].reset();
+      for (let id in fields) { fields[id].reset() };
 
       this.onReset(); // Call the reset() callback function
     },
@@ -458,7 +458,7 @@ let GM_config = (function (GM) {
         default:
           var A = document.createElement(arguments[0]),
               B = arguments[1];
-          for (var b in B) {
+          for (let b in B) {
             if (b.indexOf("on") == 0)
               A.addEventListener(b.substring(2), B[b], false);
             else if (",style,accesskey,id,name,src,href,which,for".indexOf("," +
@@ -470,7 +470,7 @@ let GM_config = (function (GM) {
           if (typeof arguments[2] == "string")
             A.innerHTML = arguments[2];
           else
-            for (var i = 2, len = arguments.length; i < len; ++i)
+            for (let i = 2, len = arguments.length; i < len; ++i)
               A.appendChild(arguments[i]);
       }
       return A;
@@ -651,7 +651,7 @@ GM_configField.prototype = {
         firstProp;
 
     // Retrieve the first prop
-    for (var i in field) { firstProp = i; break; }
+    for (let i in field) { firstProp = i; break; }
 
     var label = field.label && type != "button" ?
       create('label', {
@@ -676,7 +676,7 @@ GM_configField.prototype = {
         });
         this.node = wrap;
 
-        for (var i = 0, len = options.length; i < len; ++i) {
+        for (let i = 0, len = options.length; i < len; ++i) {
           var radLabel = create('label', {
             className: 'radio_label'
           }, options[i]);
@@ -703,7 +703,7 @@ GM_configField.prototype = {
         });
         this.node = wrap;
 
-        for (var i = 0, len = options.length; i < len; ++i) {
+        for (let i = 0, len = options.length; i < len; ++i) {
           var option = options[i];
           wrap.appendChild(create('option', {
             value: option,
@@ -776,7 +776,7 @@ GM_configField.prototype = {
         break;
       case 'radio':
         var radios = node.getElementsByTagName('input');
-        for (var i = 0, len = radios.length; i < len; ++i) {
+        for (let i = 0, len = radios.length; i < len; ++i) {
           if (radios[i].checked)
             rval = radios[i].value;
         }
@@ -820,14 +820,14 @@ GM_configField.prototype = {
         node.checked = this['default'];
         break;
       case 'select':
-        for (var i = 0, len = node.options.length; i < len; ++i) {
+        for (let i = 0, len = node.options.length; i < len; ++i) {
           if (node.options[i].textContent == this['default'])
             node.selectedIndex = i;
         }
         break;
       case 'radio':
         var radios = node.getElementsByTagName('input');
-        for (var i = 0, len = radios.length; i < len; ++i) {
+        for (let i = 0, len = radios.length; i < len; ++i) {
           if (radios[i].value == this['default'])
             radios[i].checked = true;
         }
