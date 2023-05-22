@@ -264,7 +264,7 @@ let GM_config = (function (GM) {
                 id: configId + '_section_' + secNum
               }));
 
-            if (typeof settings.section === 'string')
+            if (!Array.isArray(settings.section))
               settings.section = [settings.section];
 
             if (settings.section[0])
