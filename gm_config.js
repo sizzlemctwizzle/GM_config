@@ -249,13 +249,9 @@ let GM_config = (function (GM) {
           className: 'config_header block center'
         }, config.title));
 
-        var secNum = 0; // Section count
         // Append elements
-        var section = bodyWrapper.appendChild(create('div', {
-          className: 'section_header_holder',
-          id: configId + '_section_' + (++secNum)
-        }));
-        
+        var section = bodyWrapper,
+          secNum = 0; // Section count
 
         // loop through fields
         for (let id in fields) {
@@ -268,7 +264,7 @@ let GM_config = (function (GM) {
                 id: configId + '_section_' + secNum
               }));
 
-            if (Object.prototype.toString.call(settings.section) !== '[object Array]')
+            if (typeof settings.section === 'string')
               settings.section = [settings.section];
 
             if (settings.section[0])
@@ -283,6 +279,13 @@ let GM_config = (function (GM) {
                 id: configId + '_section_desc_' + secNum
               }, settings.section[1]));
             ++secNum;
+          }
+          
+          if (secNum === 0) {
+            section = bodyWrapper.appendChild(create('div', {
+                className: 'section_header_holder',
+                id: configId + '_section_' + (secNum++)
+            }));
           }
 
           // Create field elements and append to current section
