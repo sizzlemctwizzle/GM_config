@@ -491,7 +491,8 @@ let GM_config = (function (GM) {
     },
 
     create: function () {
-      let A = null;
+      let A = null,
+          B = null;
       switch(arguments.length) {
         case 1:
           A = document.createTextNode(arguments[0]);
