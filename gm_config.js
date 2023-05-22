@@ -563,7 +563,7 @@ let GM_config = (function (GM) {
   construct.prototype.parser = JSON.parse;
   construct.prototype.getValue = GM.getValue;
   construct.prototype.setValue = GM.setValue;
-  construct.prototype.log = GM.log;
+  construct.prototype.log = GM.log || console.log;
 
   // Passthrough frontends for new and old usage
   let config = function () {
