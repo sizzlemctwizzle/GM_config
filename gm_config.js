@@ -420,6 +420,11 @@ let GM_config = (function (GM) {
       if (getLive && field.node) {
         fieldVal = field.toValue();
       }
+      
+      /* Migration warning */
+      if (!this.isInit) {
+        this.log('GM_config: get called before init, see https://github.com/sizzlemctwizzle/GM_config/issues/113');
+      }
 
       return fieldVal != null ? fieldVal : field.value;
     },
