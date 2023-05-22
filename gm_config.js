@@ -163,12 +163,34 @@ let GM_config = (function (GM) {
 
         for (var id in fields) {
           var field = fields[id];
+          var fieldExists = false;
+
+          if (config.fields[id]) {
+            fieldExists = true;
+          }
 
           // for each field definition create a field object
-          if (field)
+          if (field) {
+            if (config.isOpen && fieldExists) {
+                config.fields[id].remove();
+            }
+
             config.fields[id] = new GM_configField(field, stored[id], id,
               customTypes[field.type], configId);
-          else if (config.fields[id]) delete config.fields[id];
+
+            // Add field to open frame
+            if (config.isOpen) {
+              config.fields[id].wrapper = config.fields[id].toNode();
+              config.frameSection.appendChild(config.fields[id].wrapper);
+            }
+          } else if (!field && fieldExists) {
+            // Remove field from open frame
+            if (config.isOpen) {
+              config.fields[id].remove();
+            }
+
+            delete config.fields[id];
+          }
         }
 
         config.isInit = true;
@@ -225,9 +247,13 @@ let GM_config = (function (GM) {
           className: 'config_header block center'
         }, config.title));
 
+        var secNum = 0; // Section count
         // Append elements
-        var section = bodyWrapper,
-            secNum = 0; // Section count
+        var section = bodyWrapper.appendChild(create('div', {
+          className: 'section_header_holder',
+          id: configId + '_section_' + (++secNum)
+        }));
+        
 
         // loop through fields
         for (var id in fields) {
@@ -260,6 +286,8 @@ let GM_config = (function (GM) {
           // Create field elements and append to current section
           section.appendChild((field.wrapper = field.toNode()));
         }
+        
+        config.frameSection = section;
 
         // Add save and close buttons
         bodyWrapper.appendChild(create('div',
@@ -519,6 +547,7 @@ let GM_config = (function (GM) {
       : (name, value) => localStorage.setItem(name, value);
     let log = typeof GM_log !== 'undefined' ? GM_log : console.log;
 
+    var GM = Object.create(null);
     GM.getValue = promisify(getValue);
     GM.setValue = promisify(setValue);
     GM.log = promisify(log);
@@ -528,7 +557,7 @@ let GM_config = (function (GM) {
   construct.prototype.parser = JSON.parse;
   construct.prototype.getValue = GM.getValue;
   construct.prototype.setValue = GM.setValue;
-  construct.prototype.log = GM.log || console.log;
+  construct.prototype.log = GM.log;
 
   // Passthrough frontends for new and old usage
   let config = function () {
