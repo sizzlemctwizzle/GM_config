@@ -453,7 +453,7 @@ let GM_config = (function (GM) {
             } else
               values[id] = field.value;
           } else
-            forgotten[id] = value;
+            forgotten[id] = value != null ? value : field.value;
         }
       }
 
