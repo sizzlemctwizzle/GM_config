@@ -85,12 +85,13 @@ let GM_config = (function (GM) {
       };
     }
 
+    var settings = null;
     if (args.length == 1 &&
       typeof args[0].id == "string" &&
-      typeof args[0].appendChild != "function") var settings = args[0];
+      typeof args[0].appendChild != "function") settings = args[0];
     else {
       // Provide backwards-compatibility with argument style intialization
-      var settings = {};
+      settings = {};
 
       // loop through GM_config.init() arguments
       for (let i = 0, l = args.length, arg; i < l; ++i) {
@@ -142,7 +143,7 @@ let GM_config = (function (GM) {
 
     // Set the event callbacks
     if (settings.events) {
-      var events = settings.events;
+      let events = settings.events;
       for (let e in events) {
         config["on" + e.charAt(0).toUpperCase() + e.slice(1)] = events[e];
       }
@@ -159,13 +160,13 @@ let GM_config = (function (GM) {
     config.isInit = false;
     if (settings.fields) {
       config.read(null, (stored) => { // read the stored settings
-        var fields = settings.fields,
-          customTypes = settings.types || {},
-          configId = config.id;
+        let fields = settings.fields,
+            customTypes = settings.types || {},
+            configId = config.id;
 
         for (let id in fields) {
-          var field = fields[id];
-          var fieldExists = false;
+          let field = fields[id],
+              fieldExists = false;
 
           if (config.fields[id]) {
             fieldExists = true;
@@ -223,15 +224,15 @@ let GM_config = (function (GM) {
       }
       // Die if the menu is already open on this page
       // You can have multiple instances but you can't open the same instance twice
-      var match = document.getElementById(this.id);
+      let match = document.getElementById(this.id);
       if (match && (match.tagName == "IFRAME" || match.childNodes.length > 0)) return;
 
       // Sometimes "this" gets overwritten so create an alias
-      var config = this;
+      let config = this;
 
       // Function to build the mighty config window :)
       function buildConfigWin (body, head) {
-        var create = config.create,
+        let create = config.create,
             fields = config.fields,
             configId = config.id,
             bodyWrapper = create('div', {id: configId + '_wrapper'});
@@ -250,12 +251,12 @@ let GM_config = (function (GM) {
         }, config.title));
 
         // Append elements
-        var section = bodyWrapper,
-          secNum = 0; // Section count
+        let section = bodyWrapper,
+            secNum = 0; // Section count
 
         // loop through fields
         for (let id in fields) {
-          var field = fields[id],
+          let field = fields[id],
               settings = field.settings;
 
           if (settings.section) { // the start of a new section
@@ -348,7 +349,7 @@ let GM_config = (function (GM) {
       }
 
       // Change this in the onOpen callback using this.frame.setAttribute('style', '')
-      var defaultStyle = 'bottom: auto; border: 1px solid #000; display: none; height: 75%;'
+      let defaultStyle = 'bottom: auto; border: 1px solid #000; display: none; height: 75%;'
         + ' left: 0; margin: 0; max-height: 95%; max-width: 95%; opacity: 0;'
         + ' overflow: auto; padding: 0; position: fixed; right: auto; top: 0;'
         + ' width: 75%; z-index: 9999;';
@@ -368,13 +369,13 @@ let GM_config = (function (GM) {
         // In WebKit src can't be set until it is added to the page
         this.frame.src = '';
         // we wait for the iframe to load before we can modify it
-        var that = this;
+        let that = this;
         this.frame.addEventListener('load', function(e) {
-            var frame = config.frame;
+            let frame = config.frame;
             if (!frame.contentDocument) {
               that.log("GM_config failed to initialize default settings dialog node!");
             } else {
-              var body = frame.contentDocument.getElementsByTagName('body')[0];
+              let body = frame.contentDocument.getElementsByTagName('body')[0];
               body.id = config.id; // Allows for prefixing styles with the config id
               buildConfigWin(body, frame.contentDocument.getElementsByTagName('head')[0]);
             }
@@ -397,9 +398,9 @@ let GM_config = (function (GM) {
       }
 
       // Null out all the fields so we don't leak memory
-      var fields = this.fields;
+      let fields = this.fields;
       for (let id in fields) {
-        var field = fields[id];
+        let field = fields[id];
         field.wrapper = null;
         field.node = null;
       }
@@ -417,7 +418,7 @@ let GM_config = (function (GM) {
     },
 
     get: function (name, getLive) {
-      var field = this.fields[name],
+      let field = this.fields[name],
           fieldVal = null;
 
       if (getLive && field.node) {
@@ -433,14 +434,17 @@ let GM_config = (function (GM) {
     },
 
     write: function (store, obj, cb) {
+      let forgotten = null,
+          values = null;
       if (!obj) {
-        var values = {},
-            forgotten = {},
-            fields = this.fields;
+        let fields = this.fields;
 
-        for (var id in fields) {
-          var field = fields[id];
-          var value = field.toValue();
+        values = {};
+        forgotten = {};
+
+        for (let id in fields) {
+          let field = fields[id];
+          let value = field.toValue();
 
           if (field.save) {
             if (value != null) {
@@ -478,7 +482,7 @@ let GM_config = (function (GM) {
     },
 
     reset: function () {
-      var fields = this.fields;
+      let fields = this.fields;
 
       // Reset all the fields
       for (let id in fields) { fields[id].reset(); }
@@ -487,13 +491,15 @@ let GM_config = (function (GM) {
     },
 
     create: function () {
+      let A = null,
+          B = null;
       switch(arguments.length) {
         case 1:
-          var A = document.createTextNode(arguments[0]);
+          A = document.createTextNode(arguments[0]);
           break;
         default:
-          var A = document.createElement(arguments[0]),
-              B = arguments[1];
+          A = document.createElement(arguments[0]);
+          B = arguments[1];
           for (let b in B) {
             if (b.indexOf("on") == 0)
               A.addEventListener(b.substring(2), B[b], false);
@@ -513,9 +519,9 @@ let GM_config = (function (GM) {
     },
 
     center: function () {
-      var node = this.frame;
+      let node = this.frame;
       if (!node) return;
-      var style = node.style,
+      let style = node.style,
           beforeOpacity = style.opacity;
       if (style.display == 'none') style.opacity = '0';
       style.display = '';
@@ -633,7 +639,7 @@ GM_configField.prototype = {
   create: GM_config.create,
 
   defaultValue: function(type, options) {
-    var value;
+    let value;
 
     if (type.indexOf('unsigned ') == 0)
       type = type.substring(9);
@@ -657,7 +663,7 @@ GM_configField.prototype = {
   },
 
   toNode: function() {
-    var field = this.settings,
+    let field = this.settings,
         value = this.value,
         options = field.options,
         type = field.type,
@@ -681,7 +687,7 @@ GM_configField.prototype = {
       }
     }
 
-    var retNode = create('div', { className: 'config_var',
+    let retNode = create('div', { className: 'config_var',
           id: configId + '_' + id + '_var',
           title: field.title || '' }),
         firstProp;
@@ -689,13 +695,14 @@ GM_configField.prototype = {
     // Retrieve the first prop
     for (let i in field) { firstProp = i; break; }
 
-    var label = field.label && type != "button" ?
+    let label = field.label && type != "button" ?
       create('label', {
         id: configId + '_' + id + '_field_label',
         for: configId + '_field_' + id,
         className: 'field_label'
       }, field.label) : null;
 
+    let wrap = null;
     switch (type) {
       case 'textarea':
         retNode.appendChild((this.node = create('textarea', {
@@ -707,24 +714,24 @@ GM_configField.prototype = {
         })));
         break;
       case 'radio':
-        var wrap = create('div', {
+        wrap = create('div', {
           id: configId + '_field_' + id
         });
         this.node = wrap;
 
         for (let i = 0, len = options.length; i < len; ++i) {
-          var radLabel = create('label', {
+          let radLabel = create('label', {
             className: 'radio_label'
           }, options[i]);
 
-          var rad = wrap.appendChild(create('input', {
+          let rad = wrap.appendChild(create('input', {
             value: options[i],
             type: 'radio',
             name: id,
             checked: options[i] == value
           }));
 
-          var radLabelPos = labelPos &&
+          let radLabelPos = labelPos &&
             (labelPos == 'left' || labelPos == 'right') ?
             labelPos : firstProp == 'options' ? 'left' : 'right';
 
@@ -734,13 +741,13 @@ GM_configField.prototype = {
         retNode.appendChild(wrap);
         break;
       case 'select':
-        var wrap = create('select', {
+        wrap = create('select', {
           id: configId + '_field_' + id
         });
         this.node = wrap;
 
         for (let i = 0, len = options.length; i < len; ++i) {
-          var option = options[i];
+          let option = options[i];
           wrap.appendChild(create('option', {
             value: option,
             selected: option == value
@@ -750,7 +757,7 @@ GM_configField.prototype = {
         retNode.appendChild(wrap);
         break;
       default: // fields using input elements
-        var props = {
+        let props = {
           id: configId + '_field_' + id,
           type: type,
           value: type == 'button' ? field.label : value
@@ -790,7 +797,7 @@ GM_configField.prototype = {
   },
 
   toValue: function() {
-    var node = this.node,
+    let node = this.node,
         field = this.settings,
         type = field.type,
         unsigned = false,
@@ -811,7 +818,7 @@ GM_configField.prototype = {
         rval = node[node.selectedIndex].value;
         break;
       case 'radio':
-        var radios = node.getElementsByTagName('input');
+        let radios = node.getElementsByTagName('input');
         for (let i = 0, len = radios.length; i < len; ++i) {
           if (radios[i].checked)
             rval = radios[i].value;
@@ -821,8 +828,8 @@ GM_configField.prototype = {
         break;
       case 'int': case 'integer':
       case 'float': case 'number':
-        var num = Number(node.value);
-        var warn = 'Field labeled "' + field.label + '" expects a' +
+        let num = Number(node.value);
+        let warn = 'Field labeled "' + field.label + '" expects a' +
           (unsigned ? ' positive ' : 'n ') + 'integer value';
 
         if (isNaN(num) || (type.substr(0, 3) == 'int' &&
@@ -845,7 +852,7 @@ GM_configField.prototype = {
   },
 
   reset: function() {
-    var node = this.node,
+    let node = this.node,
         field = this.settings,
         type = field.type;
 
@@ -862,7 +869,7 @@ GM_configField.prototype = {
         }
         break;
       case 'radio':
-        var radios = node.getElementsByTagName('input');
+        let radios = node.getElementsByTagName('input');
         for (let i = 0, len = radios.length; i < len; ++i) {
           if (radios[i].value == this['default'])
             radios[i].checked = true;
@@ -883,10 +890,10 @@ GM_configField.prototype = {
   },
 
   reload: function() {
-    var wrapper = this.wrapper;
+    let wrapper = this.wrapper;
     if (wrapper) {
-      var fieldParent = wrapper.parentNode;
-      var newWrapper = this.toNode();
+      let fieldParent = wrapper.parentNode;
+      let newWrapper = this.toNode();
       fieldParent.insertBefore(newWrapper, wrapper);
       this.remove();
       this.wrapper = newWrapper;
@@ -894,7 +901,7 @@ GM_configField.prototype = {
   },
 
   _checkNumberRange: function(num, warn) {
-    var field = this.settings;
+    let field = this.settings;
     if (typeof field.min == "number" && num < field.min) {
       alert(warn + ' greater than or equal to ' + field.min + '.');
       return null;
