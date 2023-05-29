@@ -898,7 +898,7 @@ GM_configField.prototype = {
       let fieldParent = wrapper.parentNode;
       let newWrapper = this.toNode();
       fieldParent.insertBefore(newWrapper, wrapper);
-      this.remove();
+      GM_config.remove(this.wrapper);
       this.wrapper = newWrapper;
     }
   },
