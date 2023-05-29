@@ -84,6 +84,10 @@ let GM_config = (function (GM) {
         stylish: ""
       };
     }
+    config.frameStyle = 'bottom: auto; border: 1px solid #000; display: none; height: 75%;'
+      + ' left: 0; margin: 0; max-height: 95%; max-width: 95%; opacity: 0;'
+      + ' overflow: auto; padding: 0; position: fixed; right: auto; top: 0;'
+      + ' width: 75%; z-index: 9999;';
 
     var settings = null;
     if (args.length == 1 &&
@@ -140,6 +144,9 @@ let GM_config = (function (GM) {
 
     // Set the frame
     if (settings.frame) config.frame = settings.frame;
+	
+    // Set the style attribute of the frame
+    if (settings.frameStyle) config.frameStyle = settings.frameStyle;
 
     // Set the event callbacks
     if (settings.events) {
@@ -348,22 +355,16 @@ let GM_config = (function (GM) {
         config.isOpen = true;
       }
 
-      // Change this in the onOpen callback using this.frame.setAttribute('style', '')
-      let defaultStyle = 'bottom: auto; border: 1px solid #000; display: none; height: 75%;'
-        + ' left: 0; margin: 0; max-height: 95%; max-width: 95%; opacity: 0;'
-        + ' overflow: auto; padding: 0; position: fixed; right: auto; top: 0;'
-        + ' width: 75%; z-index: 9999;';
-
       // Either use the element passed to init() or create an iframe
       if (this.frame) {
         this.frame.id = this.id; // Allows for prefixing styles with the config id
-        this.frame.setAttribute('style', defaultStyle);
+        this.frame.setAttribute('style', this.frameStyle);
         buildConfigWin(this.frame, this.frame.ownerDocument.getElementsByTagName('head')[0]);
       } else {
         // Create frame
         document.body.appendChild((this.frame = this.create('iframe', {
           id: this.id,
-          style: defaultStyle
+          style: this.frameStyle
         })));
 
         // In WebKit src can't be set until it is added to the page
