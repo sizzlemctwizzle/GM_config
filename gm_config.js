@@ -886,8 +886,8 @@ GM_configField.prototype = {
       }
   },
 
-  remove: function(el) {
-    GM_config.remove(el || this.wrapper);
+  remove: function() {
+    GM_config.remove(this.wrapper);
     this.wrapper = null;
     this.node = null;
   },
