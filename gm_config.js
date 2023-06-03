@@ -360,14 +360,15 @@ let GM_config = (function (GM) {
       // Either use the element passed to init() or create an iframe
       if (this.frame) {
         this.frame.id = this.id; // Allows for prefixing styles with the config id
-        this.frame.setAttribute('style', this.frameStyle);
+        if (this.frameStyle) this.frame.setAttribute('style', this.frameStyle);
         buildConfigWin(this.frame, this.frame.ownerDocument.getElementsByTagName('head')[0]);
       } else {
         // Create frame
-        document.body.appendChild((this.frame = this.create('iframe', {
-          id: this.id,
-          style: this.frameStyle
-        })));
+        this.frame = this.create('iframe', {
+          id: this.id
+        });
+        if (this.frameStyle) this.frame.setAttribute('style', this.frameStyle);
+        document.body.appendChild(this.frame);
 
         // In WebKit src can't be set until it is added to the page
         this.frame.src = '';
