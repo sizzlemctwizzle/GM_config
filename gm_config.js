@@ -591,6 +591,8 @@ let GM_config = (function (GM) {
     };
   };
 
+  // Reusable functions and properties
+  // Usable via GM_config.*
   config.create = construct.prototype.create;
   config.isGM = construct.prototype.isGM;
   config.setValue = construct.prototype.setValue;
