@@ -142,13 +142,13 @@ let GM_config = (function (GM) {
     if (settings.title) config.title = settings.title;
 
     // Set the custom css
-    if (settings.css) config.css.stylish = settings.css;
+    if (typeof settings.css === 'string') config.css.stylish = settings.css;
 
     // Set the frame
     if (settings.frame) config.frame = settings.frame;
 	
     // Set the style attribute of the frame
-    if (settings.frameStyle) config.frameStyle = settings.frameStyle;
+    if (typeof settings.frameStyle === 'string') config.frameStyle = settings.frameStyle;
 
     // Set the event callbacks
     if (settings.events) {
