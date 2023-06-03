@@ -599,6 +599,8 @@ let GM_config = (function (GM) {
   config.parser = construct.prototype.parser;
   config.log = construct.prototype.log;
   config.remove = construct.prototype.remove;
+  config.read = construct.prototype.read.bind(config);
+  config.write = construct.prototype.write.bind(config);
 
   return config;
 }(typeof GM === 'object' ? GM : Object.create(null)));
