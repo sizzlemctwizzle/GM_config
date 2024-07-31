@@ -36,7 +36,7 @@ type FieldTypes =
     | 'select'
     | 'checkbox'
     | 'unsigned int'
-    | 'unsinged integer'
+    | 'unsigned integer'
     | 'int'
     | 'integer'
     | 'float'
