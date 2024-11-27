@@ -115,9 +115,9 @@ declare class GM_configStruct<CustomTypes extends string = never> {
     init<CustomTypes extends string>(options: InitOptions<CustomTypes>): void;
 
     /** Display the config panel */
-    open(): void;
+    open(skipCb?: boolean): void;
     /** Close the config panel */
-    close(): void;
+    close(skipCb?: boolean): void;
 
     /** Directly set the value of a field */
     set(fieldId: string, value: FieldValue): void;
@@ -127,7 +127,7 @@ declare class GM_configStruct<CustomTypes extends string = never> {
      */
     get(fieldId: string, getLive?: boolean): FieldValue;
     /** Save the current values */
-    save(): void;
+    save(skipCb?: boolean): void;
 
     read(store?: string): any;
 

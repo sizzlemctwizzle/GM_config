@@ -225,10 +225,10 @@ let GM_config = (function (GM) {
     },
 
     // call GM_config.open() from your script to open the menu
-    open: function () {
+    open: function (skipCb) {
       // don't open before init is finished
       if (!this.isInit) {
-        setTimeout(() => this.open(), 0);
+        setTimeout(() => this.open(skipCb), 0);
         return;
       }
       // Die if the menu is already open on this page
@@ -342,10 +342,12 @@ let GM_config = (function (GM) {
         config.center(); // Show and center iframe
         window.addEventListener('resize', config.center, false); // Center frame on resize
 
-        // Call the open() callback function
-        config.onOpen(config.frame.contentDocument || config.frame.ownerDocument,
-                      config.frame.contentWindow || window,
-                      config.frame);
+        if (!skipCb) {
+          // Call the open() callback function
+          config.onOpen(config.frame.contentDocument || config.frame.ownerDocument,
+                        config.frame.contentWindow || window,
+                        config.frame);
+        }
 
         // Close frame on window close
         window.addEventListener('beforeunload', function () {
@@ -385,11 +387,11 @@ let GM_config = (function (GM) {
       }
     },
 
-    save: function () {
-      this.write(null, null, (vals) => this.onSave(vals));
+    save: function (skipCb) {
+      this.write(null, null, skipCb ? function() {} : (vals) => this.onSave(vals));
     },
 
-    close: function() {
+    close: function(skipCb) {
       // If frame is an iframe then remove it
       if (this.frame && this.frame.contentDocument) {
         this.remove(this.frame);
@@ -407,7 +409,7 @@ let GM_config = (function (GM) {
         field.node = null;
       }
 
-      this.onClose(); //  Call the close() callback function
+      if (!skipCb) this.onClose(); //  Call the close() callback function
       this.isOpen = false;
     },
 
@@ -483,13 +485,13 @@ let GM_config = (function (GM) {
       })();
     },
 
-    reset: function () {
+    reset: function (skipCb) {
       let fields = this.fields;
 
       // Reset all the fields
       for (let id in fields) { fields[id].reset(); }
 
-      this.onReset(); // Call the reset() callback function
+      if (!skipCb) this.onReset(); // Call the reset() callback function
     },
 
     create: function () {
