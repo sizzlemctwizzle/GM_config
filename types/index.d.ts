@@ -52,6 +52,8 @@ interface InitOptionsNoCustom {
     fields: Record<string, Field>;
     /** Optional styling to apply to the menu */
     css?: string;
+    /** Optional styling to apply to the menu iframe */
+    frameStyle?: string
     /** Element to use for the config panel */
     frame?: HTMLElement;
 
