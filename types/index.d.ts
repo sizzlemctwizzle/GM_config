@@ -53,7 +53,7 @@ interface InitOptionsNoCustom {
     /** Optional styling to apply to the menu */
     css?: string;
     /** Optional styling to apply to the menu iframe */
-    frameStyle?: string
+    frameStyle?: string;
     /** Element to use for the config panel */
     frame?: HTMLElement;
 
